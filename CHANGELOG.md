@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.0.0]
+
+- Fork of https://github.com/msironi/expr-eval because we introduce some breaking changes
+- BREAKING CHANGE: Concatenation operator is renamed from || to | in order to avoid ambiguity with the logical or-operator.
+- Support the logical && and ||-operators
+- Support property access using the backet notation which allows for dereferencing properties using a variable.
+- Fetching an unknown array index will now result in undefined instead of the first element in the array.
+
 ## [2.0.2.1] 2025-05-07
 
 - Fork of https://github.com/silentmatt/expr-eval which appears to be abandoned

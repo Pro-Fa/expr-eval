@@ -36,7 +36,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/msironi/expr-eval.git"
+    "url": "git+https://github.com/Pro-Fa/expr-eval.git"
   },
   "keywords": [
     "expression",
@@ -46,10 +46,10 @@
     "function",
     "parser"
   ],
-  "author": "Matthew Crumley, Mark Sironi",
+  "author": "Matthew Crumley, Mark Sironi, Sander Toonen",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/msironi/expr-eval/issues"
+    "url": "https://github.com/Pro-Fa/expr-eval/issues"
   },
-  "homepage": "https://github.com/msironi/expr-eval#readme"
+  "homepage": "https://github.com/Pro-Fa/expr-eval#readme"
 }
