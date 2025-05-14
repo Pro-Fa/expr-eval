@@ -27,11 +27,11 @@ export default function expressionToString(tokens, toJS) {
       if (toJS) {
         if (f === '^') {
           nstack.push('Math.pow(' + n1 + ', ' + n2 + ')');
-        } else if (f === 'and') {
+        } else if (f === 'and' || f === '&&') {
           nstack.push('(!!' + n1 + ' && !!' + n2 + ')');
-        } else if (f === 'or') {
+        } else if (f === 'or' || f === '||') {
           nstack.push('(!!' + n1 + ' || !!' + n2 + ')');
-        } else if (f === '||') {
+        } else if (f === '|') {
           nstack.push('(function(a,b){ return Array.isArray(a) && Array.isArray(b) ? a.concat(b) : String(a) + String(b); }((' + n1 + '),(' + n2 + ')))');
         } else if (f === '==') {
           nstack.push('(' + n1 + ' === ' + n2 + ')');

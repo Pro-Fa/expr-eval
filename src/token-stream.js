@@ -437,6 +437,13 @@ TokenStream.prototype.isOperator = function () {
       this.current = this.newToken(TOP, '||');
       this.pos++;
     } else {
+      this.current = this.newToken(TOP, '|');
+    }
+  } else if (c === '&') {
+    if (this.expression.charAt(this.pos + 1) === '&') {
+      this.current = this.newToken(TOP, '&&');
+      this.pos++;
+    } else {
       return false;
     }
   } else if (c === '=') {

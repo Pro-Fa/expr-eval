@@ -75,16 +75,16 @@ describe('Binary Operators', function () {
     });
   });
 
-  describe('||', function () {
+  describe('|', function () {
     it('should return the correct value', function () {
       var parser = new Parser();
-      assert.strictEqual(parser.evaluate('"a" || "b"'), 'ab');
-      assert.deepStrictEqual(parser.evaluate('[0, 1] || [2, 3]'), [0, 1, 2, 3]);
+      assert.strictEqual(parser.evaluate('"a" | "b"'), 'ab');
+      assert.deepStrictEqual(parser.evaluate('[0, 1] | [2, 3]'), [0, 1, 2, 3]);
     });
     it('should return undefined if any input is undefined', function () {
       var parser = new Parser();
-      assert.strictEqual(parser.evaluate('"a" || undefined'), undefined);
-      assert.strictEqual(parser.evaluate('undefined || "a"'), undefined);
+      assert.strictEqual(parser.evaluate('"a" | undefined'), undefined);
+      assert.strictEqual(parser.evaluate('undefined | "a"'), undefined);
     });
   });
 

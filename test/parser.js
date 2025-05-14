@@ -166,7 +166,6 @@ describe('Parser', function () {
       });
 
       it('should fail with partial operators', function () {
-        assert.throws(function () { parser.parse('"a" | "b"'); }, Error);
         assert.throws(function () { parser.parse('2 = 2'); }, Error);
         assert.throws(function () { parser.parse('2 ! 3'); }, Error);
         assert.throws(function () { parser.parse('1 o 0'); }, Error);
@@ -433,7 +432,7 @@ describe('Parser', function () {
         }
       });
 
-      assert.throws(function () { parser.parse('"as" || "df"'); }, /\|/);
+      assert.throws(function () { parser.parse('"as" | "df"'); }, /\|/);
     });
 
     it('should allow conditional operator to be disabled', function () {

@@ -23,7 +23,11 @@ ParserState.prototype.next = function () {
   return (this.nextToken = this.tokens.next());
 };
 
-ParserState.prototype.tokenMatches = function (token, value) {
+ParserState.prototype.tokenMatches = function (token, value, exclude) {
+  if (exclude && contains(exclude, token.value)) {
+    return false;
+  }
+
   if (typeof value === 'undefined') {
     return true;
   } else if (Array.isArray(value)) {
@@ -47,8 +51,8 @@ ParserState.prototype.restore = function () {
   this.nextToken = this.savedNextToken;
 };
 
-ParserState.prototype.accept = function (type, value) {
-  if (this.nextToken.type === type && this.tokenMatches(this.nextToken, value)) {
+ParserState.prototype.accept = function (type, value, exclude) {
+  if (this.nextToken.type === type && this.tokenMatches(this.nextToken, value, exclude)) {
     this.next();
     return true;
   }
@@ -190,7 +194,7 @@ ParserState.prototype.parseConditionalExpression = function (instr) {
 
 ParserState.prototype.parseOrExpression = function (instr) {
   this.parseAndExpression(instr);
-  while (this.accept(TOP, 'or')) {
+  while (this.accept(TOP, ['or', '||'])) {
     var falseBranch = [];
     this.parseAndExpression(falseBranch);
     instr.push(new Instruction(IEXPR, falseBranch));
@@ -200,7 +204,7 @@ ParserState.prototype.parseOrExpression = function (instr) {
 
 ParserState.prototype.parseAndExpression = function (instr) {
   this.parseComparison(instr);
-  while (this.accept(TOP, 'and')) {
+  while (this.accept(TOP, ['and', '&&'])) {
     var trueBranch = [];
     this.parseComparison(trueBranch);
     instr.push(new Instruction(IEXPR, trueBranch));
@@ -219,11 +223,11 @@ ParserState.prototype.parseComparison = function (instr) {
   }
 };
 
-var ADD_SUB_OPERATORS = ['+', '-', '||'];
+var ADD_SUB_OPERATORS = ['+', '-', '|'];
 
 ParserState.prototype.parseAddSub = function (instr) {
   this.parseTerm(instr);
-  while (this.accept(TOP, ADD_SUB_OPERATORS)) {
+  while (this.accept(TOP, ADD_SUB_OPERATORS, ['||'])) {
     var op = this.current;
     this.parseTerm(instr);
     instr.push(binaryInstruction(op.value));

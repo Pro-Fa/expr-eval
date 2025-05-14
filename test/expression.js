@@ -93,12 +93,12 @@ describe('Expression', function () {
         assert.strictEqual(Parser.evaluate('2^(-4)'), 1 / 16);
       });
 
-      it('\'as\' || \'df\'', function () {
-        assert.strictEqual(Parser.evaluate('\'as\' || \'df\''), 'asdf');
+      it('\'as\' | \'df\'', function () {
+        assert.strictEqual(Parser.evaluate('\'as\' | \'df\''), 'asdf');
       });
 
-      it('[1, 2] || [3, 4] || [5, 6]', function () {
-        assert.deepStrictEqual(Parser.evaluate('[1, 2] || [3, 4] || [5, 6]'), [ 1, 2, 3, 4, 5, 6 ]);
+      it('[1, 2] | [3, 4] | [5, 6]', function () {
+        assert.deepStrictEqual(Parser.evaluate('[1, 2] | [3, 4] | [5, 6]'), [ 1, 2, 3, 4, 5, 6 ]);
       });
 
       it('should fail with undefined variables', function () {
@@ -240,8 +240,8 @@ describe('Expression', function () {
         assert.strictEqual(Parser.evaluate('fn.max(conf.limits.lower, conf.limits.upper)', { fn: { max: Math.max }, conf: { limits: { lower: 4, upper: 9 } } }), 9);
       });
 
-      it('[1, 2+3, 4*5, 6/7, [8, 9, 10], "1" || "1"]', function () {
-        assert.strictEqual(JSON.stringify(Parser.evaluate('[1, 2+3, 4*5, 6/7, [8, 9, 10], "1" || "1"]')), JSON.stringify([1, 5, 20, 6 / 7, [8, 9, 10], '11']));
+      it('[1, 2+3, 4*5, 6/7, [8, 9, 10], "1" | "1"]', function () {
+        assert.strictEqual(JSON.stringify(Parser.evaluate('[1, 2+3, 4*5, 6/7, [8, 9, 10], "1" | "1"]')), JSON.stringify([1, 5, 20, 6 / 7, [8, 9, 10], '11']));
       });
 
       it('1 ? 1 : 0', function () {
@@ -641,6 +641,24 @@ describe('Expression', function () {
           parser.functions.doIt = o => o.x + o.y;
           const expr = `doIt({ x: 3, y: 4, z: 8 })`;
           assert.strictEqual(parser.evaluate(expr), 7);
+        });
+      });
+
+      describe('extra logical operators', () => {
+        it('false or true', function () {
+          assert.deepStrictEqual(Parser.evaluate('false or true'), true);
+        });
+
+        it('false || true', function () {
+          assert.deepStrictEqual(Parser.evaluate('false || true'), true);
+        });
+
+        it('false and true', function () {
+          assert.deepStrictEqual(Parser.evaluate('false and true'), false);
+        });
+
+        it('false && true', function () {
+          assert.deepStrictEqual(Parser.evaluate('false && true'), false);
         });
       });
     });
@@ -1046,8 +1064,8 @@ describe('Expression', function () {
         assert.strictEqual(Parser.parse('["a", ["b", ["c"]], true, 1 + 2 + 3]').toString(), '["a", ["b", ["c"]], true, ((1 + 2) + 3)]');
       });
 
-      it('\'as\' || \'df\'', function () {
-        assert.strictEqual(parser.parse('\'as\' || \'df\'').toString(), '("as" || "df")');
+      it('\'as\' | \'df\'', function () {
+        assert.strictEqual(parser.parse('\'as\' | \'df\'').toString(), '("as" | "df")');
       });
 
       it('\'A\\bB\\tC\\nD\\fE\\r\\\'F\\\\G\'', function () {
@@ -1131,14 +1149,14 @@ describe('Expression', function () {
         assert.strictEqual(f(-1), 0.5);
       });
 
-      it('x || y', function () {
-        var expr = parser.parse('x || y');
+      it('x | y', function () {
+        var expr = parser.parse('x | y');
         var f = expr.toJSFunction('x, y');
         assert.strictEqual(f(4, 2), '42');
       });
 
-      it('[4, 3] || [1, 2]', function () {
-        var expr = parser.parse('x || y');
+      it('[4, 3] | [1, 2]', function () {
+        var expr = parser.parse('x | y');
         var f = expr.toJSFunction('x, y');
         assert.deepStrictEqual(f([ 4, 3 ], [ 1, 2 ]), [ 4, 3, 1, 2 ]);
       });
@@ -1314,9 +1332,9 @@ describe('Expression', function () {
         assert.strictEqual(parser.parse('a or fail()').toJSFunction('a')(true), true);
       });
 
-      it('\'as\' || s', function () {
-        assert.strictEqual(parser.parse('\'as\' || s').toJSFunction('s')('df'), 'asdf');
-        assert.strictEqual(parser.parse('\'as\' || s').toJSFunction('s')(4), 'as4');
+      it('\'as\' | s', function () {
+        assert.strictEqual(parser.parse('\'as\' | s').toJSFunction('s')('df'), 'asdf');
+        assert.strictEqual(parser.parse('\'as\' | s').toJSFunction('s')(4), 'as4');
       });
 
       it('\'A\\bB\\tC\\nD\\fE\\r\\\'F\\\\G\'', function () {
@@ -1372,8 +1390,8 @@ describe('Expression', function () {
         assert.strictEqual(parser.parse('a["foo"]').toJSFunction('a')({ foo: 42 }), undefined);
       });
 
-      it('[1, 2+3, 4*5, 6/7, [8, 9, 10], "1" || "1"]', function () {
-        var exp = parser.parse('[1, 2+3, 4*5, 6/7, [8, 9, 10], "1" || "1"]');
+      it('[1, 2+3, 4*5, 6/7, [8, 9, 10], "1" | "1"]', function () {
+        var exp = parser.parse('[1, 2+3, 4*5, 6/7, [8, 9, 10], "1" | "1"]');
         assert.strictEqual(JSON.stringify(exp.toJSFunction()()), JSON.stringify([1, 5, 20, 6 / 7, [8, 9, 10], '11']));
       });
     });
