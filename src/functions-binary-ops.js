@@ -78,8 +78,16 @@ export function setVar(name, value, variables) {
   return value;
 }
 
-export function arrayIndex(array, index) {
-  return array === undefined ? undefined : array[index | 0];
+export function arrayIndexOrProperty(array, index) {
+  if (array === undefined || index === undefined) {
+    return undefined;
+  }
+
+  if (typeof index !== 'number' && typeof index !== 'string') {
+    return undefined;
+  }
+
+  return array[index];
 }
 
 export function andOperator(a, b) {

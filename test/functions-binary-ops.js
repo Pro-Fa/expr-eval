@@ -207,7 +207,7 @@ describe('Binary Operators', function () {
     it('should return the correct value', function () {
       var parser = new Parser();
       assert.strictEqual(parser.evaluate('x = [1, 2, 3]; x[1]'), 2);
-      assert.strictEqual(parser.evaluate('x = [1, 2, 3]; x[undefined]'), 1);
+      assert.strictEqual(parser.evaluate('x = [1, 2, 3]; x[undefined]'), undefined);
     });
     it('should return undefined if the input array is undefined', function () {
       var parser = new Parser();

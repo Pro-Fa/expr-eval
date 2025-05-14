@@ -271,6 +271,7 @@ describe('Expression', function () {
           assert.strictEqual(Parser.evaluate('undefined'), undefined);
           assert.strictEqual(Parser.evaluate('x = undefined; x'), undefined);
         });
+
         it('should fail to parse undefined as a custom function', function () {
           // undefined is not a function
           assert.throws(() => Parser.evaluate('undefined()'), /undefined is not a function/);
@@ -312,6 +313,47 @@ describe('Expression', function () {
           parser.functions.doIt = () => null;
           const result = parser.evaluate('x = doIt(); x');
           assert.strictEqual(result, null);
+        });
+      });
+
+      describe('Object properties', function () {
+        var parser = new Parser();
+        var obj = { thingy: { array: [{ value: 10 }], foo: 5 }, someKey: 'array', numericKey: 0 };
+
+        it('control', function () {
+          assert.strictEqual(parser.evaluate('thingy.array[0].value', obj), 10);
+          assert.strictEqual(parser.evaluate('thingy.array[numericKey].value', obj), 10);
+          assert.strictEqual(parser.evaluate('thingy.array[12 * numericKey].value', obj), 10);
+        });
+
+        it('non-existent properties', function () {
+          assert.strictEqual(parser.evaluate('thingy.doesNotExist', obj), undefined);
+          assert.strictEqual(parser.evaluate('thingy.doesNotExist[0]', obj), undefined);
+          assert.strictEqual(parser.evaluate('thingy.doesNotExist[0].childArray[1].notHere.alsoNotHere', obj), undefined);
+          assert.strictEqual(parser.evaluate('thingy.array[0].value.doesNotExist', obj), undefined);
+
+          assert.strictEqual(parser.evaluate('thingy.doesNotExist ?? 1', obj), 1);
+          assert.strictEqual(parser.evaluate('thingy.array[0].value.doesNotExist ?? 1', obj), 1);
+          assert.strictEqual(parser.evaluate('thingy.doesNotExist[0].childArray[1].notHere.alsoNotHere ?? 1', obj), 1);
+        });
+        it('non-existent array elements', function () {
+          assert.strictEqual(parser.evaluate('thingy.array[1]', obj), undefined);
+          assert.strictEqual(parser.evaluate('thingy.array[1].value', obj), undefined);
+
+          assert.strictEqual(parser.evaluate('thingy.array[1] ?? 1', obj), 1);
+          assert.strictEqual(parser.evaluate('thingy.array[1].value ?? 1', obj), 1);
+        });
+
+        it('bracket notation', function () {
+          assert.strictEqual(parser.evaluate('thingy["foo"]', obj), 5);
+          assert.strictEqual(parser.evaluate('thingy["array"][0].value', obj), 10);
+          assert.strictEqual(parser.evaluate('thingy[someKey][0].value', obj), 10);
+          assert.strictEqual(parser.evaluate('thingy["array"][numericKey].value', obj), 10);
+        });
+
+        it('bracket notation for non-existent properties', function () {
+          assert.strictEqual(parser.evaluate('thingy["array"][1]', obj), undefined);
+          assert.strictEqual(parser.evaluate('thingy["doesNotExist"][0]', obj), undefined);
         });
       });
 
@@ -1401,30 +1443,6 @@ describe('Expression', function () {
       NOTE: Expressions with the following cannot be converted to JS functions.
         * case/when blocks
       */
-
-      describe('object property references that return undefined', function () {
-        var obj = { thingy: { array: [{ value: 10 }] } };
-        it('control', function () {
-          assert.strictEqual(parser.evaluate('thingy.array[0].value', obj), 10);
-        });
-        it('non-existent properties', function () {
-          assert.strictEqual(parser.evaluate('thingy.doesNotExist', obj), undefined);
-          assert.strictEqual(parser.evaluate('thingy.doesNotExist[0]', obj), undefined);
-          assert.strictEqual(parser.evaluate('thingy.doesNotExist[0].childArray[1].notHere.alsoNotHere', obj), undefined);
-          assert.strictEqual(parser.evaluate('thingy.array[0].value.doesNotExist', obj), undefined);
-
-          assert.strictEqual(parser.evaluate('thingy.doesNotExist ?? 1', obj), 1);
-          assert.strictEqual(parser.evaluate('thingy.array[0].value.doesNotExist ?? 1', obj), 1);
-          assert.strictEqual(parser.evaluate('thingy.doesNotExist[0].childArray[1].notHere.alsoNotHere ?? 1', obj), 1);
-        });
-        it('non-existent array elements', function () {
-          assert.strictEqual(parser.evaluate('thingy.array[1]', obj), undefined);
-          assert.strictEqual(parser.evaluate('thingy.array[1].value', obj), undefined);
-
-          assert.strictEqual(parser.evaluate('thingy.array[1] ?? 1', obj), 1);
-          assert.strictEqual(parser.evaluate('thingy.array[1].value ?? 1', obj), 1);
-        });
-      });
 
       it('a ?? b + c', function () {
         assert.strictEqual(Parser.parse('a ?? b + c').toJSFunction('a,b,c')(1, 2, 3), 4);
