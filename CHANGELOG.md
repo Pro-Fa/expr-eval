@@ -1,6 +1,10 @@
 # Changelog
 
-## [3.0.0]
+## [3.0.4] 2025-08-15
+
+- Add 'not in' operator, "c" not in ["a", "b"].
+
+## [3.0.3] 2025-05-07
 
 - Fork of https://github.com/msironi/expr-eval because we introduce some breaking changes
 - BREAKING CHANGE: Concatenation operator is renamed from || to | in order to avoid ambiguity with the logical or-operator.

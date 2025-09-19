@@ -1,14 +1,42 @@
 {
-  "name": "expr-eval-enhanced",
-  "version": "3.0.3",
+  "name": "@pro-fa/expr-eval",
+  "version": "3.0.4",
   "description": "Mathematical expression evaluator",
+  "keywords": [
+    "expression",
+    "math",
+    "evaluate",
+    "eval",
+    "function",
+    "parser"
+  ],
+  "homepage": "https://github.com/Pro-Fa/expr-eval#readme",
+  "bugs": {
+    "url": "https://github.com/Pro-Fa/expr-eval/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Pro-Fa/expr-eval.git"
+  },
+  "license": "MIT",
+  "author": "Matthew Crumley, Mark Sironi, Sander Toonen",
+  "type": "commonjs",
   "main": "dist/bundle.js",
-  "module": "dist/index.mjs",
-  "typings": "parser.d.ts",
   "directories": {
     "test": "test"
   },
-  "dependencies": {},
+  "files": [
+    "dist/",
+    "parser.d.ts"
+  ],
+  "scripts": {
+    "test": "npm run build && mocha",
+    "coverage": "npm run build && nyc --reporter=lcov --reporter=text-summary mocha",
+    "lint": "eslint index.js src test rollup.config.js rollup-min.config.js",
+    "watch": "rollup -c rollup.config.js -w",
+    "build": "rollup -c rollup.config.js && rollup -c rollup-min.config.js && rollup -c rollup-esm.config.js",
+    "prepublish": "npm run build"
+  },
   "devDependencies": {
     "eslint": "^6.3.0",
     "eslint-config-semistandard": "^15.0.0",
@@ -22,34 +50,6 @@
     "rollup": "^1.20.3",
     "rollup-plugin-uglify": "^6.0.3"
   },
-  "scripts": {
-    "test": "npm run build && mocha",
-    "coverage": "npm run build && nyc --reporter=lcov --reporter=text-summary mocha",
-    "lint": "eslint index.js src test rollup.config.js rollup-min.config.js",
-    "watch": "rollup -c rollup.config.js -w",
-    "build": "rollup -c rollup.config.js && rollup -c rollup-min.config.js && rollup -c rollup-esm.config.js",
-    "prepublish": "npm run build"
-  },
-  "files": [
-    "dist/",
-    "parser.d.ts"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Pro-Fa/expr-eval.git"
-  },
-  "keywords": [
-    "expression",
-    "math",
-    "evaluate",
-    "eval",
-    "function",
-    "parser"
-  ],
-  "author": "Matthew Crumley, Mark Sironi, Sander Toonen",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/Pro-Fa/expr-eval/issues"
-  },
-  "homepage": "https://github.com/Pro-Fa/expr-eval#readme"
+  "module": "dist/index.mjs",
+  "typings": "parser.d.ts"
 }

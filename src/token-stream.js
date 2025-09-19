@@ -162,6 +162,12 @@ TokenStream.prototype.isNamedOp = function () {
   }
   if (i > startPos) {
     var str = this.expression.substring(startPos, i);
+    if (str === 'not') {
+      // The operator could be 'not' or 'not in', we need to look ahead in the input stream.
+      if (this.expression.substring(startPos, i + 3) === 'not in') {
+        str = 'not in';
+      }
+    }
     if (this.isOperatorEnabled(str) && (str in this.binaryOps || str in this.unaryOps || str in this.ternaryOps)) {
       this.current = this.newToken(TOP, str);
       this.pos += str.length;

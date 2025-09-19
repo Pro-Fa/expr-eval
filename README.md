@@ -69,6 +69,16 @@ parser.evaluate('sqrt -1'); // NaN
 parser.evaluate('sqrt -1 ?? 0'); // 0
 ```
 
+#### not in operator ####
+
+The `not in` operator has been added.
+
+`"a" not in ["a", "b", "c"]`
+
+is equivalent to
+
+`not ("a" in ["a", "b", "c"])`
+
 #### array/structure references act like ?. ####
 
 Structure/array property references now act like `?.`, meaning if the entire property chain does not exist then

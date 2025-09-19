@@ -102,6 +102,10 @@ export function inOperator(a, b) {
   return b === undefined ? false : contains(b, a);
 }
 
+export function notInOperator(a, b) {
+  return !inOperator(a, b);
+}
+
 export function coalesce(a, b) {
   return a === undefined || a === null || a === Infinity || isNaN(a) ? b : a;
 }

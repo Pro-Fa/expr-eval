@@ -245,6 +245,38 @@ describe('Operators', function () {
     });
   });
 
+  describe('not in operator', function () {
+    var parser = new Parser();
+
+    it('"c" not in ["a", "b"]', function () {
+      assert.strictEqual(parser.evaluate('"c" not in toto', { toto: ['a', 'b'] }), true);
+    });
+
+    it('"a" in ["a", "b"]', function () {
+      assert.strictEqual(parser.evaluate('"a" not in toto', { toto: ['a', 'b'] }), false);
+    });
+
+    it('"a" in ["b", "a"]', function () {
+      assert.strictEqual(parser.evaluate('"a" not in toto', { toto: ['b', 'a'] }), false);
+    });
+
+    it('3 in [4, 3]', function () {
+      assert.strictEqual(parser.evaluate('3 not in toto', { toto: [4, 3] }), false);
+    });
+
+    it('"c" in ["a", "b"]', function () {
+      assert.strictEqual(parser.evaluate('"c" not in toto', { toto: ['a', 'b'] }), true);
+    });
+
+    it('"c" in ["b", "a"]', function () {
+      assert.strictEqual(parser.evaluate('"c" not in toto', { toto: ['b', 'a'] }), true);
+    });
+
+    it('3 in [1, 2]', function () {
+      assert.strictEqual(parser.evaluate('3 not in toto', { toto: [1, 2] }), true);
+    });
+  });
+
   describe('not operator', function () {
     it('not 1', function () {
       assert.strictEqual(Parser.evaluate('not 1'), false);

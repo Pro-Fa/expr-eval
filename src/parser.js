@@ -24,6 +24,7 @@ import {
   andOperator,
   orOperator,
   inOperator,
+  notInOperator,
   coalesce,
   asOperator
 } from './functions-binary-ops';
@@ -128,6 +129,7 @@ export function Parser(options) {
     and: andOperator,
     '&&': andOperator,
     in: inOperator,
+    'not in': notInOperator,
     or: orOperator,
     '||': orOperator,
     '??': coalesce,
