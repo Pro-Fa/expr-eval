@@ -1,5 +1,4 @@
-/* eslint-disable no-prototype-builtins */
-/* eslint-disable quote-props */
+
 // cSpell:words TEOF fndef
 import { TEOF } from './token';
 import { TokenStream } from './token-stream';

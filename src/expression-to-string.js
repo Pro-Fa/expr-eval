@@ -132,7 +132,7 @@ export default function expressionToString(tokens, toJS) {
         nstack.push(`case ${n2} ` + whens.join(' ') + ' end');
       } else {
         // ...push a string for the entire case onto the stack.
-        nstack.push(`case ` + whens.join(' ') + ' end');
+        nstack.push('case ' + whens.join(' ') + ' end');
       }
     } else if (type === IWHENCOND) {
       // We are evaluating a WHEN x THEN y portion of a CASE statement; the top of the
@@ -164,7 +164,7 @@ export default function expressionToString(tokens, toJS) {
       nstack.push(`else ${n1}`);
     } else if (type === IOBJECT) {
       // We are constructing an object, push an empty object onto the stack.
-      nstack.push(`{ `);
+      nstack.push('{ ');
     } else if (type === IOBJECTEND) {
       // We have completed constructing an object, append the closing brace.
       nstack.push(`${nstack.pop()} }`);

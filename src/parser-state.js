@@ -417,7 +417,7 @@ ParserState.prototype.parseCaseWhen = function (instr) {
       this.parseConditionalExpression(instr);
       instr.push(new Instruction(whenInstruction, count++));
     } else {
-      throw new Error(`case block missing when`);
+      throw new Error('case block missing when');
     }
   }
 
@@ -431,7 +431,7 @@ ParserState.prototype.parseCaseWhen = function (instr) {
   if (this.accept(TKEYWORD, 'end')) {
     instr.push(new Instruction(caseInstruction, count));
   } else {
-    throw new Error(`invalid case block`);
+    throw new Error('invalid case block');
   }
 };
 

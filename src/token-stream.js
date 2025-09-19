@@ -241,44 +241,44 @@ TokenStream.prototype.unescape = function (v) {
   while (index >= 0) {
     var c = v.charAt(++index);
     switch (c) {
-      case '\'':
-        buffer += '\'';
-        break;
-      case '"':
-        buffer += '"';
-        break;
-      case '\\':
-        buffer += '\\';
-        break;
-      case '/':
-        buffer += '/';
-        break;
-      case 'b':
-        buffer += '\b';
-        break;
-      case 'f':
-        buffer += '\f';
-        break;
-      case 'n':
-        buffer += '\n';
-        break;
-      case 'r':
-        buffer += '\r';
-        break;
-      case 't':
-        buffer += '\t';
-        break;
-      case 'u':
-        // interpret the following 4 characters as the hex of the unicode code point
-        var codePoint = v.substring(index + 1, index + 5);
-        if (!codePointPattern.test(codePoint)) {
-          this.parseError('Illegal escape sequence: \\u' + codePoint);
-        }
-        buffer += String.fromCharCode(parseInt(codePoint, 16));
-        index += 4;
-        break;
-      default:
-        throw this.parseError('Illegal escape sequence: "\\' + c + '"');
+    case '\'':
+      buffer += '\'';
+      break;
+    case '"':
+      buffer += '"';
+      break;
+    case '\\':
+      buffer += '\\';
+      break;
+    case '/':
+      buffer += '/';
+      break;
+    case 'b':
+      buffer += '\b';
+      break;
+    case 'f':
+      buffer += '\f';
+      break;
+    case 'n':
+      buffer += '\n';
+      break;
+    case 'r':
+      buffer += '\r';
+      break;
+    case 't':
+      buffer += '\t';
+      break;
+    case 'u':
+      // interpret the following 4 characters as the hex of the unicode code point
+      var codePoint = v.substring(index + 1, index + 5);
+      if (!codePointPattern.test(codePoint)) {
+        this.parseError('Illegal escape sequence: \\u' + codePoint);
+      }
+      buffer += String.fromCharCode(parseInt(codePoint, 16));
+      index += 4;
+      break;
+    default:
+      throw this.parseError('Illegal escape sequence: "\\' + c + '"');
     }
     ++index;
     var backslash = v.indexOf('\\', index);

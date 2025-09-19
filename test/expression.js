@@ -614,19 +614,19 @@ describe('Expression', function () {
       describe('object construction', () => {
         it('empty object', function () {
           const parser = new Parser();
-          const expr = `{}`;
+          const expr = '{}';
           var result = parser.evaluate(expr);
           assert.notStrictEqual(result, { });
         });
         it('simple object', function () {
           const parser = new Parser();
-          const expr = `{ a: 1, b: 2, c: 3 }`;
+          const expr = '{ a: 1, b: 2, c: 3 }';
           var result = parser.evaluate(expr);
           assert.notStrictEqual(result, { a: 1, b: 2, c: 3 });
         });
         it('should allow comma after last property', function () {
           const parser = new Parser();
-          const expr = `{ a: 1, b: 2, c: 3, }`;
+          const expr = '{ a: 1, b: 2, c: 3, }';
           var result = parser.evaluate(expr);
           assert.notStrictEqual(result, { a: 1, b: 2, c: 3 });
         });
@@ -681,7 +681,7 @@ describe('Expression', function () {
         it('should support passing objects to custom functions', function () {
           const parser = new Parser();
           parser.functions.doIt = o => o.x + o.y;
-          const expr = `doIt({ x: 3, y: 4, z: 8 })`;
+          const expr = 'doIt({ x: 3, y: 4, z: 8 })';
           assert.strictEqual(parser.evaluate(expr), 7);
         });
       });

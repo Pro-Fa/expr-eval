@@ -1,4 +1,4 @@
-/* eslint-disable no-trailing-spaces */
+
 /* eslint-disable array-bracket-spacing */
 /* global describe, it */
 

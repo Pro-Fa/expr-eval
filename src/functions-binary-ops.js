@@ -121,13 +121,13 @@ export function asOperator(a, b) {
   }
   if (typeof b === 'string') {
     switch (b.toLowerCase()) {
-      case 'boolean':
-        return Boolean(a);
-      case 'int':
-      case 'integer':
-        return Math.round(Number(a));
-      case 'number':
-        return Number(a);
+    case 'boolean':
+      return Boolean(a);
+    case 'int':
+    case 'integer':
+      return Math.round(Number(a));
+    case 'number':
+      return Number(a);
     }
   }
   throw new Error(`unknown type: ${b}`);

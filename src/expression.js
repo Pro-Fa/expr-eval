@@ -54,7 +54,7 @@ Expression.prototype.variables = function (options) {
 
 Expression.prototype.toJSFunction = function (param, variables) {
   var expr = this;
-  var f = new Function(param, 'with(this.functions) with (this.ternaryOps) with (this.binaryOps) with (this.unaryOps) { return ' + expressionToString(this.simplify(variables).tokens, true) + '; }'); // eslint-disable-line no-new-func
+  var f = new Function(param, 'with(this.functions) with (this.ternaryOps) with (this.binaryOps) with (this.unaryOps) { return ' + expressionToString(this.simplify(variables).tokens, true) + '; }');
   return function () {
     return f.apply(expr, arguments);
   };
