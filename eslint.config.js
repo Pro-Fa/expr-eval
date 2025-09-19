@@ -1,5 +1,7 @@
 const js = require('@eslint/js');
 const { FlatCompat } = require('@eslint/eslintrc');
+const tseslint = require('@typescript-eslint/eslint-plugin');
+const tsparser = require('@typescript-eslint/parser');
 
 const compat = new FlatCompat({
   baseDirectory: __dirname,
@@ -90,6 +92,58 @@ module.exports = [
       ],
       'linebreak-style': ['error', 'unix'],
       // Standard rules that were included in semistandard
+      'indent': ['error', 2],
+      'quotes': ['error', 'single'],
+      'no-trailing-spaces': 'error',
+      'eol-last': 'error',
+      'no-multiple-empty-lines': ['error', { max: 1 }],
+      'comma-dangle': ['error', 'never'],
+      'object-curly-spacing': ['error', 'always'],
+      'array-bracket-spacing': ['error', 'never'],
+      'computed-property-spacing': ['error', 'never'],
+      'space-in-parens': ['error', 'never'],
+      'space-before-blocks': 'error',
+      'keyword-spacing': 'error',
+      'space-infix-ops': 'error',
+      'space-unary-ops': 'error'
+    }
+  },
+  // TypeScript files configuration
+  {
+    files: ['**/*.ts', '**/*.tsx'],
+    languageOptions: {
+      parser: tsparser,
+      parserOptions: {
+        ecmaVersion: 2022,
+        sourceType: 'module'
+      },
+      globals: {
+        // Node.js globals
+        global: 'readonly',
+        process: 'readonly',
+        Buffer: 'readonly',
+        __dirname: 'readonly',
+        __filename: 'readonly',
+        console: 'readonly'
+      }
+    },
+    plugins: {
+      '@typescript-eslint': tseslint
+    },
+    rules: {
+      // Basic TypeScript rules that are commonly available
+      '@typescript-eslint/no-unused-vars': 'error',
+      '@typescript-eslint/no-explicit-any': 'warn',
+
+      // Standard formatting rules
+      'semi': ['error', 'always'],
+      'space-before-function-paren': [
+        'error', {
+          'anonymous': 'always',
+          'named': 'never'
+        }
+      ],
+      'linebreak-style': ['error', 'unix'],
       'indent': ['error', 2],
       'quotes': ['error', 'single'],
       'no-trailing-spaces': 'error',
