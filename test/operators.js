@@ -949,10 +949,14 @@ describe('Operators', function () {
       assert.strictEqual(Parser.evaluate('a[0]', { a: [4, 3, 2, 1] }), 4);
     });
 
-    it('a[0.1]', function () {
+    it('a[0.1] on array', function () {
       assert.throws(function () {
         Parser.evaluate('a[0.1]', { a: [4, 3, 2, 1] });
       }, 'Error: Array can only be indexed with integers. Received: 0.1');
+    });
+
+    it('a[0.1] on object', function () {
+      assert.strictEqual(Parser.evaluate('a[0.1]', { a: { 0.1: 4, 1: 3 } }), 4);
     });
 
     it('a[3]', function () {

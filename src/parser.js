@@ -5,7 +5,7 @@ import { TEOF } from './token';
 import { TokenStream } from './token-stream';
 import { ParserState } from './parser-state';
 import { Expression } from './expression';
-import { atan2, condition, fac, filter, fold, gamma, hypot, indexOf, join, map, max, min, pow, random, roundTo, sum } from './functions';
+import { atan2, condition, fac, filter, fold, gamma, hypot, indexOf, join, map, max, min, pow, random, roundTo, sum, json } from './functions';
 import {
   add,
   sub,
@@ -154,7 +154,7 @@ export function Parser(options) {
     max: max,
     min: min,
     pow: pow,
-    pyt: hypot, // backward compat
+    json: json,
     random: random,
     roundTo: roundTo,
     sum: sum

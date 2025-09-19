@@ -153,6 +153,11 @@ export function join(sep, a) {
   return a.join(sep);
 }
 
+export function json(content) {
+  if (content === undefined) return undefined;
+  return JSON.stringify(content);
+}
+
 export function map(f, a) {
   if (a === undefined) return undefined;
   if (typeof f !== 'function') {

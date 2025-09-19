@@ -579,5 +579,26 @@ describe('Functions', function () {
         assert.strictEqual(parser.evaluate('sum([1, undefined, 2])'), undefined);
       });
     });
+
+    describe('json(content)', function () {
+      it('should stringify null as null', function () {
+        var parser = new Parser();
+        assert.strictEqual(parser.evaluate('json(nullValue)', { nullValue: null }), 'null');
+      });
+
+      it('should stringify arrays', function () {
+        var parser = new Parser();
+        assert.strictEqual(parser.evaluate('json(emptyArray)', { emptyArray: [] }), '[]');
+        assert.strictEqual(parser.evaluate('json(someArray)', { someArray: [null] }), '[null]');
+        assert.strictEqual(parser.evaluate('json(someArray)', { someArray: [1, 2, 3] }), '[1,2,3]');
+        assert.strictEqual(parser.evaluate('json([4, 5, 6])'), '[4,5,6]');
+      });
+
+      it('should stringify objects', function () {
+        var parser = new Parser();
+        assert.strictEqual(parser.evaluate('json(x)', { x: { a: 1, b: 2 } }), '{"a":1,"b":2}');
+        assert.strictEqual(parser.evaluate('json(x)', { x: { a: { c: 3 }, b: [1, 2] } }), '{"a":{"c":3},"b":[1,2]}');
+      });
+    });
   });
 });
