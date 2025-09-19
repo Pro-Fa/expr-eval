@@ -49,6 +49,10 @@ describe('Operators', function () {
     it('\'3\' == \'3\'', function () {
       assert.strictEqual(Parser.evaluate('\'3\' == \'3\''), true);
     });
+
+    it('null == null', function () {
+      assert.strictEqual(Parser.evaluate('null == alsoNull', { null: null, alsoNull: null }), true);
+    });
   });
 
   describe('!= operator', function () {
@@ -946,7 +950,9 @@ describe('Operators', function () {
     });
 
     it('a[0.1]', function () {
-      assert.strictEqual(Parser.evaluate('a[0.1]', { a: [4, 3, 2, 1] }), 4);
+      assert.throws(function () {
+        Parser.evaluate('a[0.1]', { a: [4, 3, 2, 1] });
+      }, 'Error: Array can only be indexed with integers. Received: 0.1');
     });
 
     it('a[3]', function () {
@@ -958,7 +964,7 @@ describe('Operators', function () {
     });
 
     it('a["foo"]', function () {
-      assert.strictEqual(Parser.evaluate('a["foo"]', { a: { foo: 'bar' } }), undefined);
+      assert.strictEqual(Parser.evaluate('a["foo"]', { a: { foo: 'bar' } }), 'bar');
     });
 
     it('a[2]^3', function () {

@@ -78,8 +78,8 @@ export function setVar(name, value, variables) {
   return value;
 }
 
-export function arrayIndexOrProperty(array, index) {
-  if (array === undefined || index === undefined) {
+export function arrayIndexOrProperty(parent, index) {
+  if (parent === undefined || index === undefined) {
     return undefined;
   }
 
@@ -87,7 +87,12 @@ export function arrayIndexOrProperty(array, index) {
     return undefined;
   }
 
-  return array[index];
+  // When parent is array and index is not a round number: Throw error.
+  if (Array.isArray(parent) && !Number.isInteger(index)) {
+    throw new Error(`Array can only be indexed with integers. Received: ${index}`);
+  }
+
+  return parent[index];
 }
 
 export function andOperator(a, b) {
