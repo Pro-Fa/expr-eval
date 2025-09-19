@@ -1,14 +1,18 @@
 import { Instruction, IOP1, IOP2, IOP3, IVAR, IEXPR, ternaryInstruction, binaryInstruction, unaryInstruction } from './instruction';
+import type { Expression } from './expression';
 
-export default function substitute(tokens, variable, expr) {
-  var newexpression = [];
-  for (var i = 0; i < tokens.length; i++) {
-    var item = tokens[i];
-    var type = item.type;
+export default function substitute(tokens: Instruction[], variable: string, expr: Expression): Instruction[] {
+  const newexpression: Instruction[] = [];
+  
+  for (let i = 0; i < tokens.length; i++) {
+    const item = tokens[i];
+    const { type } = item;
+    
     if (type === IVAR && item.value === variable) {
-      for (var j = 0; j < expr.tokens.length; j++) {
-        var expritem = expr.tokens[j];
-        var replitem;
+      for (let j = 0; j < expr.tokens.length; j++) {
+        const expritem = expr.tokens[j];
+        let replitem: Instruction;
+        
         if (expritem.type === IOP1) {
           replitem = unaryInstruction(expritem.value);
         } else if (expritem.type === IOP2) {
@@ -21,10 +25,11 @@ export default function substitute(tokens, variable, expr) {
         newexpression.push(replitem);
       }
     } else if (type === IEXPR) {
-      newexpression.push(new Instruction(IEXPR, substitute(item.value, variable, expr)));
+      newexpression.push(new Instruction(IEXPR, substitute(item.value as Instruction[], variable, expr)));
     } else {
       newexpression.push(item);
     }
   }
+  
   return newexpression;
 }

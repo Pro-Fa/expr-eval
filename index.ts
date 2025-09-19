@@ -12,6 +12,20 @@
 import { Expression } from './src/expression';
 import { Parser } from './src/parser';
 
+// Re-export types for public API
+export type {
+  Value,
+  Values,
+  ParserOptions,
+  UnaryOperator,
+  BinaryOperator,
+  SymbolOptions,
+  VariableAlias,
+  VariableValue,
+  VariableResolveResult,
+  OperatorFunction
+} from './src/types';
+
 export {
   Expression,
   Parser

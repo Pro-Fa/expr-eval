@@ -1,6 +1,6 @@
 import contains from './contains';
 
-export function add(a, b) {
+export function add(a: any, b: any): any {
   // If either value is undefined then the sum is undefined.
   if (a === undefined || b === undefined) {
     return undefined;
@@ -18,28 +18,23 @@ export function add(a, b) {
   return Number(a) + Number(b);
 }
 
-export function sub(a, b) {
+export function sub(a: number | undefined, b: number | undefined): number | undefined {
   return a === undefined || b === undefined ? undefined : a - b;
 }
 
-export function mul(a, b) {
+export function mul(a: number | undefined, b: number | undefined): number | undefined {
   return a === undefined || b === undefined ? undefined : a * b;
 }
 
-export function div(a, b) {
+export function div(a: number | undefined, b: number | undefined): number | undefined {
   return a === undefined || b === undefined ? undefined : a / b;
 }
 
-export function mod(a, b) {
+export function mod(a: number | undefined, b: number | undefined): number | undefined {
   return a === undefined || b === undefined ? undefined : a % b;
 }
 
-export function pow(a) {
-  if (a === undefined) return undefined;
-  return Math.pow(a);
-}
-
-export function concat(a, b) {
+export function concat(a: any[] | string | undefined, b: any[] | string | undefined): any[] | string | undefined {
   if (Array.isArray(a) && Array.isArray(b)) {
     return a.concat(b);
   } else if (typeof a === 'string' && typeof b === 'string') {
@@ -49,36 +44,38 @@ export function concat(a, b) {
   }
 }
 
-export function equal(a, b) {
+export function equal(a: any, b: any): boolean {
   return a === b;
 }
 
-export function notEqual(a, b) {
+export function notEqual(a: any, b: any): boolean {
   return a !== b;
 }
 
-export function greaterThan(a, b) {
+export function greaterThan(a: any, b: any): boolean {
   return a > b;
 }
 
-export function lessThan(a, b) {
+export function lessThan(a: any, b: any): boolean {
   return a < b;
 }
 
-export function greaterThanEqual(a, b) {
+export function greaterThanEqual(a: any, b: any): boolean {
   return a >= b;
 }
 
-export function lessThanEqual(a, b) {
+export function lessThanEqual(a: any, b: any): boolean {
   return a <= b;
 }
 
-export function setVar(name, value, variables) {
-  if (variables) variables[name] = value;
+export function setVar(name: string, value: any, variables: Record<string, any> | undefined): any {
+  if (variables) {
+    variables[name] = value;
+  }
   return value;
 }
 
-export function arrayIndexOrProperty(parent, index) {
+export function arrayIndexOrProperty(parent: any, index: number | string | undefined): any {
   if (parent === undefined || index === undefined) {
     return undefined;
   }
@@ -95,27 +92,27 @@ export function arrayIndexOrProperty(parent, index) {
   return parent[index];
 }
 
-export function andOperator(a, b) {
+export function andOperator(a: any, b: any): boolean {
   return Boolean(a && b);
 }
 
-export function orOperator(a, b) {
+export function orOperator(a: any, b: any): boolean {
   return Boolean(a || b);
 }
 
-export function inOperator(a, b) {
+export function inOperator(a: any, b: any[] | undefined): boolean {
   return b === undefined ? false : contains(b, a);
 }
 
-export function notInOperator(a, b) {
+export function notInOperator(a: any, b: any[] | undefined): boolean {
   return !inOperator(a, b);
 }
 
-export function coalesce(a, b) {
+export function coalesce(a: any, b: any): any {
   return a === undefined || a === null || a === Infinity || isNaN(a) ? b : a;
 }
 
-export function asOperator(a, b) {
+export function asOperator(a: any, b: string | undefined): any {
   if (a === undefined || b === undefined) {
     return undefined;
   }

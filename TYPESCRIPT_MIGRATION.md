@@ -35,7 +35,7 @@ The project has been prepared for TypeScript conversion with the following tooli
 - Set up linting and type checking
 - Prepare development environment
 
-### Phase 2: File-by-file conversion (Not started)
+### Phase 2: File-by-file conversion (✅ Complete)
 1. **Utilities first**: Start with simple utility files in `src/`
    - `src/token.js` → `src/token.ts`
    - `src/instruction.js` → `src/instruction.ts`
@@ -61,14 +61,16 @@ The project has been prepared for TypeScript conversion with the following tooli
 ### Phase 3: Type refinement
 - Replace the manual `parser.d.ts` with generated types
 - Add strict type annotations
-- Remove `any` types where possible
-- Add comprehensive JSDoc comments
 
 ### Phase 4: Advanced TypeScript features
 - Generic types for better type safety
 - Utility types for complex expressions
 - Template literal types for operators
 - Branded types for different value types
+
+### Phase 5: Optional
+- Remove `any` types where possible
+- Add comprehensive JSDoc comments
 
 ## Development Workflow
 
@@ -98,7 +100,7 @@ You can test the current TypeScript setup with:
 # Type checking
 npm run type-check
 
-# TypeScript linting  
+# TypeScript linting
 npm run lint:ts
 
 # Build with TypeScript

@@ -1,28 +1,33 @@
 import { IVAR, IMEMBER, IEXPR, IVARNAME } from './instruction';
+import type { Instruction } from './instruction';
 import contains from './contains';
 
-export default function getSymbols(tokens, symbols, options) {
-  options = options || {};
-  var withMembers = !!options.withMembers;
-  var prevVar = null;
+interface SymbolOptions {
+  withMembers?: boolean;
+}
 
-  for (var i = 0; i < tokens.length; i++) {
-    var item = tokens[i];
+export default function getSymbols(tokens: Instruction[], symbols: string[], options?: SymbolOptions): void {
+  const opts = options || {};
+  const withMembers = !!opts.withMembers;
+  let prevVar: string | null = null;
+
+  for (let i = 0; i < tokens.length; i++) {
+    const item = tokens[i];
     if (item.type === IVAR || item.type === IVARNAME) {
-      if (!withMembers && !contains(symbols, item.value)) {
-        symbols.push(item.value);
+      if (!withMembers && !contains(symbols, item.value as string)) {
+        symbols.push(item.value as string);
       } else if (prevVar !== null) {
         if (!contains(symbols, prevVar)) {
           symbols.push(prevVar);
         }
-        prevVar = item.value;
+        prevVar = item.value as string;
       } else {
-        prevVar = item.value;
+        prevVar = item.value as string;
       }
     } else if (item.type === IMEMBER && withMembers && prevVar !== null) {
       prevVar += '.' + item.value;
     } else if (item.type === IEXPR) {
-      getSymbols(item.value, symbols, options);
+      getSymbols(item.value as Instruction[], symbols, opts);
     } else if (prevVar !== null) {
       if (!contains(symbols, prevVar)) {
         symbols.push(prevVar);

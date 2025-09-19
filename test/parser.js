@@ -239,43 +239,57 @@ describe('Parser', function () {
         assert.strictEqual(parser.parse('sin; (2)^3').toString(), '(sin;(2 ^ 3))');
         assert.strictEqual(parser.parse('f(sin, sqrt)').evaluate({ f: function (a, b) { return [a, b]; } }).toString(),
           'function sin(a) {\n' +
-          '    if (a === undefined) return undefined;\n' +
-          '    return Math.sin(a);\n' +
-          '  },' +
+          '        if (a === undefined) {\n' +
+          '            return undefined;\n' +
+          '        }\n' +
+          '        return Math.sin(a);\n' +
+          '    },' +
           'function sqrt(a) {\n' +
-          '    if (a === undefined) return undefined;\n' +
-          '    return Math.sqrt(a);\n' +
-          '  }'
+          '        if (a === undefined) {\n' +
+          '            return undefined;\n' +
+          '        }\n' +
+          '        return Math.sqrt(a);\n' +
+          '    }'
         );
         assert.strictEqual(parser.parse('sin').evaluate().toString(),
           'function sin(a) {\n' +
-          '    if (a === undefined) return undefined;\n' +
-          '    return Math.sin(a);\n' +
-          '  }'
+          '        if (a === undefined) {\n' +
+          '            return undefined;\n' +
+          '        }\n' +
+          '        return Math.sin(a);\n' +
+          '    }'
         );
         assert.strictEqual(parser.parse('cos;').evaluate().toString(),
           'function cos(a) {\n' +
-          '    if (a === undefined) return undefined;\n' +
-          '    return Math.cos(a);\n' +
-          '  }'
+          '        if (a === undefined) {\n' +
+          '            return undefined;\n' +
+          '        }\n' +
+          '        return Math.cos(a);\n' +
+          '    }'
         );
         assert.strictEqual(parser.parse('cos;tan').evaluate().toString(),
           'function tan(a) {\n' +
-          '    if (a === undefined) return undefined;\n' +
-          '    return Math.tan(a);\n' +
-          '  }'
+          '        if (a === undefined) {\n' +
+          '            return undefined;\n' +
+          '        }\n' +
+          '        return Math.tan(a);\n' +
+          '    }'
         );
         assert.strictEqual(parser.parse('(floor)').evaluate().toString(),
           'function floor(a) {\n' +
-          '    if (a === undefined) return undefined;\n' +
-          '    return Math.floor(a);\n' +
-          '  }'
+          '        if (a === undefined) {\n' +
+          '            return undefined;\n' +
+          '        }\n' +
+          '        return Math.floor(a);\n' +
+          '    }'
         );
         assert.strictEqual(parser.parse('4; ceil').evaluate().toString(),
           'function ceil(a) {\n' +
-          '    if (a === undefined) return undefined;\n' +
-          '    return Math.ceil(a);\n' +
-          '  }'
+          '        if (a === undefined) {\n' +
+          '            return undefined;\n' +
+          '        }\n' +
+          '        return Math.ceil(a);\n' +
+          '    }'
         );
       });
 
