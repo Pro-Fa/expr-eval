@@ -11,7 +11,6 @@ export default [
   {
     ignores: [
       'dist/**',
-      '.rollup.cache/**',
       'node_modules/**',
       'coverage/**',
       '.nyc_output/**'
@@ -23,7 +22,7 @@ export default [
 
   // Source files (ES modules)
   {
-    files: ['index.js', 'src/**/*.js', 'rollup*.js'],
+    files: ['index.js', 'src/**/*.js', 'vite.config.ts'],
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
