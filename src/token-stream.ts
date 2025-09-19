@@ -276,44 +276,44 @@ export class TokenStream {
     while (currentIndex >= 0) {
       const c = v.charAt(++currentIndex);
       switch (c) {
-      case '\'':
-        buffer += '\'';
-        break;
-      case '"':
-        buffer += '"';
-        break;
-      case '\\':
-        buffer += '\\';
-        break;
-      case '/':
-        buffer += '/';
-        break;
-      case 'b':
-        buffer += '\b';
-        break;
-      case 'f':
-        buffer += '\f';
-        break;
-      case 'n':
-        buffer += '\n';
-        break;
-      case 'r':
-        buffer += '\r';
-        break;
-      case 't':
-        buffer += '\t';
-        break;
-      case 'u':
+        case '\'':
+          buffer += '\'';
+          break;
+        case '"':
+          buffer += '"';
+          break;
+        case '\\':
+          buffer += '\\';
+          break;
+        case '/':
+          buffer += '/';
+          break;
+        case 'b':
+          buffer += '\b';
+          break;
+        case 'f':
+          buffer += '\f';
+          break;
+        case 'n':
+          buffer += '\n';
+          break;
+        case 'r':
+          buffer += '\r';
+          break;
+        case 't':
+          buffer += '\t';
+          break;
+        case 'u':
         // interpret the following 4 characters as the hex of the unicode code point
-        const codePoint = v.substring(currentIndex + 1, currentIndex + 5);
-        if (!TokenStream.codePointPattern.test(codePoint)) {
-          this.parseError('Illegal escape sequence: \\u' + codePoint);
-        }
-        buffer += String.fromCharCode(parseInt(codePoint, 16));
-        currentIndex += 4;
-        break;
-      default:
-        throw this.parseError('Illegal escape sequence: "\\' + c + '"');
+          const codePoint = v.substring(currentIndex + 1, currentIndex + 5);
+          if (!TokenStream.codePointPattern.test(codePoint)) {
+            this.parseError('Illegal escape sequence: \\u' + codePoint);
+          }
+          buffer += String.fromCharCode(parseInt(codePoint, 16));
+          currentIndex += 4;
+          break;
+        default:
+          throw this.parseError('Illegal escape sequence: "\\' + c + '"');
       }
       ++currentIndex;
       const backslash = v.indexOf('\\', currentIndex);
@@ -546,4 +546,3 @@ export class TokenStream {
     throw new Error('parse error [' + coords.line + ':' + coords.column + ']: ' + msg);
   }
 }
-

@@ -69,40 +69,40 @@ export class Instruction {
 
   toString(): string {
     switch (this.type) {
-    case INUMBER:
-    case IOP1:
-    case IOP2:
-    case IOP3:
-    case IVAR:
-    case IVARNAME:
-    case IENDSTATEMENT:
-      return this.value;
-    case IFUNCALL:
-      return 'CALL ' + this.value;
-    case IFUNDEF:
-      return 'DEF ' + this.value;
-    case IARRAY:
-      return 'ARRAY ' + this.value;
-    case IMEMBER:
-      return '.' + this.value;
-    case IUNDEFINED:
-      return 'undefined';
-    case ICASECOND:
-      return `CASE ${this.value}`;
-    case ICASEMATCH:
-      return `CASE ${this.value}`;
-    case IWHENCOND:
-      return `WHEN ${this.value}`;
-    case IWHENMATCH:
-      return `WHEN ${this.value}`;
-    case ICASEELSE:
-      return 'ELSE';
-    case IPROPERTY:
-      return `PROPERTY ${this.value}`;
-    case IOBJECT:
-      return `OBJECT ${this.value}`;
-    default:
-      return 'Invalid Instruction';
+      case INUMBER:
+      case IOP1:
+      case IOP2:
+      case IOP3:
+      case IVAR:
+      case IVARNAME:
+      case IENDSTATEMENT:
+        return this.value;
+      case IFUNCALL:
+        return 'CALL ' + this.value;
+      case IFUNDEF:
+        return 'DEF ' + this.value;
+      case IARRAY:
+        return 'ARRAY ' + this.value;
+      case IMEMBER:
+        return '.' + this.value;
+      case IUNDEFINED:
+        return 'undefined';
+      case ICASECOND:
+        return `CASE ${this.value}`;
+      case ICASEMATCH:
+        return `CASE ${this.value}`;
+      case IWHENCOND:
+        return `WHEN ${this.value}`;
+      case IWHENMATCH:
+        return `WHEN ${this.value}`;
+      case ICASEELSE:
+        return 'ELSE';
+      case IPROPERTY:
+        return `PROPERTY ${this.value}`;
+      case IOBJECT:
+        return `OBJECT ${this.value}`;
+      default:
+        return 'Invalid Instruction';
     }
   }
 }

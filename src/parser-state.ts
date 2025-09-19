@@ -490,4 +490,3 @@ export class ParserState {
     return count;
   }
 }
-

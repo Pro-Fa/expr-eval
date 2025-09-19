@@ -66,7 +66,7 @@ export function gamma(n: number | undefined): number | undefined {
   if (n === undefined) {
     return undefined;
   }
-  let t: number, x: number;
+  let x: number;
 
   if (isInteger(n)) {
     if (n <= 0) {
@@ -116,8 +116,8 @@ export function gamma(n: number | undefined): number | undefined {
     x += GAMMA_P[i] / (n + i);
   }
 
-  t = n + GAMMA_G + 0.5;
-  return Math.sqrt(2 * Math.PI) * Math.pow(t, n + 0.5) * Math.exp(-t) * x;
+  const term = n + GAMMA_G + 0.5;
+  return Math.sqrt(2 * Math.PI) * Math.pow(term, n + 0.5) * Math.exp(-term) * x;
 }
 
 export function hypot(...args: (number | undefined)[]): number | undefined {
@@ -256,10 +256,10 @@ export function roundTo(value: number | undefined, exp?: number): number | undef
     return NaN;
   }
   // Shift
-  let valueStr = numValue.toString().split('e');
-  let shiftedValue = Math.round(+(valueStr[0] + 'e' + (valueStr[1] ? (+valueStr[1] - numExp) : -numExp)));
+  const valueStr = numValue.toString().split('e');
+  const shiftedValue = Math.round(+(valueStr[0] + 'e' + (valueStr[1] ? (+valueStr[1] - numExp) : -numExp)));
   // Shift back
-  let resultStr = shiftedValue.toString().split('e');
+  const resultStr = shiftedValue.toString().split('e');
   return +(resultStr[0] + 'e' + (resultStr[1] ? (+resultStr[1] + numExp) : numExp));
 }
 

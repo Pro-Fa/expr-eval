@@ -282,4 +282,3 @@ export class Parser {
     return Parser.sharedParser.parse(expr).evaluate(variables);
   }
 }
-
