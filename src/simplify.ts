@@ -4,28 +4,28 @@ import { Instruction, INUMBER, IOP1, IOP2, IOP3, IVAR, IVARNAME, IEXPR, IMEMBER,
 type OperatorFunction = (...args: any[]) => any;
 
 export default function simplify(
-  tokens: Instruction[], 
-  unaryOps: Record<string, OperatorFunction>, 
-  binaryOps: Record<string, OperatorFunction>, 
-  ternaryOps: Record<string, OperatorFunction>, 
+  tokens: Instruction[],
+  unaryOps: Record<string, OperatorFunction>,
+  binaryOps: Record<string, OperatorFunction>,
+  ternaryOps: Record<string, OperatorFunction>,
   values: Record<string, any>
 ): Instruction[] {
   const nstack: Instruction[] = [];
   const newexpression: Instruction[] = [];
   let n1: Instruction, n2: Instruction, n3: Instruction;
   let f: OperatorFunction;
-  
+
   for (let i = 0; i < tokens.length; i++) {
     const item = tokens[i];
     const { type } = item;
-    
+
     if (type === INUMBER || type === IVARNAME) {
       if (Array.isArray(item.value)) {
         nstack.push(...simplify(
-          item.value.map((x) => new Instruction(INUMBER, x)).concat(new Instruction(IARRAY, item.value.length)), 
-          unaryOps, 
-          binaryOps, 
-          ternaryOps, 
+          item.value.map((x) => new Instruction(INUMBER, x)).concat(new Instruction(IARRAY, item.value.length)),
+          unaryOps,
+          binaryOps,
+          ternaryOps,
           values
         ));
       } else {
@@ -71,10 +71,10 @@ export default function simplify(
       newexpression.push(item);
     }
   }
-  
+
   while (nstack.length > 0) {
     newexpression.push(nstack.shift()!);
   }
-  
+
   return newexpression;
 }

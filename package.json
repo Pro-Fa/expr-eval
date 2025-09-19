@@ -20,10 +20,17 @@
   },
   "license": "MIT",
   "author": "Matthew Crumley, Mark Sironi, Sander Toonen",
-  "type": "commonjs",
-  "main": "dist/bundle.js",
+  "type": "module",
+  "main": "dist/index.mjs",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/bundle.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "directories": {
     "test": "test"
   },

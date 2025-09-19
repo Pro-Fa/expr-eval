@@ -1,14 +1,29 @@
-const js = require('@eslint/js');
-const { FlatCompat } = require('@eslint/eslintrc');
-const tseslint = require('@typescript-eslint/eslint-plugin');
-const tsparser = require('@typescript-eslint/parser');
+import js from '@eslint/js';
+import { FlatCompat } from '@eslint/eslintrc';
+import tseslint from '@typescript-eslint/eslint-plugin';
+import tsparser from '@typescript-eslint/parser';
+import { fileURLToPath } from 'url';
+import path from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const compat = new FlatCompat({
   baseDirectory: __dirname,
   recommendedConfig: js.configs.recommended
 });
 
-module.exports = [
+export default [
+  // Global ignores for generated files
+  {
+    ignores: [
+      'dist/**',
+      '.rollup.cache/**',
+      'node_modules/**',
+      'coverage/**',
+      '.nyc_output/**'
+    ]
+  },
   // Source files (use ES modules)
   {
     files: ['index.js', 'src/**/*.js', 'rollup*.js'],
@@ -52,12 +67,12 @@ module.exports = [
       'space-unary-ops': 'error'
     }
   },
-  // Test files configuration (CommonJS style)
+  // Test files configuration (now ESM style)
   {
     files: ['test/**/*.js'],
     languageOptions: {
       ecmaVersion: 2022,
-      sourceType: 'script',
+      sourceType: 'module',
       globals: {
         // Node.js globals
         global: 'readonly',
@@ -66,9 +81,6 @@ module.exports = [
         __dirname: 'readonly',
         __filename: 'readonly',
         console: 'readonly',
-        module: 'readonly',
-        require: 'readonly',
-        exports: 'readonly',
         // Mocha globals
         describe: 'readonly',
         it: 'readonly',
@@ -133,7 +145,7 @@ module.exports = [
     rules: {
       // Basic TypeScript rules that are commonly available
       '@typescript-eslint/no-unused-vars': 'error',
-      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-explicit-any': 'off',
 
       // Standard formatting rules
       'semi': ['error', 'always'],

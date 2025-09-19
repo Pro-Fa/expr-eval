@@ -229,7 +229,7 @@ function evaluateExpressionToken(expr: Expression, values: EvaluationValues, tok
       return f;
     })());
   } else if (type === IEXPR) {
-    nstack.push(createExpressionEvaluator(token, expr, values));
+    nstack.push(createExpressionEvaluator(token, expr));
   } else if (type === IEXPREVAL) {
     nstack.push(token);
   } else if (type === IMEMBER) {
@@ -322,7 +322,7 @@ function evaluateExpressionToken(expr: Expression, values: EvaluationValues, tok
   }
 }
 
-function createExpressionEvaluator(token: Instruction, expr: Expression, values: EvaluationValues): ExpressionEvaluator {
+function createExpressionEvaluator(token: Instruction, expr: Expression): ExpressionEvaluator {
   if (isExpressionEvaluator(token)) {
     return token;
   }

@@ -210,7 +210,7 @@ export class Parser {
     // - { alias: "xxx" } the token is an alias for xxx, i.e. use xxx as the token.
     // - { value: <something> } use <something> as the value for the variable
     // - any other value is treated as the value to use for the token.
-    this.resolve = (_token: string): VariableResolveResult => undefined;
+    this.resolve = (): VariableResolveResult => undefined;
   }
 
   parse(expr: string): Expression {

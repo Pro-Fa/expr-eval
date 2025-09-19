@@ -10,11 +10,11 @@ export default function expressionToString(tokens: Instruction[], toJS?: boolean
   const nstack: string[] = [];
   let n1: string, n2: string, n3: string;
   let f: string, args: string[], argCount: number;
-  
+
   for (let i = 0; i < tokens.length; i++) {
     const item = tokens[i];
     const { type } = item;
-    
+
     if (type === INUMBER) {
       if (typeof item.value === 'number' && item.value < 0) {
         nstack.push('(' + item.value + ')');
@@ -184,7 +184,7 @@ export default function expressionToString(tokens: Instruction[], toJS?: boolean
       throw new Error('invalid Expression');
     }
   }
-  
+
   if (nstack.length > 1) {
     if (toJS) {
       return nstack.join(',');

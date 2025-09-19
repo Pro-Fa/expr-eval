@@ -4,11 +4,11 @@ import evaluate from './evaluate';
 import expressionToString from './expression-to-string';
 import getSymbols from './get-symbols';
 import { Instruction } from './instruction';
-import type { 
-  OperatorFunction, 
-  Values, 
-  SymbolOptions, 
-  VariableResolveResult 
+import type {
+  OperatorFunction,
+  Values,
+  SymbolOptions,
+  VariableResolveResult
 } from './types';
 
 // Parser interface (will be more complete when we convert parser.js)
