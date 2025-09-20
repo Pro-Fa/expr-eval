@@ -1,7 +1,7 @@
 /* global describe, it */
 
 import assert from 'assert';
-import { Parser } from '../../dist/index.mjs';
+import { Parser } from '../../index';
 
 describe('Unary Operators TypeScript Test', function () {
   describe('- (negation)', function () {

@@ -515,6 +515,24 @@
     "@typescript-eslint/types" "8.44.0"
     eslint-visitor-keys "^4.2.1"
 
+"@typescript/native-preview-win32-x64@7.0.0-dev.20250920.1":
+  version "7.0.0-dev.20250920.1"
+  resolved "https://registry.npmjs.org/@typescript/native-preview-win32-x64/-/native-preview-win32-x64-7.0.0-dev.20250920.1.tgz"
+  integrity sha512-arxNEOP4LMr+rxCxbitG9ejEkmvvj7pkjMFTAFHfWJC0mKuT+1cQu79iZBhY16oHB4HLCziJRBRdMQhIB2Wf+w==
+
+"@typescript/native-preview@^7.0.0-dev.20250920.1":
+  version "7.0.0-dev.20250920.1"
+  resolved "https://registry.npmjs.org/@typescript/native-preview/-/native-preview-7.0.0-dev.20250920.1.tgz"
+  integrity sha512-iuMeX3RUMysVWGvzXzJrPdMBWDo0LlLDk6FU8PbYgCA1MUlguHePK5wqS/GlOrRLBQ0BjXM1W8q81J37vIW63g==
+  optionalDependencies:
+    "@typescript/native-preview-darwin-arm64" "7.0.0-dev.20250920.1"
+    "@typescript/native-preview-darwin-x64" "7.0.0-dev.20250920.1"
+    "@typescript/native-preview-linux-arm" "7.0.0-dev.20250920.1"
+    "@typescript/native-preview-linux-arm64" "7.0.0-dev.20250920.1"
+    "@typescript/native-preview-linux-x64" "7.0.0-dev.20250920.1"
+    "@typescript/native-preview-win32-arm64" "7.0.0-dev.20250920.1"
+    "@typescript/native-preview-win32-x64" "7.0.0-dev.20250920.1"
+
 "@vitest/coverage-v8@^3.2.4":
   version "3.2.4"
   resolved "https://registry.npmjs.org/@vitest/coverage-v8/-/coverage-v8-3.2.4.tgz"

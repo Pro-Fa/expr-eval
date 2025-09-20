@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { Parser } from '../../dist/index.mjs';
+import { Parser } from '../../index';
 
 describe('Expression Advanced Features TypeScript Test', () => {
   describe('function definitions', () => {

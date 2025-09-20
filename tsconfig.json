@@ -1,33 +1,67 @@
 {
   "compilerOptions": {
-    "target": "ES2018",
+    // Language and Environment
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM"],
     "module": "ESNext",
-    "moduleResolution": "node",
-    "lib": ["ES2020"],
-    "types": ["vitest/globals"],
+    "moduleResolution": "bundler",
+
+    // Module Resolution
+    "allowImportingTsExtensions": false,
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "checkJs": false,
+
+    // Emit
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
     "outDir": "./dist",
     "rootDir": "./",
+    "removeComments": false,
+    "noEmit": false,
+    "importHelpers": false,
+    "downlevelIteration": false,
+
+    // Interop Constraints
+    "isolatedModules": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "verbatimModuleSyntax": false,
+
+    // Type Checking (Strict Mode)
     "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
     "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
     "noImplicitThis": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": false,
+    "noImplicitOverride": false,
+    "allowUnusedLabels": false,
+    "allowUnreachableCode": false,
     "exactOptionalPropertyTypes": false,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "forceConsistentCasingInFileNames": true,
+
+    // Additional Checks
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noPropertyAccessFromIndexSignature": false,
+
+    // Completeness
     "skipLibCheck": true,
-    "resolveJsonModule": true,
-    "allowJs": true,
-    "checkJs": false,
+    "skipDefaultLibCheck": true,
+
+    // Performance
     "incremental": true,
-    "composite": false
+    "composite": false,
+    "tsBuildInfoFile": "./dist/.tsbuildinfo",
+
+    // Testing Framework
+    "types": ["vitest/globals"]
   },
   "include": [
     "src/**/*",
