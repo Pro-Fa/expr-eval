@@ -87,9 +87,11 @@ export class ParserState {
       const coords = this.tokens.getCoordinates();
       throw new ParseError(
         `Expected ${value || type}`,
-        { line: coords.line, column: coords.column },
-        this.nextToken?.value?.toString(),
-        this.tokens.expression
+        {
+          position: { line: coords.line, column: coords.column },
+          token: this.nextToken?.value?.toString(),
+          expression: this.tokens.expression
+        }
       );
     }
   }
@@ -129,9 +131,11 @@ export class ParserState {
       const coords = this.tokens.getCoordinates();
       throw new ParseError(
         `Unexpected token: ${this.nextToken}`,
-        { line: coords.line, column: coords.column },
-        this.nextToken?.value?.toString(),
-        this.tokens.expression
+        {
+          position: { line: coords.line, column: coords.column },
+          token: this.nextToken?.value?.toString(),
+          expression: this.tokens.expression
+        }
       );
     }
   }
@@ -192,9 +196,10 @@ export class ParserState {
           const coords = this.tokens.getCoordinates();
           throw new ParseError(
             'function definition is not permitted',
-            { line: coords.line, column: coords.column },
-            undefined,
-            this.tokens.expression
+            {
+              position: { line: coords.line, column: coords.column },
+              expression: this.tokens.expression
+            }
           );
         }
         for (let i = 0, len = (varName.value as number) + 1; i < len; i++) {
@@ -387,8 +392,9 @@ export class ParserState {
         if (!this.allowMemberAccess) {
           throw new AccessError(
             'member access is not permitted',
-            undefined,
-            this.tokens.expression
+            {
+              expression: this.tokens.expression
+            }
           );
         }
 
@@ -398,8 +404,9 @@ export class ParserState {
         if (!this.tokens.isOperatorEnabled('[')) {
           throw new AccessError(
             'Array access is disabled',
-            undefined,
-            this.tokens.expression
+            {
+              expression: this.tokens.expression
+            }
           );
         }
 

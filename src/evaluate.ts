@@ -1,6 +1,7 @@
 import { INUMBER, IOP1, IOP2, IOP3, IVAR, IVARNAME, IFUNCALL, IFUNDEF, IEXPR, IEXPREVAL, IMEMBER, IENDSTATEMENT, IARRAY, IUNDEFINED, ICASEMATCH, IWHENMATCH, ICASEELSE, ICASECOND, IWHENCOND, IOBJECT, IPROPERTY, IOBJECTEND } from './instruction';
 import type { Instruction } from './instruction';
 import type { Expression } from './expression';
+import type { Value, Values } from './types';
 import { EvaluationError, VariableError, FunctionError, AccessError } from './types';
 
 // cSpell:words INUMBER IVAR IVARNAME IFUNCALL IEXPR IEXPREVAL IMEMBER IENDSTATEMENT IARRAY
@@ -14,17 +15,17 @@ interface VariableAlias {
 }
 
 interface VariableValue {
-  value: any;
+  value: Value;
 }
 
-type VariableResolveResult = VariableAlias | VariableValue | any | undefined;
+type VariableResolveResult = VariableAlias | VariableValue | Value | undefined;
 
 interface ExpressionEvaluator {
   type: typeof IEXPREVAL;
-  value: (scope: Record<string, any>) => any;
+  value: (scope: Values) => Value | Promise<Value>;
 }
 
-type EvaluationValues = Record<string, any>;
+type EvaluationValues = Values;
 type EvaluationStack = any[];
 
 /**
@@ -36,7 +37,7 @@ type EvaluationStack = any[];
  * @returns The return value is the expression result value or a promise that when resolved will contain
  * the expression result value.  A promise is only returned if a caller defined function returns a promise.
  */
-export default function evaluate(tokens: Instruction | Instruction[], expr: Expression, values: EvaluationValues): any {
+export default function evaluate(tokens: Instruction | Instruction[], expr: Expression, values: EvaluationValues): Value | Promise<Value> {
   if (isExpressionEvaluator(tokens)) {
     return resolveExpression(tokens, values);
   }
@@ -69,7 +70,7 @@ function isPromise(obj: any): obj is Promise<any> {
  * @returns The return value is the expression result value or a promise that when resolved will contain
  * the expression result value.  A promise is only returned if a caller defined function returns a promise.
  */
-function runEvaluateLoop(tokens: Instruction[], expr: Expression, values: EvaluationValues, nstack: EvaluationStack, startAt: number = 0): any {
+function runEvaluateLoop(tokens: Instruction[], expr: Expression, values: EvaluationValues, nstack: EvaluationStack, startAt: number = 0): Value | Promise<Value> {
   const numTokens = tokens.length;
   for (let i = startAt; i < numTokens; i++) {
     const item = tokens[i];
@@ -101,7 +102,7 @@ function runEvaluateLoop(tokens: Instruction[], expr: Expression, values: Evalua
  * @param values Input values provided to the expression.
  * @returns The expression value.
  */
-function resolveFinalValue(nstack: EvaluationStack, values: EvaluationValues): any {
+function resolveFinalValue(nstack: EvaluationStack, values: EvaluationValues): Value | Promise<Value> {
   if (nstack.length > 1) {
     throw new Error('invalid Expression (parity)');
   }
@@ -152,8 +153,10 @@ function evaluateExpressionToken(expr: Expression, values: EvaluationValues, tok
     if (/^__proto__|prototype|constructor$/.test(token.value as string)) {
       throw new AccessError(
         'Prototype access detected',
-        token.value as string,
-        expr.toString()
+        {
+          propertyName: token.value as string,
+          expression: expr.toString()
+        }
       );
     }
     if (token.value in expr.functions) {
@@ -174,7 +177,7 @@ function evaluateExpressionToken(expr: Expression, values: EvaluationValues, tok
         // { alias: "xxx" } - use xxx as the IVAR token instead of what was typed.
         // { value: <something> } use <something> as the value for the variable.
         const resolved: VariableResolveResult | undefined = expr.parser.resolve(token.value);
-        if (typeof resolved === 'object' && resolved && typeof resolved.alias === 'string') {
+        if (typeof resolved === 'object' && resolved && 'alias' in resolved && typeof resolved.alias === 'string') {
           // The parser's resolver function returned { alias: "xxx" }, we want to use
           // resolved.alias in place of token.value.
           if (resolved.alias in values) {
@@ -191,7 +194,9 @@ function evaluateExpressionToken(expr: Expression, values: EvaluationValues, tok
       if (!pushed) {
         throw new VariableError(
           token.value as string,
-          expr.toString()
+          {
+            expression: expr.toString()
+          }
         );
       }
     }
@@ -211,8 +216,10 @@ function evaluateExpressionToken(expr: Expression, values: EvaluationValues, tok
     } else {
       throw new FunctionError(
         `${f} is not a function`,
-        String(f),
-        expr.toString()
+        {
+          functionName: String(f),
+          expression: expr.toString()
+        }
       );
     }
   } else if (type === IFUNDEF) {
@@ -340,7 +347,7 @@ function createExpressionEvaluator(token: Instruction, expr: Expression): Expres
   }
   return {
     type: IEXPREVAL,
-    value: function (scope: EvaluationValues): any {
+    value: function (scope: EvaluationValues): Value | Promise<Value> {
       return evaluate(token.value as Instruction[], expr, scope);
     }
   };
@@ -350,6 +357,6 @@ function isExpressionEvaluator(n: any): n is ExpressionEvaluator {
   return n && n.type === IEXPREVAL;
 }
 
-function resolveExpression(n: any, values: EvaluationValues): any {
+function resolveExpression(n: any, values: EvaluationValues): Value | Promise<Value> {
   return isExpressionEvaluator(n) ? n.value(values) : n;
 }

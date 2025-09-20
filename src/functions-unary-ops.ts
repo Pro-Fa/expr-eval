@@ -1,9 +1,27 @@
+import type { Value, Primitive } from './types';
+
+/**
+ * Negation operator - returns the negative of a number
+ */
 export function neg(a: number | undefined): number | undefined {
   return a === undefined ? undefined : -a;
 }
 
-export function pos(a: any): number | undefined {
-  return a === undefined ? undefined : Number(a);
+/**
+ * Positive operator - converts value to number
+ * Overloaded for better type inference
+ */
+export function pos(a: undefined): undefined;
+export function pos(a: number): number;
+export function pos(a: string): number;
+export function pos(a: boolean): number;
+export function pos(a: Value): number | undefined;
+export function pos(a: Value): number | undefined {
+  if (a === undefined) {
+    return undefined;
+  }
+  const result = Number(a);
+  return isNaN(result) ? undefined : result;
 }
 
 // fac is in functions.js

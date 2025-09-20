@@ -12,7 +12,7 @@ interface ParserLike {
   unaryOps: Record<string, OperatorFunction>;
   binaryOps: Record<string, OperatorFunction>;
   ternaryOps: Record<string, OperatorFunction>;
-  consts: Record<string, number>;
+  consts: Record<string, any>;
   options: {
     allowMemberAccess?: boolean;
     operators?: Record<string, any>;
@@ -34,7 +34,7 @@ export class TokenStream {
   public unaryOps: Record<string, OperatorFunction>;
   public binaryOps: Record<string, OperatorFunction>;
   public ternaryOps: Record<string, OperatorFunction>;
-  public consts: Record<string, number>;
+  public consts: Record<string, any>;
   public expression: string;
   public savedPosition: number = 0;
   public savedCurrent: Token | null = null;
@@ -546,9 +546,10 @@ export class TokenStream {
     const coords = this.getCoordinates();
     throw new ParseError(
       msg,
-      { line: coords.line, column: coords.column },
-      undefined,
-      this.expression
+      {
+        position: { line: coords.line, column: coords.column },
+        expression: this.expression
+      }
     );
   }
 }

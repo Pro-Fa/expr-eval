@@ -3,6 +3,8 @@ import { TEOF } from './token';
 import { TokenStream } from './token-stream';
 import { ParserState } from './parser-state';
 import { Expression } from './expression';
+import type { Value } from './types';
+import type { Instruction } from './instruction';
 import { atan2, condition, fac, filter, fold, gamma, hypot, indexOf, join, map, max, min, pow, random, roundTo, sum, json } from './functions';
 import {
   add,
@@ -74,16 +76,16 @@ interface VariableAlias {
 }
 
 interface VariableValue {
-  value: any;
+  value: Value;
 }
 
-type VariableResolveResult = VariableAlias | VariableValue | any | undefined;
+type VariableResolveResult = VariableAlias | VariableValue | Value | undefined;
 
 // Variable resolver function type
 type VariableResolver = (token: string) => VariableResolveResult;
 
 // Values object for evaluation
-type Values = Record<string, any>;
+type Values = Record<string, Value>;
 
 export class Parser {
   public options: ParserOptions;
@@ -92,7 +94,7 @@ export class Parser {
   public binaryOps: Record<string, OperatorFunction>;
   public ternaryOps: Record<string, OperatorFunction>;
   public functions: Record<string, OperatorFunction>;
-  public consts: Record<string, any>;
+  public consts: Record<string, Value>;
   public resolve: VariableResolver;
 
   /**
@@ -239,7 +241,7 @@ export class Parser {
    * ```
    */
   parse(expr: string): Expression {
-    const instr: any[] = [];
+    const instr: Instruction[] = [];
     const parserState = new ParserState(
       this,
       new TokenStream(this, expr),
@@ -268,7 +270,7 @@ export class Parser {
    * const result = parser.evaluate('2 + 3 * x', { x: 4 }); // Returns 14
    * ```
    */
-  evaluate(expr: string, variables?: Values): any {
+  evaluate(expr: string, variables?: Values): Value | Promise<Value> {
     return this.parse(expr).evaluate(variables);
   }
 
@@ -359,7 +361,7 @@ export class Parser {
    * const result = Parser.evaluate('2 + 3 * x', { x: 4 }); // Returns 14
    * ```
    */
-  static evaluate(expr: string, variables?: Values): any {
+  static evaluate(expr: string, variables?: Values): Value | Promise<Value> {
     return Parser.sharedParser.parse(expr).evaluate(variables);
   }
 }

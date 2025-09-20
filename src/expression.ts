@@ -7,8 +7,10 @@ import { Instruction } from './instruction';
 import type {
   OperatorFunction,
   Values,
+  Value,
   SymbolOptions,
-  VariableResolveResult
+  VariableResolveResult,
+  ReadonlyValues
 } from './types';
 
 // Parser interface (will be more complete when we convert parser.js)
@@ -58,9 +60,9 @@ export class Expression {
    * const simplified = expr.simplify(); // Results in '5 + x'
    * ```
    */
-  simplify(values?: Values): Expression {
-    values = values || {};
-    return new Expression(simplify(this.tokens, this.unaryOps, this.binaryOps, this.ternaryOps, values), this.parser);
+  simplify(values?: ReadonlyValues): Expression {
+    const safeValues = values || {};
+    return new Expression(simplify(this.tokens, this.unaryOps, this.binaryOps, this.ternaryOps, safeValues), this.parser);
   }
 
   /**
@@ -96,9 +98,9 @@ export class Expression {
    * const result = expr.evaluate({ x: 4 }); // Returns 14
    * ```
    */
-  evaluate(values?: Values): any {
-    values = values || {};
-    return evaluate(this.tokens, this, values);
+  evaluate(values?: ReadonlyValues): Value | Promise<Value> {
+    const safeValues = values || {};
+    return evaluate(this.tokens, this, safeValues);
   }
 
   /**
@@ -176,10 +178,10 @@ export class Expression {
    * const result2 = fn2({ x: 1, y: 2, z: 3 }); // Returns 7
    * ```
    */
-  toJSFunction(param: string, variables?: Values): (...args: any[]) => any {
+  toJSFunction(param: string, variables?: ReadonlyValues): (...args: Value[]) => Value {
     const expr = this;
     const f = new Function(param, 'with(this.functions) with (this.ternaryOps) with (this.binaryOps) with (this.unaryOps) { return ' + expressionToString(this.simplify(variables).tokens, true) + '; }');
-    return function (...args: any[]): any {
+    return function (...args: Value[]): Value {
       return f.apply(expr, args);
     };
   }
