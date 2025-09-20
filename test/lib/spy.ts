@@ -22,8 +22,8 @@ export default function spy<TArgs extends unknown[] = unknown[], TReturn = unkno
     spyWrapper.called = true;
     return fn(...args);
   }
-  
+
   spyWrapper.called = false;
-  
+
   return spyWrapper as SpyFunction<TArgs, TReturn>;
 }
