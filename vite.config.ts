@@ -23,6 +23,16 @@ export default defineConfig(() => {
             }
           },
           minify: false
+        },
+        esbuild: {
+          minifyIdentifiers: false,
+          keepNames: true,
+          target: 'es2020'
+        },
+        rollupOptions: {
+          output: {
+            exports: 'named' as const
+          }
         }
       };
 
@@ -46,9 +56,24 @@ export default defineConfig(() => {
           terserOptions: {
             compress: {
               drop_console: true,
-              drop_debugger: true
+              drop_debugger: true,
+              // Prevent void 0 replacement
+              unsafe_undefined: false
+            },
+            mangle: {
+              // Keep undefined as undefined
+              reserved: ['undefined']
+            },
+            format: {
+              // Preserve undefined instead of void 0
+              preserve_annotations: true
             }
           }
+        },
+        esbuild: {
+          minifyIdentifiers: false,
+          keepNames: true,
+          target: 'es2020'
         }
       };
 
@@ -76,6 +101,11 @@ export default defineConfig(() => {
             }
           },
           minify: false
+        },
+        esbuild: {
+          minifyIdentifiers: false,
+          keepNames: true,
+          target: 'es2020'
         }
       };
   }
