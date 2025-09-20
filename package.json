@@ -40,6 +40,8 @@
   ],
   "scripts": {
     "test": "npm run build && vitest run",
+    "test:ts": "vitest run test/expression/expression-core-partial.ts test/expression/expression-advanced-partial.ts test/expression/expression-fork-partial.ts test/expression/expression-methods-partial.ts test/functions/functions-binary-ops-partial.ts test/functions/functions-unary-ops-partial.ts test/functions/functions-advanced-partial.ts test/functions/functions-array-string-partial.ts test/functions/functions-logical-partial.ts test/functions/functions-higher-order-partial.ts test/parser/parser-core-partial.ts test/parser/parser-numbers-partial.ts test/parser/parser-options-partial.ts test/operators/operators-comparison-partial.ts test/operators/operators-logical-partial.ts test/operators/operators-math-trig-partial.ts test/operators/operators-math-basic-partial.ts test/operators/operators-misc-partial.ts",
+    "test:ts:watch": "vitest --testNamePattern=partial",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
     "coverage": "npm run build && vitest run --coverage",

@@ -35,7 +35,9 @@ export default defineConfig({
     include: [
       'test/**/*.{test,spec}.{js,ts}',
       'test/*.js', // Include test files in root test directory
-      'test/*.ts'  // Include TypeScript test files
+      'test/*.ts', // Include TypeScript test files
+      'test/*-partial.ts', // Include TypeScript partial files in root
+      'test/**/*-partial.ts' // Include TypeScript partial files in subdirectories
     ],
     exclude: [
       'node_modules/**',

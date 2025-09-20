@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { Parser } from '../dist/index.mjs';
+import { Parser } from '../../dist/index.mjs';
 
 describe('Expression Core Features TypeScript Test', () => {
   describe('basic arithmetic evaluation', () => {

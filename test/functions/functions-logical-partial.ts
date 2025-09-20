@@ -1,7 +1,7 @@
 /* global describe, it */
 
 import assert from 'assert';
-import { Parser } from '../dist/index.mjs';
+import { Parser } from '../../dist/index.mjs';
 
 describe('Logical and Comparison Operators TypeScript Test', function () {
   describe('< (less than)', function () {

@@ -1,7 +1,7 @@
 /* global describe, it */
 
 import assert from 'assert';
-import { Parser } from '../dist/index.mjs';
+import { Parser } from '../../dist/index.mjs';
 
 describe('Higher-Order Functions TypeScript Test', function () {
   describe('filter(f, array)', function () {

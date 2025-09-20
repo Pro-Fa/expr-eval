@@ -1,5 +1,5 @@
 import { expect, describe, it } from 'vitest';
-import { Parser } from '../index.js';
+import { Parser } from '../../index.js';
 
 // Expression Methods Tests - Converted from expression.js
 // Tests for substitute(), simplify(), variables(), symbols(), toString(), and toJSFunction() methods

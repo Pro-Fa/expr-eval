@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { Parser } from '../dist/index.mjs';
+import { Parser } from '../../dist/index.mjs';
 
 describe('Expression Fork Features TypeScript Test', () => {
   describe('CASE statements', () => {
