@@ -250,7 +250,7 @@ describe('Expression Fork Features TypeScript Test', () => {
           { value: 20 },
           { value: 30 }
         ],
-        c: 3,
+        c: 3
       });
     });
 

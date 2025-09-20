@@ -6,7 +6,6 @@ import getSymbols from './get-symbols';
 import { Instruction } from './instruction';
 import type {
   OperatorFunction,
-  Values,
   Value,
   SymbolOptions,
   VariableResolveResult,

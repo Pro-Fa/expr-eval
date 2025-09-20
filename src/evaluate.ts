@@ -2,7 +2,7 @@ import { INUMBER, IOP1, IOP2, IOP3, IVAR, IVARNAME, IFUNCALL, IFUNDEF, IEXPR, IE
 import type { Instruction } from './instruction';
 import type { Expression } from './expression';
 import type { Value, Values } from './types';
-import { EvaluationError, VariableError, FunctionError, AccessError } from './types';
+import { VariableError, FunctionError, AccessError } from './types';
 
 // cSpell:words INUMBER IVAR IVARNAME IFUNCALL IEXPR IEXPREVAL IMEMBER IENDSTATEMENT IARRAY
 // cSpell:words IFUNDEF IUNDEFINED ICASEMATCH ICASECOND IWHENCOND IWHENMATCH ICASEELSE IPROPERTY

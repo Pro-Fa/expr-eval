@@ -1,4 +1,4 @@
-import type { Value, Primitive } from './types';
+import type { Value } from './types';
 
 /**
  * Negation operator - returns the negative of a number

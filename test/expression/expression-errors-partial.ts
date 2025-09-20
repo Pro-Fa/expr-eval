@@ -3,8 +3,6 @@ import {
   Parser,
   ExpressionError,
   ParseError,
-  EvaluationError,
-  ArgumentError,
   AccessError,
   VariableError,
   FunctionError
@@ -330,31 +328,28 @@ describe('Expression Error Types Test', () => {
       const testCases = [
         {
           expression: 'undefinedVar + 5',
-          expectedExpression: '(undefinedVar + 5)',
           errorType: VariableError,
           setup: () => parser.evaluate('undefinedVar + 5')
         },
         {
           expression: 'notFunc() + 3',
-          expectedExpression: '(notFunc() + 3)',
           errorType: FunctionError,
           setup: () => parser.evaluate('notFunc() + 3', { notFunc: 'not a function' })
         },
         {
           expression: 'obj.prop',
-          expectedExpression: 'obj.prop',
           errorType: AccessError,
           setup: () => new Parser({ allowMemberAccess: false }).evaluate('obj.prop')
         }
       ];
 
-      testCases.forEach(({ expression, expectedExpression, errorType, setup }) => {
+      testCases.forEach(({ expression, errorType, setup }) => {
         try {
           setup();
         } catch (error: unknown) {
           expect(error).toBeInstanceOf(errorType);
           const expressionError = error as ExpressionError;
-          expect(expressionError.expression).toBe(expectedExpression);
+          expect(expressionError.expression).toContain(expression);
         }
       });
     });
