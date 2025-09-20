@@ -28,11 +28,6 @@ export default defineConfig(() => {
           minifyIdentifiers: false,
           keepNames: true,
           target: 'es2020'
-        },
-        rollupOptions: {
-          output: {
-            exports: 'named' as const
-          }
         }
       };
 
@@ -97,7 +92,9 @@ export default defineConfig(() => {
           },
           rollupOptions: {
             output: {
-              exports: 'named' as const
+              exports: 'named' as const,
+              preserveModules: false, // Bundle for easier consumption
+              inlineDynamicImports: false
             }
           },
           minify: false
