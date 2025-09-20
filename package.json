@@ -22,6 +22,9 @@
   "author": "Matthew Crumley, Mark Sironi, Sander Toonen",
   "type": "module",
   "sideEffects": false,
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "main": "dist/index.mjs",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -81,5 +84,15 @@
     "vite": "^6.0.1",
     "vite-plugin-dts": "^4.3.0",
     "vitest": "^3.2.4"
-  }
+  },
+  "bundlesize": [
+    {
+      "path": "./dist/bundle.min.js",
+      "maxSize": "50kb"
+    },
+    {
+      "path": "./dist/index.mjs",
+      "maxSize": "80kb"
+    }
+  ]
 }

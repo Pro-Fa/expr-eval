@@ -1,6 +1,7 @@
 // cSpell:words TEOF TNUMBER TSTRING TPAREN TBRACKET TCOMMA TNAME TSEMICOLON TUNDEFINED TKEYWORD TBRACE
 
 import { Token, TEOF, TOP, TNUMBER, TSTRING, TPAREN, TBRACKET, TCOMMA, TNAME, TSEMICOLON, TKEYWORD, TBRACE, TokenType, TokenValue } from './token';
+import { ParseError } from './types';
 
 // Type for operator functions - they accept arrays of values and return a value
 type OperatorFunction = (...args: any[]) => any;
@@ -543,6 +544,11 @@ export class TokenStream {
 
   parseError(msg: string): never {
     const coords = this.getCoordinates();
-    throw new Error('parse error [' + coords.line + ':' + coords.column + ']: ' + msg);
+    throw new ParseError(
+      msg,
+      { line: coords.line, column: coords.column },
+      undefined,
+      this.expression
+    );
   }
 }

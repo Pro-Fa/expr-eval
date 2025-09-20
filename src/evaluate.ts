@@ -1,6 +1,7 @@
 import { INUMBER, IOP1, IOP2, IOP3, IVAR, IVARNAME, IFUNCALL, IFUNDEF, IEXPR, IEXPREVAL, IMEMBER, IENDSTATEMENT, IARRAY, IUNDEFINED, ICASEMATCH, IWHENMATCH, ICASEELSE, ICASECOND, IWHENCOND, IOBJECT, IPROPERTY, IOBJECTEND } from './instruction';
 import type { Instruction } from './instruction';
 import type { Expression } from './expression';
+import { EvaluationError, VariableError, FunctionError, AccessError } from './types';
 
 // cSpell:words INUMBER IVAR IVARNAME IFUNCALL IEXPR IEXPREVAL IMEMBER IENDSTATEMENT IARRAY
 // cSpell:words IFUNDEF IUNDEFINED ICASEMATCH ICASECOND IWHENCOND IWHENMATCH ICASEELSE IPROPERTY
@@ -149,7 +150,11 @@ function evaluateExpressionToken(expr: Expression, values: EvaluationValues, tok
     }
   } else if (type === IVAR) {
     if (/^__proto__|prototype|constructor$/.test(token.value as string)) {
-      throw new Error('prototype access detected');
+      throw new AccessError(
+        'Prototype access detected',
+        token.value as string,
+        expr.toString()
+      );
     }
     if (token.value in expr.functions) {
       nstack.push(expr.functions[token.value]);
@@ -184,7 +189,10 @@ function evaluateExpressionToken(expr: Expression, values: EvaluationValues, tok
         }
       }
       if (!pushed) {
-        throw new Error('undefined variable: ' + token.value);
+        throw new VariableError(
+          token.value as string,
+          expr.toString()
+        );
       }
     }
   } else if (type === IOP1) {
@@ -201,7 +209,11 @@ function evaluateExpressionToken(expr: Expression, values: EvaluationValues, tok
     if (typeof f === 'function') {
       nstack.push(f.apply(undefined, args));
     } else {
-      throw new Error(`${f}` + ' is not a function');
+      throw new FunctionError(
+        `${f} is not a function`,
+        String(f),
+        expr.toString()
+      );
     }
   } else if (type === IFUNDEF) {
     // Create closure to keep references to arguments and expression

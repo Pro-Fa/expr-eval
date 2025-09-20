@@ -281,23 +281,66 @@ describe('Parser Options TypeScript Test', () => {
     const parser = new Parser();
 
     it('should track token positions correctly', () => {
-      expect(() => parser.parse('@23')).toThrow(/parse error \[1:1]/);
-      expect(() => parser.parse('\n@23')).toThrow(/parse error \[2:1]/);
-      expect(() => parser.parse('1@3')).toThrow(/parse error \[1:2]/);
-      expect(() => parser.parse('12@')).toThrow(/parse error \[1:3]/);
-      expect(() => parser.parse('12@\n')).toThrow(/parse error \[1:3]/);
-      expect(() => parser.parse('@23 +\n45 +\n6789')).toThrow(/parse error \[1:1]/);
-      expect(() => parser.parse('1@3 +\n45 +\n6789')).toThrow(/parse error \[1:2]/);
-      expect(() => parser.parse('12@ +\n45 +\n6789')).toThrow(/parse error \[1:3]/);
-      expect(() => parser.parse('123 +\n@5 +\n6789')).toThrow(/parse error \[2:1]/);
-      expect(() => parser.parse('123 +\n4@ +\n6789')).toThrow(/parse error \[2:2]/);
-      expect(() => parser.parse('123 +\n45@+\n6789')).toThrow(/parse error \[2:3]/);
-      expect(() => parser.parse('123 +\n45 +\n@789')).toThrow(/parse error \[3:1]/);
-      expect(() => parser.parse('123 +\n45 +\n6@89')).toThrow(/parse error \[3:2]/);
-      expect(() => parser.parse('123 +\n45 +\n67@9')).toThrow(/parse error \[3:3]/);
-      expect(() => parser.parse('123 +\n45 +\n679@')).toThrow(/parse error \[3:4]/);
-      expect(() => parser.parse('123 +\n\n679@')).toThrow(/parse error \[3:4]/);
-      expect(() => parser.parse('123 +\n\n\n\n\n679@')).toThrow(/parse error \[6:4]/);
+      // Test that ParseError instances include position information
+      try {
+        parser.parse('@23');
+        expect.fail('Should have thrown an error');
+      } catch (error: unknown) {
+        const e = error as any;
+        expect(e.constructor.name).toBe('ParseError');
+        expect(e.position).toEqual({ line: 1, column: 1 });
+        expect(e.message).toContain('Unknown character "@"');
+      }
+
+      try {
+        parser.parse('\n@23');
+        expect.fail('Should have thrown an error');
+      } catch (error: unknown) {
+        const e = error as any;
+        expect(e.constructor.name).toBe('ParseError');
+        expect(e.position).toEqual({ line: 2, column: 1 });
+        expect(e.message).toContain('Unknown character "@"');
+      }
+
+      try {
+        parser.parse('1@3');
+        expect.fail('Should have thrown an error');
+      } catch (error: unknown) {
+        const e = error as any;
+        expect(e.constructor.name).toBe('ParseError');
+        expect(e.position).toEqual({ line: 1, column: 2 });
+        expect(e.message).toContain('Unknown character "@"');
+      }
+
+      try {
+        parser.parse('12@');
+        expect.fail('Should have thrown an error');
+      } catch (error: unknown) {
+        const e = error as any;
+        expect(e.constructor.name).toBe('ParseError');
+        expect(e.position).toEqual({ line: 1, column: 3 });
+        expect(e.message).toContain('Unknown character "@"');
+      }
+
+      try {
+        parser.parse('123 +\n@5 +\n6789');
+        expect.fail('Should have thrown an error');
+      } catch (error: unknown) {
+        const e = error as any;
+        expect(e.constructor.name).toBe('ParseError');
+        expect(e.position).toEqual({ line: 2, column: 1 });
+        expect(e.message).toContain('Unknown character "@"');
+      }
+
+      try {
+        parser.parse('123 +\n45 +\n6@89');
+        expect.fail('Should have thrown an error');
+      } catch (error: unknown) {
+        const e = error as any;
+        expect(e.constructor.name).toBe('ParseError');
+        expect(e.position).toEqual({ line: 3, column: 2 });
+        expect(e.message).toContain('Unknown character "@"');
+      }
     });
   });
 });

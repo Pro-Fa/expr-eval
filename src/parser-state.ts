@@ -7,6 +7,7 @@ import { TOP, TNUMBER, TSTRING, TPAREN, TBRACKET, TCOMMA, TNAME, TSEMICOLON, TEO
 import { Instruction, INUMBER, IVAR, IVARNAME, IFUNCALL, IFUNDEF, IEXPR, IMEMBER, IENDSTATEMENT, IARRAY, IUNDEFINED, ternaryInstruction, binaryInstruction, unaryInstruction, IWHENMATCH, ICASEMATCH, ICASEELSE, ICASECOND, IWHENCOND, IPROPERTY, IOBJECT, IOBJECTEND, InstructionType } from './instruction';
 import contains from './contains';
 import { TokenStream } from './token-stream';
+import { ParseError, AccessError } from './types';
 
 // Parser interface (will be more complete when we convert parser.js)
 interface ParserLike {
@@ -84,7 +85,12 @@ export class ParserState {
   expect(type: TokenType, value?: TokenValueMatcher): void {
     if (!this.accept(type, value)) {
       const coords = this.tokens.getCoordinates();
-      throw new Error('parse error [' + coords.line + ':' + coords.column + ']: Expected ' + (value || type));
+      throw new ParseError(
+        `Expected ${value || type}`,
+        { line: coords.line, column: coords.column },
+        this.nextToken?.value?.toString(),
+        this.tokens.expression
+      );
     }
   }
 
@@ -120,7 +126,13 @@ export class ParserState {
     } else if (this.accept(TKEYWORD)) {
       this.parseKeywordExpression(instr);
     } else {
-      throw new Error('unexpected ' + this.nextToken);
+      const coords = this.tokens.getCoordinates();
+      throw new ParseError(
+        `Unexpected token: ${this.nextToken}`,
+        { line: coords.line, column: coords.column },
+        this.nextToken?.value?.toString(),
+        this.tokens.expression
+      );
     }
   }
 
@@ -177,7 +189,13 @@ export class ParserState {
       const lastInstrIndex = instr.length - 1;
       if (varName.type === IFUNCALL) {
         if (!this.tokens.isOperatorEnabled('()=')) {
-          throw new Error('function definition is not permitted');
+          const coords = this.tokens.getCoordinates();
+          throw new ParseError(
+            'function definition is not permitted',
+            { line: coords.line, column: coords.column },
+            undefined,
+            this.tokens.expression
+          );
         }
         for (let i = 0, len = (varName.value as number) + 1; i < len; i++) {
           const index = lastInstrIndex - i;
@@ -367,14 +385,22 @@ export class ParserState {
 
       if (op.value === '.') {
         if (!this.allowMemberAccess) {
-          throw new Error('unexpected ".", member access is not permitted');
+          throw new AccessError(
+            'member access is not permitted',
+            undefined,
+            this.tokens.expression
+          );
         }
 
         this.expect(TNAME);
         instr.push(new Instruction(IMEMBER, this.current!.value));
       } else if (op.value === '[') {
         if (!this.tokens.isOperatorEnabled('[')) {
-          throw new Error('unexpected "[]", arrays are disabled');
+          throw new AccessError(
+            'Array access is disabled',
+            undefined,
+            this.tokens.expression
+          );
         }
 
         this.parseExpression(instr);

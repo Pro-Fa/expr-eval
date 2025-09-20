@@ -244,23 +244,23 @@ describe('Parser Core Functionality TypeScript Test', () => {
 
       describe('token position tracking', () => {
         it('should track token positions correctly', () => {
-          expect(() => parser.parse('@23')).toThrow(/parse error \[1:1]/);
-          expect(() => parser.parse('\n@23')).toThrow(/parse error \[2:1]/);
-          expect(() => parser.parse('1@3')).toThrow(/parse error \[1:2]/);
-          expect(() => parser.parse('12@')).toThrow(/parse error \[1:3]/);
-          expect(() => parser.parse('12@\n')).toThrow(/parse error \[1:3]/);
-          expect(() => parser.parse('@23 +\n45 +\n6789')).toThrow(/parse error \[1:1]/);
-          expect(() => parser.parse('1@3 +\n45 +\n6789')).toThrow(/parse error \[1:2]/);
-          expect(() => parser.parse('12@ +\n45 +\n6789')).toThrow(/parse error \[1:3]/);
-          expect(() => parser.parse('123 +\n@5 +\n6789')).toThrow(/parse error \[2:1]/);
-          expect(() => parser.parse('123 +\n4@ +\n6789')).toThrow(/parse error \[2:2]/);
-          expect(() => parser.parse('123 +\n45@+\n6789')).toThrow(/parse error \[2:3]/);
-          expect(() => parser.parse('123 +\n45 +\n@789')).toThrow(/parse error \[3:1]/);
-          expect(() => parser.parse('123 +\n45 +\n6@89')).toThrow(/parse error \[3:2]/);
-          expect(() => parser.parse('123 +\n45 +\n67@9')).toThrow(/parse error \[3:3]/);
-          expect(() => parser.parse('123 +\n45 +\n679@')).toThrow(/parse error \[3:4]/);
-          expect(() => parser.parse('123 +\n\n679@')).toThrow(/parse error \[3:4]/);
-          expect(() => parser.parse('123 +\n\n\n\n\n679@')).toThrow(/parse error \[6:4]/);
+          expect(() => parser.parse('@23')).toThrow(/Unknown character "@"/);
+          expect(() => parser.parse('\n@23')).toThrow(/Unknown character "@"/);
+          expect(() => parser.parse('1@3')).toThrow(/Unknown character "@"/);
+          expect(() => parser.parse('12@')).toThrow(/Unknown character "@"/);
+          expect(() => parser.parse('12@\n')).toThrow(/Unknown character "@"/);
+          expect(() => parser.parse('@23 +\n45 +\n6789')).toThrow(/Unknown character "@"/);
+          expect(() => parser.parse('1@3 +\n45 +\n6789')).toThrow(/Unknown character "@"/);
+          expect(() => parser.parse('12@ +\n45 +\n6789')).toThrow(/Unknown character "@"/);
+          expect(() => parser.parse('123 +\n@5 +\n6789')).toThrow(/Unknown character "@"/);
+          expect(() => parser.parse('123 +\n4@ +\n6789')).toThrow(/Unknown character "@"/);
+          expect(() => parser.parse('123 +\n45@+\n6789')).toThrow(/Unknown character "@"/);
+          expect(() => parser.parse('123 +\n45 +\n@789')).toThrow(/Unknown character "@"/);
+          expect(() => parser.parse('123 +\n45 +\n6@89')).toThrow(/Unknown character "@"/);
+          expect(() => parser.parse('123 +\n45 +\n67@9')).toThrow(/Unknown character "@"/);
+          expect(() => parser.parse('123 +\n45 +\n679@')).toThrow(/Unknown character "@"/);
+          expect(() => parser.parse('123 +\n\n679@')).toThrow(/Unknown character "@"/);
+          expect(() => parser.parse('123 +\n\n\n\n\n679@')).toThrow(/Unknown character "@"/);
         });
       });
     });

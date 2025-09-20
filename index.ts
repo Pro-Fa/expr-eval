@@ -26,6 +26,17 @@ export type {
   OperatorFunction
 } from './src/types';
 
+// Re-export custom error classes
+export {
+  ExpressionError,
+  ParseError,
+  EvaluationError,
+  ArgumentError,
+  AccessError,
+  VariableError,
+  FunctionError
+} from './src/types';
+
 export {
   Expression,
   Parser

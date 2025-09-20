@@ -95,6 +95,18 @@ export class Parser {
   public consts: Record<string, any>;
   public resolve: VariableResolver;
 
+  /**
+   * Creates a new Parser instance with the specified options.
+   *
+   * @param options - Configuration options for the parser
+   * @example
+   * ```typescript
+   * const parser = new Parser({
+   *   allowMemberAccess: false,
+   *   operators: { add: true, multiply: true }
+   * });
+   * ```
+   */
   constructor(options?: ParserOptions) {
     this.options = options || { operators: { conversion: false } };
     this.keywords = [
@@ -103,7 +115,7 @@ export class Parser {
       'then',
       'else',
       'end'
-    ];
+    ] as const;
     this.unaryOps = {
       '-': neg,
       '+': pos,
@@ -213,6 +225,19 @@ export class Parser {
     this.resolve = (): VariableResolveResult => undefined;
   }
 
+  /**
+   * Parses a mathematical expression into an Expression object.
+   *
+   * @param expr - The mathematical expression string to parse
+   * @returns An Expression object that can be evaluated
+   * @throws {ParseError} When the expression contains syntax errors
+   * @example
+   * ```typescript
+   * const parser = new Parser();
+   * const expression = parser.parse('2 + 3 * x');
+   * const result = expression.evaluate({ x: 4 }); // Returns 14
+   * ```
+   */
   parse(expr: string): Expression {
     const instr: any[] = [];
     const parserState = new ParserState(
@@ -227,6 +252,22 @@ export class Parser {
     return new Expression(instr, this);
   }
 
+  /**
+   * Parses and immediately evaluates a mathematical expression.
+   * This is a convenience method equivalent to `parser.parse(expr).evaluate(variables)`.
+   *
+   * @param expr - The mathematical expression string to evaluate
+   * @param variables - Optional object containing variable values
+   * @returns The result of evaluating the expression
+   * @throws {ParseError} When the expression contains syntax errors
+   * @throws {VariableError} When the expression references undefined variables
+   * @throws {EvaluationError} When runtime evaluation fails
+   * @example
+   * ```typescript
+   * const parser = new Parser();
+   * const result = parser.evaluate('2 + 3 * x', { x: 4 }); // Returns 14
+   * ```
+   */
   evaluate(expr: string, variables?: Values): any {
     return this.parse(expr).evaluate(variables);
   }
@@ -258,12 +299,24 @@ export class Parser {
     '()=': 'fndef',
     '??': 'coalesce',
     'as': 'conversion'
-  };
+  } as const;
 
   private static getOptionName(op: string): string {
     return Parser.optionNameMap.hasOwnProperty(op) ? Parser.optionNameMap[op] : op;
   }
 
+  /**
+   * Checks if a specific operator is enabled in this parser's configuration.
+   *
+   * @param op - The operator to check
+   * @returns True if the operator is enabled, false otherwise
+   * @example
+   * ```typescript
+   * const parser = new Parser({ operators: { add: false } });
+   * console.log(parser.isOperatorEnabled('+')); // false
+   * console.log(parser.isOperatorEnabled('*')); // true (default enabled)
+   * ```
+   */
   isOperatorEnabled(op: string): boolean {
     const optionName = Parser.getOptionName(op);
     const operators = this.options.operators || {};
@@ -274,10 +327,38 @@ export class Parser {
   // Static methods for the shared parser instance
   private static sharedParser = new Parser();
 
+  /**
+   * Parses a mathematical expression using the default shared parser instance.
+   * This is a static convenience method.
+   *
+   * @param expr - The mathematical expression string to parse
+   * @returns An Expression object that can be evaluated
+   * @throws {ParseError} When the expression contains syntax errors
+   * @example
+   * ```typescript
+   * const expression = Parser.parse('2 + 3 * x');
+   * const result = expression.evaluate({ x: 4 }); // Returns 14
+   * ```
+   */
   static parse(expr: string): Expression {
     return Parser.sharedParser.parse(expr);
   }
 
+  /**
+   * Parses and immediately evaluates a mathematical expression using the default shared parser instance.
+   * This is a static convenience method equivalent to `Parser.parse(expr).evaluate(variables)`.
+   *
+   * @param expr - The mathematical expression string to evaluate
+   * @param variables - Optional object containing variable values
+   * @returns The result of evaluating the expression
+   * @throws {ParseError} When the expression contains syntax errors
+   * @throws {VariableError} When the expression references undefined variables
+   * @throws {EvaluationError} When runtime evaluation fails
+   * @example
+   * ```typescript
+   * const result = Parser.evaluate('2 + 3 * x', { x: 4 }); // Returns 14
+   * ```
+   */
   static evaluate(expr: string, variables?: Values): any {
     return Parser.sharedParser.parse(expr).evaluate(variables);
   }
