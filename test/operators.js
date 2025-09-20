@@ -4,7 +4,7 @@
 
 import assert from 'assert';
 import { Parser } from '../dist/index.mjs';
-import spy from './lib/spy.js';
+import spy from './lib/spy.ts';
 
 function returnTrue() {
   return true;

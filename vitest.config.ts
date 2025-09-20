@@ -34,7 +34,8 @@ export default defineConfig({
     // Configure to work with existing JS test files during migration
     include: [
       'test/**/*.{test,spec}.{js,ts}',
-      'test/*.js' // Include test files in root test directory
+      'test/*.js', // Include test files in root test directory
+      'test/*.ts'  // Include TypeScript test files
     ],
     exclude: [
       'node_modules/**',

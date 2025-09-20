@@ -4,6 +4,7 @@
     "module": "ESNext",
     "moduleResolution": "node",
     "lib": ["ES2020"],
+    "types": ["vitest/globals"],
     "outDir": "./dist",
     "rootDir": "./",
     "strict": true,
