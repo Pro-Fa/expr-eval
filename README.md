@@ -1,5 +1,5 @@
-JavaScript Expression Evaluator
-===============================
+Expression Evaluator
+==================================
 
 [![npm](https://img.shields.io/npm/v/expr-eval.svg?maxAge=3600)](https://www.npmjs.com/package/expr-eval)
 [![CDNJS version](https://img.shields.io/cdnjs/v/expr-eval.svg?maxAge=3600)](https://cdnjs.com/libraries/expr-eval)
@@ -7,8 +7,17 @@ JavaScript Expression Evaluator
 
 Description
 -------------------------------------
-**This is a fork of expr-eval 2.0.2 with some enhancements, as it appears that package is no longer being maintained.  This fork
-adds the following enhancements.**
+**This is a modern TypeScript port of the expr-eval library, completely rewritten with contemporary build tools and development practices.** Originally based on expr-eval 2.0.2, this version has been restructured with a modular architecture, full TypeScript support, and comprehensive testing using Vitest. The library almost maintains backward compatibility while providing enhanced features and improved maintainability.
+
+This port adds the following enhancements over the original:
+
+### Support for json() function ###
+
+This wil return a json string:
+
+```js
+json([1, 2, 3])
+```
 
 ### Support for undefined ###
 
@@ -68,6 +77,16 @@ parser.evaluate('10 / z ?? 0', obj); // 0
 parser.evaluate('sqrt -1'); // NaN
 parser.evaluate('sqrt -1 ?? 0'); // 0
 ```
+
+#### not in operator ####
+
+The `not in` operator has been added.
+
+`"a" not in ["a", "b", "c"]`
+
+is equivalent to
+
+`not ("a" in ["a", "b", "c"])`
 
 #### array/structure references act like ?. ####
 
@@ -605,3 +624,45 @@ To disable the pre-defined constants, you can replace or delete `parser.consts`:
 1. `cd` to the project directory
 2. Install development dependencies: `npm install`
 3. Run the tests: `npm test`
+
+### Performance Testing ###
+
+This library includes comprehensive performance benchmarks to ensure optimal performance and detect regressions.
+
+#### Quick Start
+
+```bash
+# Run all performance benchmarks
+npm run bench
+
+# Run specific benchmark categories
+npm run bench:parsing     # Parser performance
+npm run bench:evaluation  # Evaluation performance
+npm run bench:memory      # Memory usage benchmarks
+```
+
+#### Understanding Results
+
+The benchmark suite tests:
+- **Parsing Performance** - Expression parsing speed
+- **Evaluation Performance** - Variable evaluation and mathematical computation speed
+- **Memory Efficiency** - Memory usage and garbage collection impact
+- **Scalability** - Performance with increasing expression complexity
+
+Performance results include operations per second (ops/sec) and timing data. The system automatically assigns performance grades (A-F) and flags potential regressions.
+
+#### Example Output
+
+```
+📊 Parsing Performance Tests
+┌─────────────────────────┬──────────────┬─────────────┬──────────┐
+│ Expression Type         │ Mean (ms)    │ Ops/sec     │ Status   │
+├─────────────────────────┼──────────────┼─────────────┼──────────┤
+│ Simple arithmetic       │ 0.0045       │ 220,000     │ ✅ Fast  │
+│ Complex expressions     │ 0.0250       │ 40,000      │ ✅ Fast  │
+└─────────────────────────┴──────────────┴─────────────┴──────────┘
+
+🏆 Overall Performance Grade: A
+```
+
+For detailed performance testing documentation, see [PERFORMANCE.md](./PERFORMANCE.md).

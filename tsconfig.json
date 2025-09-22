@@ -1,0 +1,81 @@
+{
+  "compilerOptions": {
+    // Language and Environment
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+
+    // Module Resolution
+    "allowImportingTsExtensions": false,
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "checkJs": false,
+
+    // Emit
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "rootDir": "./",
+    "removeComments": false,
+    "noEmit": false,
+    "importHelpers": false,
+    "downlevelIteration": false,
+
+    // Interop Constraints
+    "isolatedModules": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "verbatimModuleSyntax": false,
+
+    // Type Checking (Strict Mode)
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": false,
+    "noImplicitOverride": false,
+    "allowUnusedLabels": false,
+    "allowUnreachableCode": false,
+    "exactOptionalPropertyTypes": false,
+
+    // Additional Checks
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noPropertyAccessFromIndexSignature": false,
+
+    // Completeness
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+
+    // Performance
+    "incremental": true,
+    "composite": false,
+    "tsBuildInfoFile": "./dist/.tsbuildinfo",
+
+    // Testing Framework
+    "types": ["vitest/globals"]
+  },
+  "include": [
+    "src/**/*",
+    "index.ts",
+    "test/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "coverage",
+    ".nyc_output",
+    "**/*.d.ts"
+  ],
+  "ts-node": {
+    "esm": true
+  }
+}
