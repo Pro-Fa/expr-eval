@@ -1,13 +1,11 @@
 Expression Evaluator
 ==================================
 
-[![npm](https://img.shields.io/npm/v/expr-eval.svg?maxAge=3600)](https://www.npmjs.com/package/expr-eval)
-[![CDNJS version](https://img.shields.io/cdnjs/v/expr-eval.svg?maxAge=3600)](https://cdnjs.com/libraries/expr-eval)
-[![Build Status](https://travis-ci.org/silentmatt/expr-eval.svg?branch=master)](https://travis-ci.org/silentmatt/expr-eval)
+[![npm](https://img.shields.io/npm/v/@pro-fa/expr-eval.svg?maxAge=3600)](https://www.npmjs.com/package/@pro-fa/expr-eval)
 
 Description
 -------------------------------------
-**This is a modern TypeScript port of the expr-eval library, completely rewritten with contemporary build tools and development practices.** Originally based on expr-eval 2.0.2, this version has been restructured with a modular architecture, full TypeScript support, and comprehensive testing using Vitest. The library almost maintains backward compatibility while providing enhanced features and improved maintainability.
+**This is a modern TypeScript port of the expr-eval library, completely rewritten with contemporary build tools and development practices.** Originally based on [expr-eval 2.0.2](http://silentmatt.com/javascript-expression-evaluator/), this version has been restructured with a modular architecture, TypeScript support, and comprehensive testing using Vitest. The library almost maintains backward compatibility while providing enhanced features and improved maintainability.
 
 This port adds the following enhancements over the original:
 
