@@ -25,21 +25,21 @@ describe('% operator', () => {
   });
 
   it('returns the correct value', () => {
-    strictEqual(parser.evaluate('0 % 5'), 0);
-    strictEqual(parser.evaluate('1 % 5'), 1);
-    strictEqual(parser.evaluate('2 % 5'), 2);
-    strictEqual(parser.evaluate('3 % 5'), 3);
-    strictEqual(parser.evaluate('4 % 5'), 4);
-    strictEqual(parser.evaluate('5 % 5'), 0);
-    strictEqual(parser.evaluate('6 % 5'), 1);
-    strictEqual(parser.evaluate('-2 % 5'), -2);
-    strictEqual(parser.evaluate('-6 % 5'), -1);
+    strictEqual(parser.evaluate('0 % 5') as number, 0);
+    strictEqual(parser.evaluate('1 % 5') as number, 1);
+    strictEqual(parser.evaluate('2 % 5') as number, 2);
+    strictEqual(parser.evaluate('3 % 5') as number, 3);
+    strictEqual(parser.evaluate('4 % 5') as number, 4);
+    strictEqual(parser.evaluate('5 % 5') as number, 0);
+    strictEqual(parser.evaluate('6 % 5') as number, 1);
+    strictEqual(parser.evaluate('-2 % 5') as number, -2);
+    strictEqual(parser.evaluate('-6 % 5') as number, -1);
   });
 
   it('returns NaN for 0 divisor', () => {
-    ok(isNaN(parser.evaluate('0 % 0')));
-    ok(isNaN(parser.evaluate('1 % 0')));
-    ok(isNaN(parser.evaluate('-1 % 0')));
+    ok(isNaN(parser.evaluate('0 % 0') as number));
+    ok(isNaN(parser.evaluate('1 % 0') as number));
+    ok(isNaN(parser.evaluate('-1 % 0') as number));
   });
 });
 
@@ -53,15 +53,15 @@ describe('-x', () => {
   });
 
   it('negates its argument', () => {
-    strictEqual(parser.evaluate('-0'), 0);
-    strictEqual(parser.evaluate('-0.5'), -0.5);
-    strictEqual(parser.evaluate('-1'), -1);
-    strictEqual(parser.evaluate('-123'), -123);
-    strictEqual(parser.evaluate('-(-1)'), 1);
+    strictEqual(parser.evaluate('-0') as number, 0);
+    strictEqual(parser.evaluate('-0.5') as number, -0.5);
+    strictEqual(parser.evaluate('-1') as number, -1);
+    strictEqual(parser.evaluate('-123') as number, -123);
+    strictEqual(parser.evaluate('-(-1)') as number, 1);
   });
 
   it('converts its argument to a number', () => {
-    strictEqual(parser.evaluate('-"123"'), -123);
+    strictEqual(parser.evaluate('-"123"') as number, -123);
   });
 });
 
@@ -75,15 +75,15 @@ describe('+x', () => {
   });
 
   it('returns its argument', () => {
-    strictEqual(parser.evaluate('+0'), 0);
-    strictEqual(parser.evaluate('+0.5'), 0.5);
-    strictEqual(parser.evaluate('+1'), 1);
-    strictEqual(parser.evaluate('+123'), 123);
-    strictEqual(parser.evaluate('+(+1)'), 1);
+    strictEqual(parser.evaluate('+0') as number, 0);
+    strictEqual(parser.evaluate('+0.5') as number, 0.5);
+    strictEqual(parser.evaluate('+1') as number, 1);
+    strictEqual(parser.evaluate('+123') as number, 123);
+    strictEqual(parser.evaluate('+(+1)') as number, 1);
   });
 
   it('converts its argument to a number', () => {
-    strictEqual(parser.evaluate('+"123"'), 123);
+    strictEqual(parser.evaluate('+"123"') as number, 123);
   });
 });
 
@@ -98,49 +98,49 @@ describe('x!', () => {
   });
 
   it('returns exact answer for integers', () => {
-    strictEqual(parser.evaluate('(-10)!'), Infinity);
-    strictEqual(parser.evaluate('(-2)!'), Infinity);
-    strictEqual(parser.evaluate('(-1)!'), Infinity);
-    strictEqual(parser.evaluate('0!'), 1);
-    strictEqual(parser.evaluate('1!'), 1);
-    strictEqual(parser.evaluate('2!'), 2);
-    strictEqual(parser.evaluate('3!'), 6);
-    strictEqual(parser.evaluate('4!'), 24);
-    strictEqual(parser.evaluate('5!'), 120);
-    strictEqual(parser.evaluate('6!'), 720);
-    strictEqual(parser.evaluate('7!'), 5040);
-    strictEqual(parser.evaluate('8!'), 40320);
-    strictEqual(parser.evaluate('9!'), 362880);
-    strictEqual(parser.evaluate('10!'), 3628800);
-    strictEqual(parser.evaluate('25!'), 1.5511210043330984e+25);
-    strictEqual(parser.evaluate('50!'), 3.0414093201713376e+64);
-    strictEqual(parser.evaluate('100!'), 9.332621544394418e+157);
-    strictEqual(parser.evaluate('170!'), 7.257415615308004e+306);
-    strictEqual(parser.evaluate('171!'), Infinity);
+    strictEqual(parser.evaluate('(-10)!') as number, Infinity);
+    strictEqual(parser.evaluate('(-2)!') as number, Infinity);
+    strictEqual(parser.evaluate('(-1)!') as number, Infinity);
+    strictEqual(parser.evaluate('0!') as number, 1);
+    strictEqual(parser.evaluate('1!') as number, 1);
+    strictEqual(parser.evaluate('2!') as number, 2);
+    strictEqual(parser.evaluate('3!') as number, 6);
+    strictEqual(parser.evaluate('4!') as number, 24);
+    strictEqual(parser.evaluate('5!') as number, 120);
+    strictEqual(parser.evaluate('6!') as number, 720);
+    strictEqual(parser.evaluate('7!') as number, 5040);
+    strictEqual(parser.evaluate('8!') as number, 40320);
+    strictEqual(parser.evaluate('9!') as number, 362880);
+    strictEqual(parser.evaluate('10!') as number, 3628800);
+    strictEqual(parser.evaluate('25!') as number, 1.5511210043330984e+25);
+    strictEqual(parser.evaluate('50!') as number, 3.0414093201713376e+64);
+    strictEqual(parser.evaluate('100!') as number, 9.332621544394418e+157);
+    strictEqual(parser.evaluate('170!') as number, 7.257415615308004e+306);
+    strictEqual(parser.evaluate('171!') as number, Infinity);
   });
 
   it('returns approximation for fractions', () => {
     const delta = 1e-14;
-    assertCloseTo(parser.evaluate('(-2.5)!'), 2.36327180120735, delta);
-    assertCloseTo(parser.evaluate('(-1.5)!'), -3.54490770181103, delta);
-    assertCloseTo(parser.evaluate('(-0.75)!'), 3.625609908221908, delta);
-    assertCloseTo(parser.evaluate('(-0.5)!'), 1.772453850905516, delta);
-    assertCloseTo(parser.evaluate('(-0.25)!'), 1.225416702465177, delta);
-    assertCloseTo(parser.evaluate('0.25!'), 0.906402477055477, delta);
-    assertCloseTo(parser.evaluate('0.5!'), 0.886226925452758, delta);
-    assertCloseTo(parser.evaluate('0.75!'), 0.9190625268488832, delta);
-    assertCloseTo(parser.evaluate('1.5!'), 1.329340388179137, delta);
-    assertCloseTo(parser.evaluate('84.9!'), 1.8056411593417e128, 1e115);
-    assertCloseTo(parser.evaluate('85.1!'), 4.395670640362208e128, 1e115);
-    assertCloseTo(parser.evaluate('98.6!'), 1.483280675613632e155, 1e142);
-    strictEqual(parser.evaluate('171.35!'), Infinity);
-    strictEqual(parser.evaluate('172.5!'), Infinity);
+    assertCloseTo(parser.evaluate('(-2.5)!') as number, 2.36327180120735, delta);
+    assertCloseTo(parser.evaluate('(-1.5)!') as number, -3.54490770181103, delta);
+    assertCloseTo(parser.evaluate('(-0.75)!') as number, 3.625609908221908, delta);
+    assertCloseTo(parser.evaluate('(-0.5)!') as number, 1.772453850905516, delta);
+    assertCloseTo(parser.evaluate('(-0.25)!') as number, 1.225416702465177, delta);
+    assertCloseTo(parser.evaluate('0.25!') as number, 0.906402477055477, delta);
+    assertCloseTo(parser.evaluate('0.5!') as number, 0.886226925452758, delta);
+    assertCloseTo(parser.evaluate('0.75!') as number, 0.9190625268488832, delta);
+    assertCloseTo(parser.evaluate('1.5!') as number, 1.329340388179137, delta);
+    assertCloseTo(parser.evaluate('84.9!') as number, 1.8056411593417e128, 1e115);
+    assertCloseTo(parser.evaluate('85.1!') as number, 4.395670640362208e128, 1e115);
+    assertCloseTo(parser.evaluate('98.6!') as number, 1.483280675613632e155, 1e142);
+    strictEqual(parser.evaluate('171.35!') as number, Infinity);
+    strictEqual(parser.evaluate('172.5!') as number, Infinity);
   });
 
   it('handles NaN and infinity correctly', () => {
-    ok(isNaN(parser.evaluate('(0/0)!')));
-    strictEqual(parser.evaluate('(1/0)!'), Infinity);
-    ok(isNaN(parser.evaluate('(-1/0)!')));
+    ok(isNaN(parser.evaluate('(0/0)!') as number));
+    strictEqual(parser.evaluate('(1/0)!') as number, Infinity);
+    ok(isNaN(parser.evaluate('(-1/0)!') as number));
   });
 });
 
