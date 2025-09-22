@@ -3,7 +3,6 @@ dist
 coverage
 .idea
 .nyc_output
-package-lock.json
 
 # TypeScript
 *.tsbuildinfo
