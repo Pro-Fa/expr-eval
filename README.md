@@ -615,3 +615,45 @@ To disable the pre-defined constants, you can replace or delete `parser.consts`:
 1. `cd` to the project directory
 2. Install development dependencies: `npm install`
 3. Run the tests: `npm test`
+
+### Performance Testing ###
+
+This library includes comprehensive performance benchmarks to ensure optimal performance and detect regressions.
+
+#### Quick Start
+
+```bash
+# Run all performance benchmarks
+npm run bench
+
+# Run specific benchmark categories
+npm run bench:parsing     # Parser performance
+npm run bench:evaluation  # Evaluation performance
+npm run bench:memory      # Memory usage benchmarks
+```
+
+#### Understanding Results
+
+The benchmark suite tests:
+- **Parsing Performance** - Expression parsing speed
+- **Evaluation Performance** - Variable evaluation and mathematical computation speed
+- **Memory Efficiency** - Memory usage and garbage collection impact
+- **Scalability** - Performance with increasing expression complexity
+
+Performance results include operations per second (ops/sec) and timing data. The system automatically assigns performance grades (A-F) and flags potential regressions.
+
+#### Example Output
+
+```
+📊 Parsing Performance Tests
+┌─────────────────────────┬──────────────┬─────────────┬──────────┐
+│ Expression Type         │ Mean (ms)    │ Ops/sec     │ Status   │
+├─────────────────────────┼──────────────┼─────────────┼──────────┤
+│ Simple arithmetic       │ 0.0045       │ 220,000     │ ✅ Fast  │
+│ Complex expressions     │ 0.0250       │ 40,000      │ ✅ Fast  │
+└─────────────────────────┴──────────────┴─────────────┴──────────┘
+
+🏆 Overall Performance Grade: A
+```
+
+For detailed performance testing documentation, see [PERFORMANCE.md](./PERFORMANCE.md).

@@ -9,8 +9,8 @@
  but don't feel like you have to let me know or ask permission.
 */
 
-import { Expression } from './src/expression';
-import { Parser } from './src/parser';
+import { Expression } from './src/core/expression.js';
+import { Parser } from './src/parsing/parser.js';
 
 // Re-export types for public API
 export type {
@@ -24,7 +24,7 @@ export type {
   VariableValue,
   VariableResolveResult,
   OperatorFunction
-} from './src/types';
+} from './src/types/index.js';
 
 // Re-export custom error classes
 export {
@@ -35,7 +35,7 @@ export {
   AccessError,
   VariableError,
   FunctionError
-} from './src/types';
+} from './src/types/errors.js';
 
 export {
   Expression,

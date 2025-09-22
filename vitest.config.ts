@@ -9,6 +9,7 @@ export default defineConfig({
       reporter: ['text', 'json', 'html', 'lcov'],
       exclude: [
         'test/**',
+        'benchmarks/**',
         'dist/**',
         'node_modules/**',
         '**/*.d.ts',
@@ -36,13 +37,14 @@ export default defineConfig({
       'test/**/*.{test,spec}.{js,ts}',
       'test/*.js', // Include test files in root test directory
       'test/*.ts', // Include TypeScript test files
-      'test/*-partial.ts', // Include TypeScript partial files in root
-      'test/**/*-partial.ts' // Include TypeScript partial files in subdirectories
+      'test/*.ts', // Include TypeScript partial files in root
+      'test/**/*.ts' // Include TypeScript files in subdirectories
     ],
     exclude: [
       'node_modules/**',
       'dist/**',
-      'test/lib/**' // Exclude utility files
+      'test/lib/**', // Exclude utility files
+      'benchmarks/**' // Exclude benchmark files from regular test runs
     ]
   }
 });
