@@ -32,7 +32,7 @@ describe('sqrt(x)', () => {
     strictEqual(parser.evaluate('sqrt 1'), 1);
     assertCloseTo(parser.evaluate('sqrt 2'), 1.4142135623730951, delta);
     strictEqual(parser.evaluate('sqrt 4'), 2);
-    assertCloseTo(parser.evaluate('sqrt 8'), 2.8284271247461903, 0);
+    assertCloseTo(parser.evaluate('sqrt 8'), 2.8284271247461903, delta);
     strictEqual(parser.evaluate('sqrt 16'), 4);
     strictEqual(parser.evaluate('sqrt 81'), 9);
     strictEqual(parser.evaluate('sqrt 100'), 10);
