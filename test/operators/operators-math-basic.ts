@@ -275,7 +275,7 @@ describe('expm1(x)', () => {
 });
 
 describe('log1p(x)', () => {
-  it('returns e^x - 1', () => {
+  it('returns log(1 + x)', () => {
     const delta = 1e-15;
 
     ok(isNaN(parser.evaluate('log1p(0/0)')));
