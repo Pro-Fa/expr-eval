@@ -16,7 +16,8 @@ export const BUILTIN_FUNCTION_DOCS: Record<string, string> = {
   indexOf: 'indexOf(x, a): First index of x in a (array/string), -1 if not found.',
   join: 'join(sep, a): Join array a with separator sep.',
   if: 'if(c, a, b): c ? a : b (both branches evaluate).',
-  json: 'json(x): Returns JSON string for x.'
+  json: 'json(x): Returns JSON string for x.',
+  sum: 'sum(a): Sum of all elements in a.',
 };
 
 export const BUILTIN_KEYWORD_DOCS: Record<string, string> = {

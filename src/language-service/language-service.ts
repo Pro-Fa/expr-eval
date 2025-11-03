@@ -5,7 +5,7 @@ import { TEOF, TOP, TNUMBER, TSTRING, TPAREN, TBRACKET, TCOMMA, TNAME, TSEMICOLO
 import { Parser } from '../parsing/parser.js';
 import type { Values, Value } from '../types';
 import type { CompletionItem, HoverResult, HighlightToken, LanguageServiceOptions, GetCompletionsParams, GetHoverParams, LanguageServiceApi } from './language-service.types';
-import { BUILTIN_FUNCTION_DOCS, BUILTIN_KEYWORD_DOCS, DEFAULT_CONSTANT_DOCS } from './language-service-doc-definitions';
+import { BUILTIN_FUNCTION_DOCS, BUILTIN_KEYWORD_DOCS, DEFAULT_CONSTANT_DOCS } from './language-service.documentation';
 
 function valueTypeName(value: Value): string {
   const t = typeof value;

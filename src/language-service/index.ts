@@ -4,5 +4,4 @@
  */
 
 export * from './language-service.js';
-export * from './language-service.types.js';
-export * from './language-service-doc-definitions.js';
+export type * from './language-service.types.js';
