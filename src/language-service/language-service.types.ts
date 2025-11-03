@@ -24,9 +24,9 @@ export interface HighlightToken {
 }
 
 export interface LanguageServiceOptions {
-  // allow consumers to inject additional docs or custom functions/constants
-  functionDocs?: Record<string, string>;
-  constantDocs?: Record<string, string>;
+    // A map of operator names to booleans indicating whether they are
+    // allowed in the expression.
+    operators?: Record<string, boolean>;
 }
 
 export interface GetCompletionsParams {

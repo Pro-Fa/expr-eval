@@ -53,21 +53,22 @@ function iterateTokens(ts: TokenStream, untilPos?: number): { token: Token; star
 
 export function createLanguageService(options: LanguageServiceOptions = {}): LanguageServiceApi {
   // Build a parser instance to access keywords/operators/functions/consts
-  const parser = new Parser();
+  const parser = new Parser({
+      operators: options.operators,
+  });
 
-  const functionDocs = { ...BUILTIN_FUNCTION_DOCS, ...(options.functionDocs || {}) };
+  const functionDocs = { ...BUILTIN_FUNCTION_DOCS };
   const constantDocs = {
     ...DEFAULT_CONSTANT_DOCS,
-    ...(options.constantDocs || {})
   } as Record<string, string>;
 
   function allFunctions(): string[] {
     // Parser exposes built-in functions on parser.functions
-    const funcs = parser.functions ? Object.keys(parser.functions) : [];
+    const definedFunctions = parser.functions ? Object.keys(parser.functions) : [];
     // Unary operators can also be used like functions with parens: sin(x), abs(x), ...
     const unary = parser.unaryOps ? Object.keys(parser.unaryOps) : [];
     // Merge, prefer functions map descriptions where available
-    return Array.from(new Set([...funcs, ...unary]));
+    return Array.from(new Set([...definedFunctions, ...unary]));
   }
 
   function allConstants(): string[] {
@@ -93,7 +94,7 @@ export function createLanguageService(options: LanguageServiceOptions = {}): Lan
   }
 
   function buildFunctionDetail(name: string): string {
-    // Attempt to infer arity from actual function length if present
+    // Attempt to infer arity from the actual function length if present
     const f: any = (parser.functions && parser.functions[name]) || (parser.unaryOps && parser.unaryOps[name]);
     const arity = typeof f === 'function' ? f.length : undefined;
     return arity != null ? `${name}(${Array.from({ length: arity }).map((_, i) => 'arg' + (i + 1)).join(', ')})` : `${name}(…)`;
@@ -137,11 +138,11 @@ export function createLanguageService(options: LanguageServiceOptions = {}): Lan
   }
 
   function keywordCompletions(): CompletionItem[] {
-    return (parser.keywords || []).map(k => ({
-      label: k,
+    return (parser.keywords || []).map(keyword => ({
+      label: keyword,
       kind: 'keyword' as const,
       detail: 'keyword',
-      documentation: BUILTIN_KEYWORD_DOCS[k]
+      documentation: BUILTIN_KEYWORD_DOCS[keyword]
     }));
   }
 
@@ -154,9 +155,6 @@ export function createLanguageService(options: LanguageServiceOptions = {}): Lan
   function getCompletions(params: GetCompletionsParams): CompletionItem[] {
     const { text, variables } = params;
     const pos = params.position ?? text.length;
-
-    const ts = makeTokenStream(parser, text);
-    const spans = iterateTokens(ts);
 
     const { start, prefix } = extractPrefix(text, pos);
 
@@ -189,9 +187,9 @@ export function createLanguageService(options: LanguageServiceOptions = {}): Lan
     if (token.type === TNAME || token.type === TKEYWORD) {
       // Variable hover
       if (variables && Object.prototype.hasOwnProperty.call(variables, label)) {
-        const v = variables[label];
+        const variable = variables[label];
         return {
-          contents: `${label}: ${valueTypeName(v)}`,
+          contents: `${label}: ${valueTypeName(variable)}`,
           range: { start: span.start, end: span.end }
         };
       }
@@ -237,13 +235,13 @@ export function createLanguageService(options: LanguageServiceOptions = {}): Lan
   }
 
   function getHighlighting(text: string): HighlightToken[] {
-    const ts = makeTokenStream(parser, text);
-    const spans = iterateTokens(ts);
-    return spans.map(s => ({
-      type: tokenKindToHighlight(s.token),
-      start: s.start,
-      end: s.end,
-      value: s.token.value as any
+    const tokenStream = makeTokenStream(parser, text);
+    const spans = iterateTokens(tokenStream);
+    return spans.map(span => ({
+      type: tokenKindToHighlight(span.token),
+      start: span.start,
+      end: span.end,
+      value: span.token.value as any
     }));
   }
 
