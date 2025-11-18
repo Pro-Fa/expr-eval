@@ -16,7 +16,7 @@ import {
     Token,
     TokenStream
 } from '../parsing';
-import {Parser} from '../parsing';
+import {Parser} from '../parsing/parser';
 import type {Values, Value} from '../types';
 import type { HighlightToken, LanguageServiceOptions, GetCompletionsParams, GetHoverParams, LanguageServiceApi } from './language-service.types';
 import type { CompletionItem, Hover, Range } from 'vscode-languageserver-types'
