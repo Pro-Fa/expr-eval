@@ -16,26 +16,28 @@ import {
     Token,
     TokenStream
 } from '../parsing';
-import {Parser} from '../parsing/parser.js';
+import {Parser} from '../parsing';
 import type {Values, Value} from '../types';
-import type {
-    CompletionItem,
-    HoverResult,
-    HighlightToken,
-    LanguageServiceOptions,
-    GetCompletionsParams,
-    GetHoverParams,
-    LanguageServiceApi
-} from './language-service.types';
+import type { HighlightToken, LanguageServiceOptions, GetCompletionsParams, GetHoverParams, LanguageServiceApi } from './language-service.types';
+import type { CompletionItem, Hover, Range } from 'vscode-languageserver-types'
+import { CompletionItemKind, MarkupKind } from 'vscode-languageserver-types'
+import { TextDocument } from 'vscode-languageserver-textdocument'
 import {BUILTIN_FUNCTION_DOCS, BUILTIN_KEYWORD_DOCS, DEFAULT_CONSTANT_DOCS} from './language-service.documentation';
 
 function valueTypeName(value: Value): string {
     const t = typeof value;
-    if (value === null) return 'null';
-    if (Array.isArray(value)) return 'array';
-    if (t === 'function') return 'function';
-    if (t === 'object') return 'object';
-    return t; // number, string, boolean, undefined
+    switch (true) {
+        case value === null:
+            return 'null';
+        case Array.isArray(value):
+            return 'array';
+        case t === 'function':
+            return 'function';
+        case t === 'object':
+            return 'object';
+        default:
+            return t; // number, string, boolean, undefined
+    }
 }
 
 function isWordChar(ch: string): boolean {
@@ -49,7 +51,9 @@ function extractPrefix(text: string, position: number): { start: number; prefix:
         i = i - 1;
     }
     let start = i;
-    while (start > 0 && isWordChar(text[start - 1])) start--;
+    while (start > 0 && isWordChar(text[start - 1])) {
+        start--;
+    }
     return {start, prefix: text.slice(start, position)};
 }
 
@@ -61,7 +65,9 @@ function iterateTokens(ts: TokenStream, untilPos?: number): { token: Token; star
     const spans: { token: Token; start: number; end: number }[] = [];
     while (true) {
         const t = ts.next();
-        if (t.type === TEOF) break;
+        if (t.type === TEOF) {
+            break;
+        }
         const start = (t as any).index as number;
         const end = ts.pos; // pos advanced to end of current token in TokenStream
         spans.push({token: t, start, end});
@@ -135,17 +141,23 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
 
     function buildFunctionDoc(name: string): string | undefined {
         const doc = functionDocs[name];
-        if (doc) return doc;
+        if (doc) {
+            return doc;
+        }
         // Provide a generic doc for unary operators if not documented
-        if (parser.unaryOps && parser.unaryOps[name]) return `${name} x: unary operator`;
+        if (parser.unaryOps && parser.unaryOps[name]) {
+            return `${name} x: unary operator`;
+        }
         return undefined;
     }
 
     function variableCompletions(vars?: Values): CompletionItem[] {
-        if (!vars) return [];
+        if (!vars) {
+            return [];
+        }
         return Object.keys(vars).map(k => ({
             label: k,
-            kind: 'variable' as const,
+            kind: CompletionItemKind.Variable,
             detail: valueTypeName(vars[k]),
             documentation: undefined
         }));
@@ -154,7 +166,7 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
     function functionCompletions(): CompletionItem[] {
         return allFunctions().map(name => ({
             label: name,
-            kind: 'function' as const,
+            kind: CompletionItemKind.Function,
             detail: buildFunctionDetail(name),
             documentation: buildFunctionDoc(name),
             insertText: `${name}()`
@@ -164,7 +176,7 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
     function constantCompletions(): CompletionItem[] {
         return allConstants().map(name => ({
             label: name,
-            kind: 'constant' as const,
+            kind: CompletionItemKind.Constant,
             detail: valueTypeName(parser.consts[name]),
             documentation: constantDocs[name]
         }));
@@ -173,21 +185,24 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
     function keywordCompletions(): CompletionItem[] {
         return (parser.keywords || []).map(keyword => ({
             label: keyword,
-            kind: 'keyword' as const,
+            kind: CompletionItemKind.Keyword,
             detail: 'keyword',
             documentation: BUILTIN_KEYWORD_DOCS[keyword]
         }));
     }
 
     function filterByPrefix(items: CompletionItem[], prefix: string): CompletionItem[] {
-        if (!prefix) return items;
+        if (!prefix) {
+            return items;
+        }
         const lower = prefix.toLowerCase();
         return items.filter(i => i.label.toLowerCase().startsWith(lower));
     }
 
     function getCompletions(params: GetCompletionsParams): CompletionItem[] {
-        const {text, variables} = params;
-        const pos = params.position ?? text.length;
+        const { textDocument, variables, position } = params;
+        const text = textDocument.getText();
+        const pos = textDocument.offsetAt(position);
 
         const {start, prefix} = extractPrefix(text, pos);
 
@@ -206,13 +221,17 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
         return filterByPrefix(all, prefix);
     }
 
-    function getHover(params: GetHoverParams): HoverResult {
-        const {text, position, variables} = params;
+    function getHover(params: GetHoverParams): Hover {
+        const { textDocument, position, variables } = params;
+        const text = textDocument.getText();
         const ts = makeTokenStream(parser, text);
         const spans = iterateTokens(ts);
 
-        const span = spans.find(s => position >= s.start && position <= s.end);
-        if (!span) return {contents: null};
+        const offset = textDocument.offsetAt(position);
+        const span = spans.find(s => offset >= s.start && offset <= s.end);
+        if (!span) {
+            return {contents: ''};
+        }
 
         const token = span.token;
         const label = String(token.value);
@@ -221,9 +240,10 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
             // Variable hover
             if (variables && Object.prototype.hasOwnProperty.call(variables, label)) {
                 const variable = variables[label];
+                const range: Range = { start: textDocument.positionAt(span.start), end: textDocument.positionAt(span.end) };
                 return {
-                    contents: `${label}: ${valueTypeName(variable)}`,
-                    range: {start: span.start, end: span.end}
+                    contents: { kind: MarkupKind.PlainText, value: `${label}: ${valueTypeName(variable)}` },
+                    range
                 };
             }
 
@@ -231,9 +251,11 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
             if (allFunctions().includes(label)) {
                 const detail = buildFunctionDetail(label);
                 const doc = buildFunctionDoc(label);
+                const range: Range = { start: textDocument.positionAt(span.start), end: textDocument.positionAt(span.end) };
+                const value = doc ? `**${detail}**\n\n${doc}` : detail;
                 return {
-                    contents: doc ? `**${detail}**\n\n${doc}` : detail,
-                    range: {start: span.start, end: span.end}
+                    contents: { kind: MarkupKind.Markdown, value },
+                    range
                 };
             }
 
@@ -241,33 +263,38 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
             if (allConstants().includes(label)) {
                 const v = parser.consts[label];
                 const doc = constantDocs[label];
+                const range: Range = { start: textDocument.positionAt(span.start), end: textDocument.positionAt(span.end) };
                 return {
-                    contents: `${label}: ${valueTypeName(v)}${doc ? `\n\n${doc}` : ''}`,
-                    range: {start: span.start, end: span.end}
+                    contents: { kind: MarkupKind.PlainText, value: `${label}: ${valueTypeName(v)}${doc ? `\n\n${doc}` : ''}` },
+                    range
                 };
             }
 
             // Keyword hover
             if (token.type === TKEYWORD) {
                 const doc = BUILTIN_KEYWORD_DOCS[label];
-                return {contents: doc || 'keyword', range: {start: span.start, end: span.end}};
+                const range: Range = { start: textDocument.positionAt(span.start), end: textDocument.positionAt(span.end) };
+                return { contents: { kind: MarkupKind.PlainText, value: doc || 'keyword' }, range };
             }
         }
 
         // Operators: show a simple label
         if (token.type === TOP) {
-            return {contents: `operator: ${label}`, range: {start: span.start, end: span.end}};
+            const range: Range = { start: textDocument.positionAt(span.start), end: textDocument.positionAt(span.end) };
+            return {contents: { kind: MarkupKind.PlainText, value: `operator: ${label}` }, range};
         }
 
         // Numbers/strings
         if (token.type === TNUMBER || token.type === TSTRING) {
-            return {contents: `${valueTypeName(token.value as any)}`, range: {start: span.start, end: span.end}};
+            const range: Range = { start: textDocument.positionAt(span.start), end: textDocument.positionAt(span.end) };
+            return {contents: { kind: MarkupKind.PlainText, value: `${valueTypeName(token.value as any)}` }, range};
         }
 
-        return {contents: null};
+        return {contents: ''};
     }
 
-    function getHighlighting(text: string): HighlightToken[] {
+    function getHighlighting(textDocument: TextDocument): HighlightToken[] {
+        const text = textDocument.getText();
         const tokenStream = makeTokenStream(parser, text);
         const spans = iterateTokens(tokenStream);
         return spans.map(span => ({

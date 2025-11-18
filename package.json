@@ -90,7 +90,8 @@
     "typescript-eslint": "^8.15.0",
     "vite": "^6.0.1",
     "vite-plugin-dts": "^4.3.0",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "vscode-languageserver-types": "^3.17.5"
   },
   "bundlesize": [
     {
@@ -101,5 +102,8 @@
       "path": "./dist/index.mjs",
       "maxSize": "80kb"
     }
-  ]
+  ],
+  "dependencies": {
+    "vscode-languageserver-textdocument": "^1.0.12"
+  }
 }

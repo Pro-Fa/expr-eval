@@ -1,20 +1,8 @@
-﻿import type {Values} from '../types/index.js';
+﻿import type { Values } from '../types/index.js';
+import type { Position, Hover, CompletionItem } from 'vscode-languageserver-types';
+import type { TextDocument } from 'vscode-languageserver-textdocument';
 
-// Public API types for the language service
-export type CompletionKind = 'function' | 'constant' | 'keyword' | 'variable' | 'operator';
-
-export interface CompletionItem {
-    label: string;
-    kind: CompletionKind;
-    detail?: string;
-    documentation?: string;
-    insertText?: string;
-}
-
-export interface HoverResult {
-    contents: string | null;
-    range?: { start: number; end: number };
-}
+// Public API types for the language service now align with vscode-languageserver conventions
 
 export interface HighlightToken {
     type: 'number' | 'string' | 'name' | 'keyword' | 'operator' | 'function' | 'punctuation';
@@ -30,21 +18,21 @@ export interface LanguageServiceOptions {
 }
 
 export interface GetCompletionsParams {
-    text: string;
-    position?: number; // offset in text; if omitted, end of text
+    textDocument: TextDocument;
+    position: Position; // LSP position within textDocument
     variables?: Values;
 }
 
 export interface GetHoverParams {
-    text: string;
-    position: number; // offset in text
+    textDocument: TextDocument;
+    position: Position; // LSP position within textDocument
     variables?: Values;
 }
 
 export interface LanguageServiceApi {
     getCompletions(params: GetCompletionsParams): CompletionItem[];
 
-    getHover(params: GetHoverParams): HoverResult;
+    getHover(params: GetHoverParams): Hover;
 
-    getHighlighting(text: string): HighlightToken[];
+    getHighlighting(textDocument: TextDocument): HighlightToken[];
 }
