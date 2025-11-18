@@ -1,0 +1,171 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>expr-eval + Monaco (minimal)</title>
+  <style>
+    html, body { height: 100%; margin: 0; padding: 0; }
+    #editor { width: 100%; height: 100vh; }
+  </style>
+  <script src="/dist/bundle.js"></script>
+  <!-- Monaco loader from CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.49.0/min/vs/loader.js"></script>
+</head>
+<body>
+<div id="editor"></div>
+
+<script>
+  // Configure Monaco AMD base path
+  require.config({ paths: { 'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.49.0/min/vs' } });
+
+  // Start Monaco
+  require(['vs/editor/editor.main'], function () {
+    const languageId = 'expr-eval';
+    monaco.languages.register({ id: languageId });
+
+    // Create editor with a sample model
+    const initial = 'sum([1,2,3]) + max(2, 5)';
+    const model = monaco.editor.createModel(initial, languageId);
+    const editor = monaco.editor.create(document.getElementById('editor'), {
+      model,
+      theme: 'vs-dark',
+      automaticLayout: true,
+      fontSize: 14,
+      minimap: { enabled: false }
+    });
+
+    // Access expr-eval UMD - because it is a umd bundle, it will be available as window.exprEval
+    const { createLanguageService } = window.exprEval || {};
+    if (!createLanguageService) {
+      console.error('expr-eval not found. Make sure /dist/bundle.js is built.');
+      return;
+    }
+
+    const ls = createLanguageService();
+
+    // Monaco LSP-Backed demo, mostly taken from another sample
+
+    // Minimal lsp text document backed by Monaco model
+    function makeTextDocument(m) {
+      return {
+        uri: m.uri.toString(),
+        getText: () => m.getValue(),
+        positionAt: (offset) => {
+          const p = m.getPositionAt(offset);
+          return { line: p.lineNumber - 1, character: p.column - 1 };
+        },
+        offsetAt: (pos) => m.getOffsetAt(new monaco.Position(pos.line + 1, pos.character + 1))
+      };
+    }
+
+    function toLspPosition(mp) {
+      return { line: mp.lineNumber - 1, character: mp.column - 1 };
+    }
+
+    function fromLspPosition(lp) {
+      return new monaco.Position(lp.line + 1, lp.character + 1);
+    }
+
+    // Simple variables demo (appear in completions and hover)
+    const demoVars = { x: 42, user: { name: 'Ada' }, flag: true };
+
+    // Completions provider
+    monaco.languages.registerCompletionItemProvider(languageId, {
+      provideCompletionItems: function (model, position) {
+        const doc = makeTextDocument(model);
+        const items = ls.getCompletions({ textDocument: doc, position: toLspPosition(position), variables: demoVars }) || [];
+
+        const word = model.getWordUntilPosition(position);
+        const range = new monaco.Range(position.lineNumber, word.startColumn, position.lineNumber, word.endColumn);
+
+        function mapKind(k) {
+          // Map LSP CompletionItemKind (numbers) to Monaco kinds
+          const map = {
+            3: monaco.languages.CompletionItemKind.Function,   // Function
+            6: monaco.languages.CompletionItemKind.Variable,   // Variable
+            21: monaco.languages.CompletionItemKind.Constant,  // Constant
+            14: monaco.languages.CompletionItemKind.Keyword    // Keyword
+          };
+          return map[k] || monaco.languages.CompletionItemKind.Text;
+        }
+
+        const suggestions = items.map(it => ({
+          label: it.label,
+          kind: mapKind(it.kind),
+          detail: it.detail,
+          documentation: it.documentation,
+          insertText: it.insertText || it.label,
+          range
+        }));
+
+        return { suggestions };
+      }
+    });
+
+    // Hover provider
+    monaco.languages.registerHoverProvider(languageId, {
+      provideHover: function (model, position) {
+        const doc = makeTextDocument(model);
+        const hover = ls.getHover({ textDocument: doc, position: toLspPosition(position), variables: demoVars });
+        if (!hover || !hover.contents) return { contents: [] };
+
+        let contents = [];
+        if (typeof hover.contents === 'string') {
+          contents = [{ value: hover.contents }];
+        } else if (hover.contents && typeof hover.contents === 'object') {
+          const kind = hover.contents.kind || 'plaintext';
+          const val = hover.contents.value || '';
+          contents = [{ value: val }];
+        }
+
+        let range = undefined;
+        if (hover.range) {
+          const start = fromLspPosition(hover.range.start);
+          const end = fromLspPosition(hover.range.end);
+          range = new monaco.Range(start.lineNumber, start.column, end.lineNumber, end.column);
+        }
+        return { contents, range };
+      }
+    });
+
+    // Very basic syntax highlighting using decorations from service tokens (optional)
+    function applyHighlighting() {
+      const doc = makeTextDocument(model);
+      const tokens = ls.getHighlighting(doc);
+      const rangesByClass = new Map();
+      for (const t of tokens) {
+        const start = model.getPositionAt(t.start);
+        const end = model.getPositionAt(t.end);
+        const range = new monaco.Range(start.lineNumber, start.column, end.lineNumber, end.column);
+        const cls = 'tok-' + t.type;
+        if (!rangesByClass.has(cls)) rangesByClass.set(cls, []);
+        rangesByClass.get(cls).push({ range, options: { inlineClassName: cls } });
+      }
+      // Clear and set decorations per class (store IDs to update later if needed)
+      window.__exprEvalDecos = window.__exprEvalDecos || {};
+      for (const [cls, decos] of rangesByClass.entries()) {
+        const prev = window.__exprEvalDecos[cls] || [];
+        window.__exprEvalDecos[cls] = editor.deltaDecorations(prev, decos);
+      }
+    }
+
+    // Some minimal styles for tokens
+    const style = document.createElement('style');
+    style.textContent = `
+      .tok-number { color: #b5cea8; }
+      .tok-string { color: #ce9178; }
+      .tok-keyword { color: #c586c0; }
+      .tok-operator { color: #d4d4d4; }
+      .tok-function { color: #4fc1ff; }
+      .tok-punctuation { color: #d4d4d4; }
+      .tok-name { color: #9cdcfe; }
+    `;
+    document.head.appendChild(style);
+
+    applyHighlighting();
+    model.onDidChangeContent(() => applyHighlighting());
+  });
+</script>
+</body>
+</html>

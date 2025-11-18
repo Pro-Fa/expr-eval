@@ -67,7 +67,8 @@
     "build": "npm run build:js",
     "watch": "cross-env BUILD_TARGET=esm vite build --watch",
     "clean": "rimraf dist",
-    "prepublish": "npm run build"
+    "prepublish": "npm run build",
+    "monaco-sample:serve": "npm run build:umd && node samples/language-service-sample/serve-sample.cjs"
   },
   "devDependencies": {
     "@eslint/js": "^9.15.0",
