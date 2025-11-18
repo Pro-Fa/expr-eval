@@ -1,8 +1,30 @@
-﻿import type { Values } from '../types/index.js';
+﻿import type { Values } from '../types';
 import type { Position, Hover, CompletionItem } from 'vscode-languageserver-types';
 import type { TextDocument } from 'vscode-languageserver-textdocument';
 
-// Public API types for the language service now align with vscode-languageserver conventions
+/**
+ * Public API for the language service
+ */
+export interface LanguageServiceApi {
+    /**
+     * Returns a list of possible completions for the given position in the document.
+     * @param params - Parameters for the completion request
+     */
+    getCompletions(params: GetCompletionsParams): CompletionItem[];
+
+    /**
+     * Returns a hover message for the given position in the document.
+     * @param params - Parameters for the hover request
+     */
+    getHover(params: GetHoverParams): Hover;
+
+    /**
+     * Returns a list of syntax highlighting tokens for the given text document.
+     * @param textDocument - The text document to analyze
+     */
+    getHighlighting(textDocument: TextDocument): HighlightToken[];
+}
+
 
 export interface HighlightToken {
     type: 'number' | 'string' | 'name' | 'keyword' | 'operator' | 'function' | 'punctuation';
@@ -19,20 +41,12 @@ export interface LanguageServiceOptions {
 
 export interface GetCompletionsParams {
     textDocument: TextDocument;
-    position: Position; // LSP position within textDocument
+    position: Position;
     variables?: Values;
 }
 
 export interface GetHoverParams {
     textDocument: TextDocument;
-    position: Position; // LSP position within textDocument
+    position: Position;
     variables?: Values;
-}
-
-export interface LanguageServiceApi {
-    getCompletions(params: GetCompletionsParams): CompletionItem[];
-
-    getHover(params: GetHoverParams): Hover;
-
-    getHighlighting(textDocument: TextDocument): HighlightToken[];
 }

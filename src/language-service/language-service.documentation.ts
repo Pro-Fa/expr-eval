@@ -1,4 +1,4 @@
-﻿// Built-in lightweight docs for well-known functions and keywords taken from README.md
+﻿// Built-in lightweight docs for known functions and keywords
 
 export const BUILTIN_FUNCTION_DOCS: Record<string, string> = {
     random: 'random(n): Get a random number in the range [0, n). If n is zero or missing, defaults to 1.',
