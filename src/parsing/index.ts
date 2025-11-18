@@ -8,4 +8,3 @@
 export * from './token.js';
 export * from './token-stream.js';
 export * from './instruction.js';
-export * from './parser.js';
