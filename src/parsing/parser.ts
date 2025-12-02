@@ -5,7 +5,7 @@ import { ParserState } from './parser-state.js';
 import { Expression } from '../core/expression.js';
 import type { Value } from '../types/values.js';
 import type { Instruction } from './instruction.js';
-import { atan2, condition, fac, filter, fold, gamma, hypot, indexOf, join, map, max, min, random, roundTo, sum, json } from '../functions/index.js';
+import { atan2, condition, fac, filter, fold, gamma, hypot, indexOf, join, map, max, min, random, roundTo, sum, json, stringLength, isEmpty, stringContains, startsWith, endsWith, searchCount, trim, toUpper, toLower, toTitle, stringJoin, split, repeat, reverse, left, right, replace, replaceFirst, naturalSort, toNumber, toBoolean, padLeft, padRight } from '../functions/index.js';
 import {
   add,
   sub,
@@ -206,7 +206,30 @@ export class Parser {
       json: json,
       random: random,
       roundTo: roundTo,
-      sum: sum
+      sum: sum,
+      // String manipulation functions
+      length: stringLength,
+      isEmpty: isEmpty,
+      contains: stringContains,
+      startsWith: startsWith,
+      endsWith: endsWith,
+      searchCount: searchCount,
+      trim: trim,
+      toUpper: toUpper,
+      toLower: toLower,
+      toTitle: toTitle,
+      split: split,
+      repeat: repeat,
+      reverse: reverse,
+      left: left,
+      right: right,
+      replace: replace,
+      replaceFirst: replaceFirst,
+      naturalSort: naturalSort,
+      toNumber: toNumber,
+      toBoolean: toBoolean,
+      padLeft: padLeft,
+      padRight: padRight
     };
 
     this.consts = {

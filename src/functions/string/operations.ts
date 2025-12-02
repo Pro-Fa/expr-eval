@@ -1,0 +1,400 @@
+/**
+ * String manipulation functions
+ * Provides comprehensive string operations for the expression parser
+ */
+
+/**
+ * Returns the length of a string
+ */
+export function stringLength(str: string | undefined): number | undefined {
+  if (str === undefined) {
+    return undefined;
+  }
+  if (typeof str !== 'string') {
+    throw new Error('Argument to stringLength must be a string');
+  }
+  return str.length;
+}
+
+/**
+ * Checks if a string is empty (length === 0)
+ */
+export function isEmpty(str: string | undefined): boolean | undefined {
+  if (str === undefined) {
+    return undefined;
+  }
+  if (typeof str !== 'string') {
+    throw new Error('Argument to isEmpty must be a string');
+  }
+  return str.length === 0;
+}
+
+/**
+ * Checks if a string contains a substring
+ */
+export function stringContains(str: string | undefined, substring: string | undefined): boolean | undefined {
+  if (str === undefined || substring === undefined) {
+    return undefined;
+  }
+  if (typeof str !== 'string') {
+    throw new Error('First argument to contains must be a string');
+  }
+  if (typeof substring !== 'string') {
+    throw new Error('Second argument to contains must be a string');
+  }
+  return str.includes(substring);
+}
+
+/**
+ * Checks if a string starts with a substring
+ */
+export function startsWith(str: string | undefined, substring: string | undefined): boolean | undefined {
+  if (str === undefined || substring === undefined) {
+    return undefined;
+  }
+  if (typeof str !== 'string') {
+    throw new Error('First argument to startsWith must be a string');
+  }
+  if (typeof substring !== 'string') {
+    throw new Error('Second argument to startsWith must be a string');
+  }
+  return str.startsWith(substring);
+}
+
+/**
+ * Checks if a string ends with a substring
+ */
+export function endsWith(str: string | undefined, substring: string | undefined): boolean | undefined {
+  if (str === undefined || substring === undefined) {
+    return undefined;
+  }
+  if (typeof str !== 'string') {
+    throw new Error('First argument to endsWith must be a string');
+  }
+  if (typeof substring !== 'string') {
+    throw new Error('Second argument to endsWith must be a string');
+  }
+  return str.endsWith(substring);
+}
+
+/**
+ * Counts the number of non-overlapping occurrences of a substring in a string
+ */
+export function searchCount(text: string | undefined, substring: string | undefined): number | undefined {
+  if (text === undefined || substring === undefined) {
+    return undefined;
+  }
+  if (typeof text !== 'string') {
+    throw new Error('First argument to searchCount must be a string');
+  }
+  if (typeof substring !== 'string') {
+    throw new Error('Second argument to searchCount must be a string');
+  }
+  if (substring.length === 0) {
+    return 0;
+  }
+  
+  let count = 0;
+  let position = 0;
+  while ((position = text.indexOf(substring, position)) !== -1) {
+    count++;
+    position += substring.length;
+  }
+  return count;
+}
+
+/**
+ * Removes whitespace from both ends of a string
+ */
+export function trim(str: string | undefined): string | undefined {
+  if (str === undefined) {
+    return undefined;
+  }
+  if (typeof str !== 'string') {
+    throw new Error('Argument to trim must be a string');
+  }
+  return str.trim();
+}
+
+/**
+ * Converts a string to uppercase
+ */
+export function toUpper(str: string | undefined): string | undefined {
+  if (str === undefined) {
+    return undefined;
+  }
+  if (typeof str !== 'string') {
+    throw new Error('Argument to toUpper must be a string');
+  }
+  return str.toUpperCase();
+}
+
+/**
+ * Converts a string to lowercase
+ */
+export function toLower(str: string | undefined): string | undefined {
+  if (str === undefined) {
+    return undefined;
+  }
+  if (typeof str !== 'string') {
+    throw new Error('Argument to toLower must be a string');
+  }
+  return str.toLowerCase();
+}
+
+/**
+ * Converts a string to title case (first letter of each word capitalized)
+ */
+export function toTitle(str: string | undefined): string | undefined {
+  if (str === undefined) {
+    return undefined;
+  }
+  if (typeof str !== 'string') {
+    throw new Error('Argument to toTitle must be a string');
+  }
+  return str.replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+/**
+ * Joins an array of strings with a glue string
+ * Note: This extends the existing join function to handle string arrays specifically
+ */
+export function stringJoin(arr: string[] | undefined, glue: string | undefined): string | undefined {
+  if (arr === undefined || glue === undefined) {
+    return undefined;
+  }
+  if (!Array.isArray(arr)) {
+    throw new Error('First argument to join must be an array');
+  }
+  if (typeof glue !== 'string') {
+    throw new Error('Second argument to join must be a string');
+  }
+  return arr.join(glue);
+}
+
+/**
+ * Splits a string by a delimiter
+ */
+export function split(str: string | undefined, delimiter: string | undefined): string[] | undefined {
+  if (str === undefined || delimiter === undefined) {
+    return undefined;
+  }
+  if (typeof str !== 'string') {
+    throw new Error('First argument to split must be a string');
+  }
+  if (typeof delimiter !== 'string') {
+    throw new Error('Second argument to split must be a string');
+  }
+  return str.split(delimiter);
+}
+
+/**
+ * Repeats a string a specified number of times
+ */
+export function repeat(str: string | undefined, times: number | undefined): string | undefined {
+  if (str === undefined || times === undefined) {
+    return undefined;
+  }
+  if (typeof str !== 'string') {
+    throw new Error('First argument to repeat must be a string');
+  }
+  if (typeof times !== 'number') {
+    throw new Error('Second argument to repeat must be a number');
+  }
+  if (times < 0 || !Number.isInteger(times)) {
+    throw new Error('Second argument to repeat must be a non-negative integer');
+  }
+  return str.repeat(times);
+}
+
+/**
+ * Reverses a string
+ */
+export function reverse(str: string | undefined): string | undefined {
+  if (str === undefined) {
+    return undefined;
+  }
+  if (typeof str !== 'string') {
+    throw new Error('Argument to reverse must be a string');
+  }
+  return str.split('').reverse().join('');
+}
+
+/**
+ * Returns the leftmost count characters from a string
+ */
+export function left(str: string | undefined, count: number | undefined): string | undefined {
+  if (str === undefined || count === undefined) {
+    return undefined;
+  }
+  if (typeof str !== 'string') {
+    throw new Error('First argument to left must be a string');
+  }
+  if (typeof count !== 'number') {
+    throw new Error('Second argument to left must be a number');
+  }
+  if (count < 0) {
+    throw new Error('Second argument to left must be non-negative');
+  }
+  return str.slice(0, count);
+}
+
+/**
+ * Returns the rightmost count characters from a string
+ */
+export function right(str: string | undefined, count: number | undefined): string | undefined {
+  if (str === undefined || count === undefined) {
+    return undefined;
+  }
+  if (typeof str !== 'string') {
+    throw new Error('First argument to right must be a string');
+  }
+  if (typeof count !== 'number') {
+    throw new Error('Second argument to right must be a number');
+  }
+  if (count < 0) {
+    throw new Error('Second argument to right must be non-negative');
+  }
+  if (count === 0) {
+    return '';
+  }
+  return str.slice(-count);
+}
+
+/**
+ * Replaces all occurrences of oldValue with newValue in a string
+ */
+export function replace(str: string | undefined, oldValue: string | undefined, newValue: string | undefined): string | undefined {
+  if (str === undefined || oldValue === undefined || newValue === undefined) {
+    return undefined;
+  }
+  if (typeof str !== 'string') {
+    throw new Error('First argument to replace must be a string');
+  }
+  if (typeof oldValue !== 'string') {
+    throw new Error('Second argument to replace must be a string');
+  }
+  if (typeof newValue !== 'string') {
+    throw new Error('Third argument to replace must be a string');
+  }
+  // Use split and join for compatibility with older JS targets
+  return str.split(oldValue).join(newValue);
+}
+
+/**
+ * Replaces the first occurrence of oldValue with newValue in a string
+ */
+export function replaceFirst(str: string | undefined, oldValue: string | undefined, newValue: string | undefined): string | undefined {
+  if (str === undefined || oldValue === undefined || newValue === undefined) {
+    return undefined;
+  }
+  if (typeof str !== 'string') {
+    throw new Error('First argument to replaceFirst must be a string');
+  }
+  if (typeof oldValue !== 'string') {
+    throw new Error('Second argument to replaceFirst must be a string');
+  }
+  if (typeof newValue !== 'string') {
+    throw new Error('Third argument to replaceFirst must be a string');
+  }
+  return str.replace(oldValue, newValue);
+}
+
+/**
+ * Sorts an array of strings using natural sort order (alphanumeric aware)
+ */
+export function naturalSort(arr: string[] | undefined): string[] | undefined {
+  if (arr === undefined) {
+    return undefined;
+  }
+  if (!Array.isArray(arr)) {
+    throw new Error('Argument to naturalSort must be an array');
+  }
+  
+  const collator = new Intl.Collator(undefined, {
+    numeric: true,
+    sensitivity: 'base'
+  });
+  
+  return [...arr].sort(collator.compare);
+}
+
+/**
+ * Converts a string to a number
+ */
+export function toNumber(str: string | undefined): number | undefined {
+  if (str === undefined) {
+    return undefined;
+  }
+  if (typeof str !== 'string') {
+    throw new Error('Argument to toNumber must be a string');
+  }
+  const num = Number(str);
+  if (isNaN(num)) {
+    throw new Error(`Cannot convert "${str}" to a number`);
+  }
+  return num;
+}
+
+/**
+ * Converts a string to a boolean
+ * Recognizes: 'true', '1', 'yes', 'on' as true (case-insensitive)
+ * Recognizes: 'false', '0', 'no', 'off', '' as false (case-insensitive)
+ */
+export function toBoolean(str: string | undefined): boolean | undefined {
+  if (str === undefined) {
+    return undefined;
+  }
+  if (typeof str !== 'string') {
+    throw new Error('Argument to toBoolean must be a string');
+  }
+  
+  const lower = str.toLowerCase().trim();
+  
+  if (lower === 'true' || lower === '1' || lower === 'yes' || lower === 'on') {
+    return true;
+  }
+  if (lower === 'false' || lower === '0' || lower === 'no' || lower === 'off' || lower === '') {
+    return false;
+  }
+  
+  throw new Error(`Cannot convert "${str}" to a boolean`);
+}
+
+/**
+ * Pads a string on the left to reach the target length
+ */
+export function padLeft(str: string | undefined, targetLength: number | undefined, padString?: string): string | undefined {
+  if (str === undefined || targetLength === undefined) {
+    return undefined;
+  }
+  if (typeof str !== 'string') {
+    throw new Error('First argument to padLeft must be a string');
+  }
+  if (typeof targetLength !== 'number') {
+    throw new Error('Second argument to padLeft must be a number');
+  }
+  if (targetLength < 0 || !Number.isInteger(targetLength)) {
+    throw new Error('Second argument to padLeft must be a non-negative integer');
+  }
+  return str.padStart(targetLength, padString);
+}
+
+/**
+ * Pads a string on the right to reach the target length
+ */
+export function padRight(str: string | undefined, targetLength: number | undefined, padString?: string): string | undefined {
+  if (str === undefined || targetLength === undefined) {
+    return undefined;
+  }
+  if (typeof str !== 'string') {
+    throw new Error('First argument to padRight must be a string');
+  }
+  if (typeof targetLength !== 'number') {
+    throw new Error('Second argument to padRight must be a number');
+  }
+  if (targetLength < 0 || !Number.isInteger(targetLength)) {
+    throw new Error('Second argument to padRight must be a non-negative integer');
+  }
+  return str.padEnd(targetLength, padString);
+}

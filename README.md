@@ -558,6 +558,116 @@ indexOf(x, a) | Return the first index of string or array `a` matching the value
 join(sep, a)  | Concatenate the elements of `a`, separated by `sep`.
 if(c, a, b)   | Function form of c ? a : b. Note: This always evaluates both `a` and `b`, regardless of whether `c` is `true` or not. Use `c ? a : b` instead if there are side effects, or if evaluating the branches could be expensive.
 
+#### String Manipulation Functions
+
+The parser includes comprehensive string manipulation capabilities:
+
+**String Inspection**
+
+Function               | Description
+:--------------------- | :----------
+length(str)            | Returns the length of a string. Also works as unary operator for numbers.
+isEmpty(str)           | Returns `true` if the string is empty (length === 0), `false` otherwise.
+contains(str, substr)  | Returns `true` if `str` contains `substr`, `false` otherwise.
+startsWith(str, substr)| Returns `true` if `str` starts with `substr`, `false` otherwise.
+endsWith(str, substr)  | Returns `true` if `str` ends with `substr`, `false` otherwise.
+searchCount(str, substr)| Returns the count of non-overlapping occurrences of `substr` in `str`.
+
+**String Transformation**
+
+Function         | Description
+:--------------- | :----------
+trim(str)        | Removes whitespace from both ends of a string.
+toUpper(str)     | Converts a string to uppercase.
+toLower(str)     | Converts a string to lowercase.
+toTitle(str)     | Converts a string to title case (capitalizes first letter of each word).
+repeat(str, n)   | Repeats a string `n` times. `n` must be a non-negative integer.
+reverse(str)     | Reverses a string.
+
+**String Extraction**
+
+Function         | Description
+:--------------- | :----------
+left(str, n)     | Returns the leftmost `n` characters from a string.
+right(str, n)    | Returns the rightmost `n` characters from a string.
+split(str, delim)| Splits a string by delimiter and returns an array.
+
+**String Manipulation**
+
+Function                    | Description
+:-------------------------- | :----------
+replace(str, old, new)      | Replaces all occurrences of `old` with `new` in `str`.
+replaceFirst(str, old, new) | Replaces only the first occurrence of `old` with `new` in `str`.
+
+**String/Array Sorting**
+
+Function         | Description
+:--------------- | :----------
+naturalSort(arr) | Sorts an array of strings using natural sort order (alphanumeric-aware). For example, `["file10", "file2", "file1"]` becomes `["file1", "file2", "file10"]`.
+
+**Type Conversion**
+
+Function         | Description
+:--------------- | :----------
+toNumber(str)    | Converts a string to a number. Throws an error if the string cannot be converted.
+toBoolean(str)   | Converts a string to a boolean. Recognizes `"true"`, `"1"`, `"yes"`, `"on"` as `true` (case-insensitive), and `"false"`, `"0"`, `"no"`, `"off"`, `""` as `false`.
+
+**String Padding**
+
+Function              | Description
+:-------------------- | :----------
+padLeft(str, len)     | Pads a string on the left with spaces to reach the target length.
+padRight(str, len)    | Pads a string on the right with spaces to reach the target length.
+
+**Examples:**
+
+```js
+const parser = new Parser();
+
+// String inspection
+parser.evaluate('length("hello")'); // 5
+parser.evaluate('isEmpty("")'); // true
+parser.evaluate('contains("hello world", "world")'); // true
+parser.evaluate('startsWith("hello", "he")'); // true
+parser.evaluate('endsWith("hello", "lo")'); // true
+parser.evaluate('searchCount("hello hello", "hello")'); // 2
+
+// String transformation
+parser.evaluate('trim("  hello  ")'); // "hello"
+parser.evaluate('toUpper("hello")'); // "HELLO"
+parser.evaluate('toLower("HELLO")'); // "hello"
+parser.evaluate('toTitle("hello world")'); // "Hello World"
+parser.evaluate('repeat("ha", 3)'); // "hahaha"
+parser.evaluate('reverse("hello")'); // "olleh"
+
+// String extraction
+parser.evaluate('left("hello", 3)'); // "hel"
+parser.evaluate('right("hello", 3)'); // "llo"
+parser.evaluate('split("a,b,c", ",")'); // ["a", "b", "c"]
+
+// String manipulation
+parser.evaluate('replace("hello hello", "hello", "hi")'); // "hi hi"
+parser.evaluate('replaceFirst("hello hello", "hello", "hi")'); // "hi hello"
+
+// Natural sorting
+parser.evaluate('naturalSort(["file10", "file2", "file1"])'); // ["file1", "file2", "file10"]
+
+// Type conversion
+parser.evaluate('toNumber("123")'); // 123
+parser.evaluate('toBoolean("true")'); // true
+parser.evaluate('toBoolean("yes")'); // true
+parser.evaluate('toBoolean("0")'); // false
+
+// Padding
+parser.evaluate('padLeft("5", 3)'); // "  5"
+parser.evaluate('padRight("5", 3)'); // "5  "
+
+// Complex string operations
+parser.evaluate('toUpper(trim(left("  hello world  ", 10)))'); // "HELLO WOR"
+```
+
+Note: All string functions return `undefined` if any of their required arguments are `undefined`, allowing for safe chaining and conditional logic.
+
 #### Array literals
 
 Arrays can be created by including the elements inside square `[]` brackets, separated by commas. For example:

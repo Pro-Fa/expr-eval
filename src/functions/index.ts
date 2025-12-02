@@ -6,3 +6,4 @@
 export * from './math';
 export * from './array';
 export * from './utility';
+export * from './string';
