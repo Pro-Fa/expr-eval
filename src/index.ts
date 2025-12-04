@@ -22,6 +22,9 @@ export * from './functions/utility/index.js';
 // Core evaluation engine
 export * from './core/index.js';
 
+// Language service for intellisense
+export * from './language-service/index.js';
+
 // Parsing utilities
 export * from './parsing/index.js';
 

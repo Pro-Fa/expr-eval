@@ -11,6 +11,7 @@
 
 import { Expression } from './src/core/expression.js';
 import { Parser } from './src/parsing/parser.js';
+import { createLanguageService } from "./src/language-service";
 
 // Re-export types for public API
 export type {
@@ -39,5 +40,6 @@ export {
 
 export {
   Expression,
-  Parser
+  Parser,
+    createLanguageService
 };
