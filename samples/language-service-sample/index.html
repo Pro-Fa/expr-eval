@@ -3,197 +3,133 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <title>expr-eval + Monaco (minimal)</title>
-    <style>
-        html, body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
+    <title>Expression Evaluator Playground</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class'
         }
-
-        #editor {
-            width: 100%;
-            height: 95vh;
-        }
-
-        #status {
-            height: 5vh;
-        }
-    </style>
+    </script>
+    <link rel="stylesheet" href="styles.css">
     <script src="/dist/bundle.js"></script>
     <!-- Monaco loader from CDN -->
     <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.49.0/min/vs/loader.js"></script>
 </head>
-<body>
-<div id="editor"></div>
-<div id="status">No evaluations yet!</div>
+<body class="bg-gray-50 dark:bg-[#1e1e1e] text-gray-900 dark:text-[#cccccc]">
+    <div id="app">
+        <!-- Header -->
+        <header class="h-14 bg-white dark:bg-[#333333] border-b border-gray-200 dark:border-[#3c3c3c] flex items-center justify-between px-4 shadow-sm flex-shrink-0">
+            <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2">
+                    <svg class="w-8 h-8 text-indigo-600 dark:text-[#569cd6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                    <h1 class="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-[#569cd6] dark:to-[#c586c0] bg-clip-text text-transparent">
+                        Expression Evaluator Playground
+                    </h1>
+                </div>
+            </div>
 
-<script>
-    // Configure Monaco AMD base path
-    require.config({paths: {'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.49.0/min/vs'}});
+            <div class="flex items-center gap-3">
+                <!-- Save Button -->
+                <button id="saveBtn" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 dark:bg-[#0e639c] dark:hover:bg-[#1177bb] text-white font-medium text-sm transition-colors shadow-sm hover:shadow-md">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 4H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V8l-4-4H8zM6 4v4h8V4M6 20v-7h12v7M10 4v4M14 16v2" />
+                    </svg>
+                    Save
+                </button>
 
-    // Start Monaco
-    require(['vs/editor/editor.main'], function () {
-        const languageId = 'expr-eval';
-        monaco.languages.register({id: languageId});
+                <!-- Theme Toggle -->
+                <button id="themeToggle" class="p-2 rounded-lg bg-gray-100 dark:bg-[#3c3c3c] hover:bg-gray-200 dark:hover:bg-[#4c4c4c] transition-colors" title="Toggle theme">
+                    <svg id="sunIcon" class="w-5 h-5 text-amber-500 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    <svg id="moonIcon" class="w-5 h-5 text-slate-700 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                    </svg>
+                </button>
+            </div>
+        </header>
 
-        // Create editor with a sample model
-        const initial = 'sum([1,2,3]) + max(2, 5)';
-        const model = monaco.editor.createModel(initial, languageId);
-        const editor = monaco.editor.create(document.getElementById('editor'), {
-            model,
-            theme: 'vs-dark',
-            automaticLayout: true,
-            fontSize: 14,
-            minimap: {enabled: false}
-        });
+        <!-- Main Content -->
+        <main id="mainContent">
+            <!-- Expression Editor Pane -->
+            <div id="leftPane" class="pane bg-white dark:bg-[#1e1e1e]" style="width: 60%;">
+                <div class="pane-header h-10 bg-gray-100 dark:bg-[#252526] border-b border-gray-200 dark:border-[#3c3c3c] flex items-center px-4">
+                    <span class="text-sm font-medium text-gray-600 dark:text-[#cccccc]">Expression</span>
+                    <span class="ml-2 text-xs text-gray-400 dark:text-[#808080]">Enter your expr-eval expression</span>
+                </div>
+                <div class="editor-wrapper">
+                    <div id="expressionEditor"></div>
+                </div>
+            </div>
 
-        // Access expr-eval UMD - because it is a umd bundle, it will be available as window.exprEval
-        const {createLanguageService, Parser} = window.exprEval || {};
-        if (!createLanguageService) {
-            console.error('expr-eval not found. Make sure /dist/bundle.js is built.');
-            return;
-        }
+            <!-- Resizer -->
+            <div id="resizer" class="bg-gray-200 dark:bg-[#3c3c3c]"></div>
 
-        const ls = createLanguageService();
+            <!-- Context Editor Pane -->
+            <div id="rightPane" class="pane bg-white dark:bg-[#1e1e1e]" style="width: calc(40% - 6px);">
+                <div class="pane-header h-10 bg-gray-100 dark:bg-[#252526] border-b border-gray-200 dark:border-[#3c3c3c] flex items-center px-4">
+                    <span class="text-sm font-medium text-gray-600 dark:text-[#cccccc]">Context (JSON)</span>
+                    <span class="ml-2 text-xs text-gray-400 dark:text-[#808080]">Variables available in expressions</span>
+                </div>
+                <div class="editor-wrapper">
+                    <div id="contextEditor"></div>
+                </div>
+            </div>
+        </main>
 
-        // Minimal lsp text document backed by Monaco model
-        function makeTextDocument(m) {
-            return {
-                uri: m.uri.toString(),
-                getText: () => m.getValue(),
-                positionAt: (offset) => {
-                    const p = m.getPositionAt(offset);
-                    return {line: p.lineNumber - 1, character: p.column - 1};
-                },
-                offsetAt: (pos) => m.getOffsetAt(new monaco.Position(pos.line + 1, pos.character + 1))
-            };
-        }
+        <!-- Footer / Results -->
+        <footer id="footer" class="bg-white dark:bg-[#1e1e1e] border-t border-gray-200 dark:border-[#3c3c3c]">
+            <div class="h-full flex flex-col">
+                <div class="h-8 bg-gray-100 dark:bg-[#252526] flex items-center px-4 border-b border-gray-200 dark:border-[#3c3c3c] flex-shrink-0">
+                    <span class="text-sm font-medium text-gray-600 dark:text-[#cccccc]">Result</span>
+                </div>
+                <div id="resultContainer" class="flex-1 p-4 overflow-auto">
+                    <div id="resultSuccess" class="hidden">
+                        <div class="flex items-start gap-3">
+                            <div class="flex-shrink-0 w-8 h-8 rounded-full bg-green-100 dark:bg-[#2d4a3e] flex items-center justify-center">
+                                <svg class="w-5 h-5 text-green-600 dark:text-[#4ec9b0]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm text-gray-500 dark:text-[#808080]">Evaluation Result</p>
+                                <p id="resultValue" class="text-2xl font-mono font-bold text-gray-900 dark:text-[#d4d4d4] mt-1"></p>
+                                <p id="resultType" class="text-xs text-gray-400 dark:text-[#808080] mt-1"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="resultError" class="hidden">
+                        <div class="flex items-start gap-3">
+                            <div class="flex-shrink-0 w-8 h-8 rounded-full bg-red-100 dark:bg-[#4a2d2d] flex items-center justify-center">
+                                <svg class="w-5 h-5 text-red-600 dark:text-[#f48771]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium text-red-600 dark:text-[#f48771]">Error</p>
+                                <p id="errorMessage" class="text-base font-mono text-red-700 dark:text-[#f48771] mt-1 bg-red-50 dark:bg-[#3a2222] p-3 rounded-lg border border-red-200 dark:border-[#5a3c3c]"></p>
+                                <div id="errorDetails" class="mt-3 text-sm text-gray-600 dark:text-[#cccccc] space-y-2"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="resultEmpty" class="flex items-center justify-center h-full text-gray-400 dark:text-[#808080]">
+                        <p>Enter an expression to see results</p>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
 
-        function toLspPosition(mp) {
-            return {line: mp.lineNumber - 1, character: mp.column - 1};
-        }
+    <!-- Save Toast Notification -->
+    <div id="saveToast" class="fixed bottom-52 right-4 bg-green-600 dark:bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 flex items-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        </svg>
+        <span>Saved to localStorage</span>
+    </div>
 
-        function fromLspPosition(lp) {
-            return new monaco.Position(lp.line + 1, lp.character + 1);
-        }
-
-        // Simple variables demo (appear in completions and hover)
-        const demoVars = {x: 42, user: {name: 'Ada'}, flag: true};
-
-        // Completions provider
-        monaco.languages.registerCompletionItemProvider(languageId, {
-            provideCompletionItems: function (model, position) {
-                const doc = makeTextDocument(model);
-                const items = ls.getCompletions({
-                    textDocument: doc,
-                    position: toLspPosition(position),
-                    variables: demoVars
-                }) || [];
-
-                const word = model.getWordUntilPosition(position);
-                const range = new monaco.Range(position.lineNumber, word.startColumn, position.lineNumber, word.endColumn);
-
-                function mapKind(k) {
-                    // Map LSP CompletionItemKind (numbers) to Monaco kinds
-                    const map = {
-                        3: monaco.languages.CompletionItemKind.Function,   // Function
-                        6: monaco.languages.CompletionItemKind.Variable,   // Variable
-                        21: monaco.languages.CompletionItemKind.Constant,  // Constant
-                        14: monaco.languages.CompletionItemKind.Keyword    // Keyword
-                    };
-                    return map[k] || monaco.languages.CompletionItemKind.Text;
-                }
-
-                const suggestions = items.map(it => ({
-                    label: it.label,
-                    kind: mapKind(it.kind),
-                    detail: it.detail,
-                    documentation: it.documentation,
-                    insertText: it.insertText || it.label,
-                    range
-                }));
-
-                return {suggestions};
-            }
-        });
-
-        // Hover provider
-        monaco.languages.registerHoverProvider(languageId, {
-            provideHover: function (model, position) {
-                const doc = makeTextDocument(model);
-                const hover = ls.getHover({textDocument: doc, position: toLspPosition(position), variables: demoVars});
-                if (!hover || !hover.contents) return {contents: []};
-
-                let contents = [];
-                if (typeof hover.contents === 'string') {
-                    contents = [{value: hover.contents}];
-                } else if (hover.contents && typeof hover.contents === 'object') {
-                    const kind = hover.contents.kind || 'plaintext';
-                    const val = hover.contents.value || '';
-                    contents = [{value: val}];
-                }
-
-                let range = undefined;
-                if (hover.range) {
-                    const start = fromLspPosition(hover.range.start);
-                    const end = fromLspPosition(hover.range.end);
-                    range = new monaco.Range(start.lineNumber, start.column, end.lineNumber, end.column);
-                }
-                return {contents, range};
-            }
-        });
-
-        // Very basic syntax highlighting using decorations from service tokens
-        function applyHighlighting() {
-            const doc = makeTextDocument(model);
-            const tokens = ls.getHighlighting(doc);
-            const rangesByClass = new Map();
-            for (const t of tokens) {
-                const start = model.getPositionAt(t.start);
-                const end = model.getPositionAt(t.end);
-                const range = new monaco.Range(start.lineNumber, start.column, end.lineNumber, end.column);
-                const cls = 'tok-' + t.type;
-                if (!rangesByClass.has(cls)) rangesByClass.set(cls, []);
-                rangesByClass.get(cls).push({range, options: {inlineClassName: cls}});
-            }
-            // Clear and set decorations per class (store IDs to update later if needed)
-            window.__exprEvalDecos = window.__exprEvalDecos || {};
-            for (const [cls, decos] of rangesByClass.entries()) {
-                const prev = window.__exprEvalDecos[cls] || [];
-                window.__exprEvalDecos[cls] = editor.deltaDecorations(prev, decos);
-            }
-        }
-
-        function evaluate() {
-            const expression = model.getValue();
-            const status = document.getElementById('status');
-            try{
-                const parser = new Parser();
-                const evaluationResult = parser.evaluate(expression, demoVars);
-                status.textContent = `Result: ${evaluationResult}`;
-            } catch(error) {
-                status.textContent = `Evaluation error: ${error.message}`
-            }
-        }
-
-        // Some minimal styles for tokens
-        const style = document.createElement('style');
-        style.textContent = `
-      .tok-number { color: #b5cea8; }
-      .tok-string { color: #ce9178; }
-      .tok-keyword { color: #c586c0; }
-      .tok-operator { color: #d4d4d4; }
-      .tok-function { color: #4fc1ff; }
-      .tok-punctuation { color: #d4d4d4; }
-      .tok-name { color: #9cdcfe; }
-    `;
-        document.head.appendChild(style);
-
-        applyHighlighting();
-        evaluate();
-        model.onDidChangeContent(() => { applyHighlighting(); evaluate(); });
-    });
-</script>
+    <script src="app.js"></script>
 </body>
 </html>

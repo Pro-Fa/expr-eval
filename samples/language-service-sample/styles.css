@@ -1,0 +1,101 @@
+/* Base styles */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+#app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+#mainContent {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+}
+
+/* Split pane styles */
+.pane {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.pane-header {
+    flex-shrink: 0;
+}
+
+.editor-wrapper {
+    flex: 1;
+    min-height: 0;
+    position: relative;
+}
+
+.editor-wrapper > div {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+#resizer {
+    width: 6px;
+    cursor: col-resize;
+    flex-shrink: 0;
+    position: relative;
+}
+
+#resizer:hover {
+    background-color: #6366f1 !important;
+}
+
+#resizer::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 2px;
+    height: 40px;
+    background: rgba(100, 100, 100, 0.5);
+    border-radius: 2px;
+}
+
+#footer {
+    flex-shrink: 0;
+    height: 300px;
+}
+
+/* Light theme token colors */
+.tok-number { color: #098658 !important; }
+.tok-string { color: #a31515 !important; }
+.tok-keyword { color: #af00db !important; }
+.tok-operator { color: #383a42 !important; }
+.tok-function { color: #795e26 !important; }
+.tok-punctuation { color: #383a42 !important; }
+.tok-name { color: #001080 !important; }
+
+/* Dark theme token colors */
+.dark .tok-number { color: #b5cea8 !important; }
+.dark .tok-string { color: #ce9178 !important; }
+.dark .tok-keyword { color: #c586c0 !important; }
+.dark .tok-operator { color: #d4d4d4 !important; }
+.dark .tok-function { color: #dcdcaa !important; }
+.dark .tok-punctuation { color: #d4d4d4 !important; }
+.dark .tok-name { color: #9cdcfe !important; }
+
+/* Error styling animation */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-2px); }
+    75% { transform: translateX(2px); }
+}
+
+.error-shake {
+    animation: shake 0.3s ease-in-out;
+}

@@ -26,6 +26,9 @@ const server = http.createServer((req, res) => {
 
     if (urlPath === '/' || urlPath === '/index.html') {
         urlPath = 'samples/language-service-sample/index.html';
+    } else if (urlPath === '/styles.css' || urlPath === '/app.js') {
+        // Serve sample-specific files from the sample folder
+        urlPath = 'samples/language-service-sample' + urlPath;
     }
 
     const filePath = path.join(root, urlPath);
