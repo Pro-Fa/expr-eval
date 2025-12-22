@@ -121,7 +121,7 @@ describe('Language Service', () => {
             expect(labels).toContain('case');
         });
 
-        it('should return empty when after a dot', () => {
+        it('should suggest children after a dot', () => {
             const text = 'foo.';
             const doc = TextDocument.create('file://test', 'plaintext', 1, text);
             const completions = ls.getCompletions({
@@ -129,7 +129,10 @@ describe('Language Service', () => {
                 variables: { foo: { bar: 1 } },
                 position: { line: 0, character: 4 }
             });
-            expect(completions).toHaveLength(0);
+            expect(completions.length).toBeGreaterThan(0);
+            const item = completions.find(c => c.label === 'foo.bar');
+            expect(item).toBeDefined();
+            expect(item?.insertText).toBe('bar');
         });
 
         it('should provide completion items with proper kind and detail', () => {
@@ -145,7 +148,12 @@ describe('Language Service', () => {
             expect(sinFunc).toBeDefined();
             expect(sinFunc?.kind).toBe(CompletionItemKind.Function);
             expect(sinFunc?.detail).toBeDefined();
-            expect(sinFunc?.insertText).toBe('sin()');
+            expect(sinFunc?.insertTextFormat).toBe(2);
+            // newText is provided via textEdit as a snippet with placeholders
+            const newText = (sinFunc as any)?.textEdit?.newText as string | undefined;
+            expect(typeof newText).toBe('string');
+            expect(newText).toContain('sin(');
+            expect(newText).toContain('${1');
         });
 
         it('should provide variable completions with correct kind', () => {
@@ -339,7 +347,7 @@ describe('Language Service', () => {
             }
         });
 
-        it('should show plain text content for variables', () => {
+        it('should show markdown content for variables', () => {
             const text = 'foo';
             const doc = TextDocument.create('file://test', 'plaintext', 1, text);
             const hover = ls.getHover({
@@ -349,7 +357,9 @@ describe('Language Service', () => {
             });
 
             const contents = hover.contents as any;
-            expect(contents.kind).toBe(MarkupKind.PlainText);
+            expect(contents.kind).toBe(MarkupKind.Markdown);
+            const value = getContentsValue(hover.contents);
+            expect(value).toContain('Value Preview');
         });
     });
 
