@@ -1,5 +1,5 @@
 ﻿import type { Values } from '../types';
-import type { Position, Hover, CompletionItem } from 'vscode-languageserver-types';
+import type { Position, Hover, CompletionItem, MarkupContent } from 'vscode-languageserver-types';
 import type { TextDocument } from 'vscode-languageserver-textdocument';
 
 /**
@@ -16,7 +16,7 @@ export interface LanguageServiceApi {
      * Returns a hover message for the given position in the document.
      * @param params - Parameters for the hover request
      */
-    getHover(params: GetHoverParams): Hover;
+    getHover(params: GetHoverParams): HoverV2;
 
     /**
      * Returns a list of syntax highlighting tokens for the given text document.
@@ -49,4 +49,8 @@ export interface GetHoverParams {
     textDocument: TextDocument;
     position: Position;
     variables?: Values;
+}
+
+export interface HoverV2 extends Hover {
+    contents: MarkupContent;
 }

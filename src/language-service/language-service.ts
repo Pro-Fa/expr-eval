@@ -17,12 +17,56 @@ import {
     TokenStream
 } from '../parsing';
 import {Parser} from '../parsing/parser';
-import type {Values, Value} from '../types';
-import type { HighlightToken, LanguageServiceOptions, GetCompletionsParams, GetHoverParams, LanguageServiceApi } from './language-service.types';
-import type { CompletionItem, Hover, Range } from 'vscode-languageserver-types'
-import { CompletionItemKind, MarkupKind } from 'vscode-languageserver-types'
+import {Values, Value, ValueObject} from '../types';
+import type { HighlightToken, LanguageServiceOptions, GetCompletionsParams, GetHoverParams, LanguageServiceApi, HoverV2 } from './language-service.types';
+import type {CompletionItem, Range, Position} from 'vscode-languageserver-types'
+import { CompletionItemKind, MarkupKind, InsertTextFormat } from 'vscode-languageserver-types'
 import { TextDocument } from 'vscode-languageserver-textdocument'
-import {BUILTIN_FUNCTION_DOCS, BUILTIN_KEYWORD_DOCS, DEFAULT_CONSTANT_DOCS} from './language-service.documentation';
+import { BUILTIN_KEYWORD_DOCS, DEFAULT_CONSTANT_DOCS} from './language-service.documentation';
+import { FunctionDetails } from "./language-service.models";
+
+class VarTrieNode {
+    children: Record<string, VarTrieNode> = {};
+    value: Value | undefined = undefined;
+}
+
+class VarTrie {
+    root: VarTrieNode = new VarTrieNode();
+
+    private static isValueObject(v: Value): v is ValueObject {
+        return v !== null && typeof v === 'object' && !Array.isArray(v);
+    }
+
+    buildFromValues(vars: Values): void {
+        const walk = (obj: ValueObject, node: VarTrieNode) => {
+            for (const key of Object.keys(obj)) {
+                if (!node.children[key]) {
+                    node.children[key] = new VarTrieNode();
+                }
+                const child = node.children[key];
+                child.value = obj[key];
+                const val = obj[key];
+                if (VarTrie.isValueObject(val)) {
+                    walk(val, child);
+                }
+            }
+        };
+        walk(vars as ValueObject, this.root);
+    }
+
+    search(path: string[]): VarTrieNode | undefined {
+        let node: VarTrieNode | undefined = this.root;
+        for (const seg of path) {
+            node = node?.children[seg];
+            if (!node) {
+                return undefined;
+            }
+        }
+        return node;
+    }
+}
+
+
 
 function valueTypeName(value: Value): string {
     const t = typeof value;
@@ -40,22 +84,59 @@ function valueTypeName(value: Value): string {
     }
 }
 
-function isWordChar(ch: string): boolean {
-    return /[A-Za-z0-9_$]/.test(ch);
+function pathVariableCompletions(vars: Values | undefined, prefix: string, rangePartial?: Range): CompletionItem[] {
+    if (!vars) {
+        return [];
+    }
+
+    const trie = new VarTrie();
+    trie.buildFromValues(vars);
+
+    const lastDot = prefix.lastIndexOf('.');
+    const endsWithDot = lastDot === prefix.length - 1;
+
+    const baseParts = (endsWithDot
+            ? prefix.slice(0, -1)
+            : lastDot >= 0 ? prefix.slice(0, lastDot) : ''
+    )
+        .split('.')
+        .filter(Boolean);
+
+    const partial = endsWithDot ? '' : prefix.slice(lastDot + 1);
+    const lowerPartial = partial.toLowerCase();
+
+    const baseNode = trie.search(baseParts);
+    if (!baseNode) {
+        return [];
+    }
+
+    return Object.entries(baseNode.children)
+        .filter(([k]) => !partial || k.toLowerCase().startsWith(lowerPartial))
+        .map(([key, child]) => ({
+            label: (baseParts.length ? baseParts.concat(key) : [key]).join('.'),
+            kind: CompletionItemKind.Variable,
+            detail: child.value !== undefined ? valueTypeName(child.value) : 'object',
+            insertText: key,
+            textEdit: rangePartial ? { range: rangePartial, newText: key } : undefined,
+            documentation: undefined,
+        }));
 }
 
-function extractPrefix(text: string, position: number): { start: number; prefix: string } {
-    let i = Math.max(0, Math.min(position, text.length));
-    // If the cursor is right after a word char, keep it included
-    if (i > 0 && !isWordChar(text[i]) && isWordChar(text[i - 1])) {
-        i = i - 1;
-    }
+function isPathChar(ch: string): boolean {
+    return /[A-Za-z0-9_$.]/.test(ch);
+}
+
+function extractPathPrefix(text: string, position: number): { start: number; prefix: string } {
+    const i = Math.max(0, Math.min(position, text.length));
     let start = i;
-    while (start > 0 && isWordChar(text[start - 1])) {
+
+    while (start > 0 && isPathChar(text[start - 1])) {
         start--;
     }
-    return {start, prefix: text.slice(start, position)};
+
+    return { start, prefix: text.slice(start, i) };
 }
+
 
 function makeTokenStream(parser: Parser, text: string): TokenStream {
     return new TokenStream(parser, text);
@@ -68,7 +149,7 @@ function iterateTokens(ts: TokenStream, untilPos?: number): { token: Token; star
         if (t.type === TEOF) {
             break;
         }
-        const start = (t as any).index as number;
+        const start = t.index;
         const end = ts.pos; // pos advanced to end of current token in TokenStream
         spans.push({token: t, start, end});
         if (untilPos != null && end >= untilPos) {
@@ -79,24 +160,56 @@ function iterateTokens(ts: TokenStream, untilPos?: number): { token: Token; star
     return spans;
 }
 
+function toTruncatedJsonString(
+    value: unknown,
+    maxLines = 3,
+    maxWidth = 50,
+): string {
+    let text: string;
+
+    try {
+        text = JSON.stringify(value, null, 2);
+    } catch {
+        return '<unserializable>';
+    }
+
+    if (!text) {
+        return '<empty>';
+    }
+
+    let lines: string[] = [];
+
+    for(let i = 0, lineAmount = 0; i < text.length && lineAmount < maxLines; i += maxWidth, lineAmount++) {
+        lines.push(text.slice(i, i + maxWidth));
+    }
+
+    const maxChars = maxLines * maxWidth;
+    const exceededMaxLength = text.length > maxChars;
+    return exceededMaxLength ? lines.join('\n\n') + '...' : lines.join('\n\n');
+}
+
+
 export function createLanguageService(options: LanguageServiceOptions | undefined = undefined): LanguageServiceApi {
     // Build a parser instance to access keywords/operators/functions/consts
     const parser = new Parser({
         operators: options?.operators,
     });
 
-    const functionDocs = {...BUILTIN_FUNCTION_DOCS};
     const constantDocs = {
         ...DEFAULT_CONSTANT_DOCS,
     } as Record<string, string>;
 
-    function allFunctions(): string[] {
+    function allFunctions(): FunctionDetails[] {
         // Parser exposes built-in functions on parser.functions
         const definedFunctions = parser.functions ? Object.keys(parser.functions) : [];
         // Unary operators can also be used like functions with parens: sin(x), abs(x), ...
         const unary = parser.unaryOps ? Object.keys(parser.unaryOps) : [];
         // Merge, prefer functions map descriptions where available
-        return Array.from(new Set([...definedFunctions, ...unary]));
+        const rawFunctions = Array.from(new Set([...definedFunctions, ...unary]));
+
+
+
+        return rawFunctions.map(name => new FunctionDetails(parser, name));
     }
 
     function allConstants(): string[] {
@@ -123,7 +236,7 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
             default: {
                 // If not matches, check if it's a function or an identifier
                 const functions = allFunctions();
-                if (t.type === TNAME && functions.includes(String(t.value))) {
+                if (t.type === TNAME && functions.find((f: FunctionDetails) => f.name == String(t.value))) {
                     return 'function';
                 }
 
@@ -132,62 +245,34 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
         }
     }
 
-    function buildFunctionDetail(name: string): string {
-        // Attempt to infer arity from the actual function length if present
-        const f: any = (parser.functions && parser.functions[name]) || (parser.unaryOps && parser.unaryOps[name]);
-        const arity = typeof f === 'function' ? f.length : undefined;
-        return arity != null ? `${name}(${Array.from({length: arity}).map((_, i) => 'arg' + (i + 1)).join(', ')})` : `${name}(…)`;
-    }
-
-    function buildFunctionDoc(name: string): string | undefined {
-        const doc = functionDocs[name];
-        if (doc) {
-            return doc;
-        }
-        // Provide a generic doc for unary operators if not documented
-        if (parser.unaryOps && parser.unaryOps[name]) {
-            return `${name} x: unary operator`;
-        }
-        return undefined;
-    }
-
-    function variableCompletions(vars?: Values): CompletionItem[] {
-        if (!vars) {
-            return [];
-        }
-        return Object.keys(vars).map(k => ({
-            label: k,
-            kind: CompletionItemKind.Variable,
-            detail: valueTypeName(vars[k]),
-            documentation: undefined
-        }));
-    }
-
-    function functionCompletions(): CompletionItem[] {
-        return allFunctions().map(name => ({
-            label: name,
+    function functionCompletions(rangeFull: Range): CompletionItem[] {
+        return allFunctions().map(func => ({
+            label: func.name,
             kind: CompletionItemKind.Function,
-            detail: buildFunctionDetail(name),
-            documentation: buildFunctionDoc(name),
-            insertText: `${name}()`
+            detail: func.details(),
+            documentation: func.docs(),
+            insertTextFormat: InsertTextFormat.Snippet,
+            textEdit: { range: rangeFull, newText: func.completionText() },
         }));
     }
 
-    function constantCompletions(): CompletionItem[] {
+    function constantCompletions(rangeFull: Range): CompletionItem[] {
         return allConstants().map(name => ({
             label: name,
             kind: CompletionItemKind.Constant,
             detail: valueTypeName(parser.consts[name]),
-            documentation: constantDocs[name]
+            documentation: constantDocs[name],
+            textEdit: { range: rangeFull, newText: name },
         }));
     }
 
-    function keywordCompletions(): CompletionItem[] {
+    function keywordCompletions(rangeFull: Range): CompletionItem[] {
         return (parser.keywords || []).map(keyword => ({
             label: keyword,
             kind: CompletionItemKind.Keyword,
             detail: 'keyword',
-            documentation: BUILTIN_KEYWORD_DOCS[keyword]
+            documentation: BUILTIN_KEYWORD_DOCS[keyword],
+            textEdit: { range: rangeFull, newText: keyword },
         }));
     }
 
@@ -202,57 +287,98 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
     function getCompletions(params: GetCompletionsParams): CompletionItem[] {
         const { textDocument, variables, position } = params;
         const text = textDocument.getText();
-        const pos = textDocument.offsetAt(position);
+        const offsetPosition = textDocument.offsetAt(position);
 
-        const {start, prefix} = extractPrefix(text, pos);
+        const {start, prefix} = extractPathPrefix(text, offsetPosition);
 
-        // Very light context: if immediately after a dot, do not suggest globals (future work could inspect previous name)
-        if (start > 0 && text[start - 1] === '.') {
-            return []; // object member completions out of scope for now
-        }
+        // Build ranges for replacement
+        const rangeFull: Range = { start: textDocument.positionAt(start), end: position };
+        const lastDot = prefix.lastIndexOf('.');
+        const partial = lastDot >= 0 ? prefix.slice(lastDot + 1) : prefix;
+        const replaceStartOffset =
+            start + (prefix.length - partial.length);
+        const rangePartial: Range = {
+            start: textDocument.positionAt(replaceStartOffset),
+            end: position
+        };
 
         const all: CompletionItem[] = [
-            ...functionCompletions(),
-            ...constantCompletions(),
-            ...keywordCompletions(),
-            ...variableCompletions(variables)
+            ...functionCompletions(rangeFull),
+            ...constantCompletions(rangeFull),
+            ...keywordCompletions(rangeFull),
+            ...pathVariableCompletions(variables, prefix, rangePartial),
         ];
 
-        return filterByPrefix(all, prefix);
+        return prefix.includes('.') ? all : filterByPrefix(all, prefix);
     }
 
-    function getHover(params: GetHoverParams): Hover {
+    function tryVariableHover(textDocument: TextDocument, position: Position, variables?: Values): HoverV2 | undefined {
+        // If we don't have variables, we can't provide a hover for a variable path
+        if (!variables) {
+            return undefined;
+        }
+        const text = textDocument.getText();
+        const offset = textDocument.offsetAt(position);
+        // Find start of the path (walk backwards over path chars)
+        const { start } = extractPathPrefix(text, offset);
+        // Find end of the path (walk forwards over path chars)
+        let end = offset;
+        while (end < text.length && isPathChar(text[end])) {
+            end++;
+        }
+        if (end <= start) {
+            return undefined;
+        }
+
+        const fullPath = text.slice(start, end);
+        const parts = fullPath.split('.').filter(Boolean);
+        if (parts.length === 0) {
+            return undefined;
+        }
+
+        const trie = new VarTrie();
+        trie.buildFromValues(variables);
+        const node = trie.search(parts);
+        if (!node) {
+            return undefined;
+        }
+
+        const range: Range = { start: textDocument.positionAt(start), end: textDocument.positionAt(end) };
+        const nodeValue = node.value;
+        return {
+            contents: { kind: MarkupKind.Markdown, value: `${fullPath}: ${nodeValue !== undefined ? `Variable (${valueTypeName(nodeValue)})` : 'object'}\n\n**Value Preview**\n\n${toTruncatedJsonString(nodeValue)}` },
+            range
+        };
+    }
+
+    function getHover(params: GetHoverParams): HoverV2 {
         const { textDocument, position, variables } = params;
         const text = textDocument.getText();
+
+        const variableHover = tryVariableHover(textDocument, position, variables);
+        if (variableHover) {
+            return variableHover;
+        }
+
+        // Fallback to token-based hover
         const ts = makeTokenStream(parser, text);
         const spans = iterateTokens(ts);
 
         const offset = textDocument.offsetAt(position);
         const span = spans.find(s => offset >= s.start && offset <= s.end);
         if (!span) {
-            return {contents: ''};
+            return {contents: { kind: "plaintext", value: '' }};
         }
 
         const token = span.token;
         const label = String(token.value);
 
         if (token.type === TNAME || token.type === TKEYWORD) {
-            // Variable hover
-            if (variables && Object.prototype.hasOwnProperty.call(variables, label)) {
-                const variable = variables[label];
-                const range: Range = { start: textDocument.positionAt(span.start), end: textDocument.positionAt(span.end) };
-                return {
-                    contents: { kind: MarkupKind.PlainText, value: `${label}: ${valueTypeName(variable)}` },
-                    range
-                };
-            }
-
             // Function hover
-            if (allFunctions().includes(label)) {
-                const detail = buildFunctionDetail(label);
-                const doc = buildFunctionDoc(label);
+            const func = allFunctions().find(f => f.name === label);
+            if (func) {
                 const range: Range = { start: textDocument.positionAt(span.start), end: textDocument.positionAt(span.end) };
-                const value = doc ? `**${detail}**\n\n${doc}` : detail;
+                const value = func.docs() ?? func.details();
                 return {
                     contents: { kind: MarkupKind.Markdown, value },
                     range
@@ -287,10 +413,10 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
         // Numbers/strings
         if (token.type === TNUMBER || token.type === TSTRING) {
             const range: Range = { start: textDocument.positionAt(span.start), end: textDocument.positionAt(span.end) };
-            return {contents: { kind: MarkupKind.PlainText, value: `${valueTypeName(token.value as any)}` }, range};
+            return {contents: { kind: MarkupKind.PlainText, value: `${valueTypeName(token.value)}` }, range};
         }
 
-        return {contents: ''};
+        return { contents: { kind: "plaintext", value: '' }};
     }
 
     function getHighlighting(textDocument: TextDocument): HighlightToken[] {
@@ -301,7 +427,7 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
             type: tokenKindToHighlight(span.token),
             start: span.start,
             end: span.end,
-            value: span.token.value as any
+            value: span.token.value
         }));
     }
 
@@ -310,4 +436,6 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
         getHover,
         getHighlighting
     };
+
+
 }
