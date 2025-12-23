@@ -25,7 +25,6 @@ export interface LanguageServiceApi {
     getHighlighting(textDocument: TextDocument): HighlightToken[];
 }
 
-
 export interface HighlightToken {
     type: 'number' | 'string' | 'name' | 'keyword' | 'operator' | 'function' | 'punctuation';
     start: number;
