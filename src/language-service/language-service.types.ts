@@ -52,5 +52,5 @@ export interface GetHoverParams {
 }
 
 export interface HoverV2 extends Hover {
-    contents: MarkupContent;
+    contents: MarkupContent; // Type narrowing since we know we are not going to return deprecated content
 }

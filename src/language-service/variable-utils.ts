@@ -1,9 +1,9 @@
-﻿import { TextDocument } from 'vscode-languageserver-textdocument';
+import {TextDocument} from 'vscode-languageserver-textdocument';
 import {Position, Range, MarkupKind, CompletionItem, CompletionItemKind} from 'vscode-languageserver-types';
-import { Values, Value, ValueObject } from '../types';
-import { TNAME, Token } from '../parsing';
-import { HoverV2 } from './language-service.types';
-import { toTruncatedJsonString, valueTypeName } from './ls-utils';
+import {Values, Value, ValueObject} from '../types';
+import {TNAME, Token} from '../parsing';
+import {HoverV2} from './language-service.types';
+import {toTruncatedJsonString, valueTypeName} from './ls-utils';
 
 type Span = { token: Token; start: number; end: number };
 
@@ -12,28 +12,33 @@ function isNameToken(t: Token): boolean {
 }
 
 function isDotToken(t: Token): boolean {
-    return String(t.value) === '.';
+    return t.value === '.';
 }
 
 function findNameIndexAt(spans: Span[], offset: number): number | undefined {
-    const i = spans.findIndex(s => {
+    const hitIndex = spans.findIndex(s => {
         return offset >= s.start && offset <= s.end;
     });
 
-    if (i < 0) {
+    if (hitIndex < 0) {
         return undefined;
     }
 
-    if (isNameToken(spans[i].token)) {
-        return i;
+    const token = spans[hitIndex].token;
+
+    if (isNameToken(token)) {
+        return hitIndex;
     }
 
-    if (isDotToken(spans[i].token)) {
-        if (i + 1 < spans.length && isNameToken(spans[i + 1].token)) {
-            return i + 1;
+    if (isDotToken(token)) {
+        const right = hitIndex + 1;
+        if (isNameToken(spans[right]?.token)) {
+            return right;
         }
-        if (i - 1 >= 0 && isNameToken(spans[i - 1].token)) {
-            return i - 1;
+
+        const left = hitIndex - 1;
+        if (isNameToken(spans[left]?.token)) {
+            return left;
         }
     }
 
@@ -48,7 +53,7 @@ function findNameIndexAt(spans: Span[], offset: number): number | undefined {
 function extractPathFromSpans(
     spans: Span[],
     cursorIndex: number
-): { parts: string[]; firstIndex: number; lastIndex: number } | undefined {
+): { parts: string[]; firstIndex: number } | undefined {
     if (!isNameToken(spans[cursorIndex].token)) {
         return undefined;
     }
@@ -69,12 +74,11 @@ function extractPathFromSpans(
     }
 
     const center = String(spans[cursorIndex].token.value);
-
     const parts = [...leftParts, center];
-    const firstIndex = cursorIndex - leftParts.length * 2;
-    const lastIndex = cursorIndex;
 
-    return { parts, firstIndex, lastIndex };
+    const firstIndex = cursorIndex - leftParts.length * 2;
+
+    return {parts, firstIndex};
 }
 
 function resolveValueAtPath(vars: Values | undefined, parts: string[]): Value | undefined {
@@ -82,25 +86,31 @@ function resolveValueAtPath(vars: Values | undefined, parts: string[]): Value | 
         return undefined;
     }
 
+    const isPlainObject = (v: unknown): v is Record<string, unknown> => {
+        return v !== null && typeof v === 'object' && !Array.isArray(v);
+    };
+
     let node: Value = vars;
 
     for (const segment of parts) {
-        if (node && typeof node === 'object' && !Array.isArray(node) && segment in (node as any)) {
-            node = (node as any)[segment];
-        } else {
+        if (!isPlainObject(node)) {
             return undefined;
         }
+        if (!Object.prototype.hasOwnProperty.call(node, segment)) {
+            return undefined;
+        }
+        node = (node as ValueObject)[segment];
     }
 
     return node;
 }
 
- class VarTrieNode {
+class VarTrieNode {
     children: Record<string, VarTrieNode> = {};
     value: Value | undefined = undefined;
 }
 
- class VarTrie {
+class VarTrie {
     root: VarTrieNode = new VarTrieNode();
 
     private static isValueObject(v: Value): v is ValueObject {
@@ -115,27 +125,26 @@ function resolveValueAtPath(vars: Values | undefined, parts: string[]): Value | 
                 }
 
                 const child = node.children[key];
-                const val = (obj as any)[key];
+                const val = obj[key] as Value;
+                child.value = val;
 
-                child.value = val as Value;
-
-                if (VarTrie.isValueObject(val as Value)) {
-                    walk(val as Record<string, unknown>, child);
+                if (VarTrie.isValueObject(val)) {
+                    walk(val, child);
                 }
             }
         };
 
-        walk(vars as Record<string, unknown>, this.root);
+        walk(vars, this.root);
     }
 
     search(path: string[]): VarTrieNode | undefined {
         let node: VarTrieNode | undefined = this.root;
 
         for (const seg of path) {
-            if (node) {
-                node = node.children[seg];
+            if (!node) {
+                return undefined;
             }
-
+            node = node.children[seg];
             if (!node) {
                 return undefined;
             }
@@ -181,7 +190,7 @@ export function tryVariableHoverUsingSpans(
         return undefined;
     }
 
-    const { parts, firstIndex } = extracted;
+    const {parts, firstIndex} = extracted;
 
     if (parts.length === 0) {
         return undefined;
@@ -196,12 +205,10 @@ export function tryVariableHoverUsingSpans(
         return undefined;
     }
 
-    const start = spans[nameIndex].start;
-    const end = spans[nameIndex].end;
-
+    const span = spans[nameIndex];
     const range: Range = {
-        start: textDocument.positionAt(start),
-        end: textDocument.positionAt(end),
+        start: textDocument.positionAt(span.start),
+        end: textDocument.positionAt(span.end),
     };
 
     const fullPath = partsUpToHovered.join('.');
@@ -217,33 +224,58 @@ export function tryVariableHoverUsingSpans(
     };
 }
 
+/**
+ * Returns a list of completions for variables in the given path.
+ * @param vars The variables to complete against.
+ * @param prefix The prefix of the variable name, including the dot.
+ * @param rangePartial The range of the variable name, excluding the dot. Used to replace the variable name in the completion item.
+ * @returns An array of completion items.
+ */
 export function pathVariableCompletions(vars: Values | undefined, prefix: string, rangePartial?: Range): CompletionItem[] {
-    if (!vars) return [];
+    if (!vars) {
+        return [];
+    }
 
     const trie = new VarTrie();
     trie.buildFromValues(vars as Record<string, unknown>);
 
     const lastDot = prefix.lastIndexOf('.');
-    const endsWithDot = lastDot === prefix.length - 1;
+    const endsWithDot = prefix.endsWith('.');
 
-    const baseParts = (endsWithDot ? prefix.slice(0, -1) : lastDot >= 0 ? prefix.slice(0, lastDot) : '')
-        .split('.')
-        .filter(Boolean);
+    const basePath = endsWithDot
+        ? prefix.slice(0, -1)
+        : lastDot >= 0
+            ? prefix.slice(0, lastDot)
+            : '';
 
+    const baseParts = basePath ? basePath.split('.') : [];
     const partial = endsWithDot ? '' : prefix.slice(lastDot + 1);
     const lowerPartial = partial.toLowerCase();
 
     const baseNode = trie.search(baseParts);
-    if (!baseNode) return [];
+    if (!baseNode) {
+        return [];
+    }
 
-    return Object.entries(baseNode.children)
-        .filter(([k]) => !partial || k.toLowerCase().startsWith(lowerPartial))
-        .map(([key, child]) => ({
-            label: (baseParts.length ? baseParts.concat(key) : [key]).join('.'),
+    const items: CompletionItem[] = [];
+
+    for (const key of Object.keys(baseNode.children)) {
+        if (partial && !key.toLowerCase().startsWith(lowerPartial)) {
+            continue;
+        }
+
+        const child = baseNode.children[key];
+        const label = [...baseParts, key].join('.');
+        const detail = child.value !== undefined ? valueTypeName(child.value) : 'object';
+
+        items.push({
+            label,
             kind: CompletionItemKind.Variable,
-            detail: child.value !== undefined ? valueTypeName(child.value) : 'object',
+            detail,
             insertText: key,
-            textEdit: rangePartial ? { range: rangePartial, newText: key } : undefined,
-            documentation: undefined,
-        } as CompletionItem));
+            textEdit: rangePartial ? {range: rangePartial, newText: key} : undefined,
+        });
+    }
+
+    return items;
 }
