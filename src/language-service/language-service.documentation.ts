@@ -4,13 +4,13 @@ export interface FunctionParamDoc {
     name: string;
     description: string;
     optional?: boolean;
+    isVariadic?: boolean;
 }
 
 export interface FunctionDoc {
     name: string;
     description: string;
     params?: FunctionParamDoc[];
-    isVariadic?: boolean;
 }
 
 export const BUILTIN_FUNCTION_DOCS: Record<string, FunctionDoc> = {
@@ -31,17 +31,15 @@ export const BUILTIN_FUNCTION_DOCS: Record<string, FunctionDoc> = {
     min: {
         name: 'min',
         description: 'Smallest number in the list.',
-        isVariadic: true,
         params: [
-            {name: 'values', description: 'Numbers to compare.'},
+            {name: 'values', description: 'Numbers to compare.', isVariadic: true},
         ],
     },
     max: {
         name: 'max',
         description: 'Largest number in the list.',
-        isVariadic: true,
         params: [
-            {name: 'values', description: 'Numbers to compare.'},
+            {name: 'values', description: 'Numbers to compare.', isVariadic: true},
         ],
     },
     hypot: {

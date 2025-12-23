@@ -9,7 +9,7 @@ export class FunctionDetails {
     }
 
     private arity(){
-        if(this.builtInFunctionDoc && !this.builtInFunctionDoc.isVariadic){
+        if(this.builtInFunctionDoc){
             return this.builtInFunctionDoc.params?.length;
         }
 
@@ -35,7 +35,7 @@ export class FunctionDetails {
     }
 
     public details(){
-        if(this.builtInFunctionDoc && !this.builtInFunctionDoc.isVariadic){
+        if(this.builtInFunctionDoc){
             const name = this.builtInFunctionDoc.name || this.name;
             const params = this.builtInFunctionDoc.params || [];
             return `${name}(${params.map((paramDoc) => `${paramDoc.name}`).join(', ')})`;
@@ -46,7 +46,7 @@ export class FunctionDetails {
     }
 
     public completionText(){
-        if(this.builtInFunctionDoc && !this.builtInFunctionDoc.isVariadic){
+        if(this.builtInFunctionDoc){
             const params = this.builtInFunctionDoc.params || [];
             return `${this.name}(${params.map((paramDoc, i) => `\${${i+1}:${paramDoc.name}}`).join(', ')})`;
         }

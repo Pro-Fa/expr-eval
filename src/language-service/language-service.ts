@@ -16,7 +16,6 @@ import {
     Token,
 } from '../parsing';
 import {Parser} from '../parsing/parser';
-import {Values} from '../types';
 import type {
     HighlightToken,
     LanguageServiceOptions,
@@ -25,21 +24,18 @@ import type {
     LanguageServiceApi,
     HoverV2
 } from './language-service.types';
-import type {CompletionItem, Range, Position} from 'vscode-languageserver-types'
+import type {CompletionItem, Range} from 'vscode-languageserver-types'
 import {CompletionItemKind, MarkupKind, InsertTextFormat} from 'vscode-languageserver-types'
 import {TextDocument} from 'vscode-languageserver-textdocument'
 import {BUILTIN_KEYWORD_DOCS, DEFAULT_CONSTANT_DOCS} from './language-service.documentation';
 import {FunctionDetails} from "./language-service.models";
-import {VarTrie} from './var-trie';
 import {
     valueTypeName,
-    isPathChar,
     extractPathPrefix,
-    toTruncatedJsonString,
     makeTokenStream,
     iterateTokens
 } from './ls-utils';
-import {pathVariableCompletions} from './completions.variables';
+import {pathVariableCompletions, tryVariableHoverUsingSpans} from './variable-utils';
 
 export function createLanguageService(options: LanguageServiceOptions | undefined = undefined): LanguageServiceApi {
     // Build a parser instance to access keywords/operators/functions/consts
@@ -163,60 +159,20 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
         return prefix.includes('.') ? all : filterByPrefix(all, prefix);
     }
 
-    function tryVariableHover(textDocument: TextDocument, position: Position, variables?: Values): HoverV2 | undefined {
-        // If we don't have variables, we can't provide a hover for a variable path
-        if (!variables) {
-            return undefined;
-        }
-        const text = textDocument.getText();
-        const offset = textDocument.offsetAt(position);
-        // Find start of the path (walk backwards over path chars)
-        const {start} = extractPathPrefix(text, offset);
-        // Find end of the path (walk forwards over path chars)
-        let end = offset;
-        while (end < text.length && isPathChar(text[end])) {
-            end++;
-        }
-        if (end <= start) {
-            return undefined;
-        }
-
-        const fullPath = text.slice(start, end);
-        const parts = fullPath.split('.').filter(Boolean);
-        if (parts.length === 0) {
-            return undefined;
-        }
-
-        const trie = new VarTrie();
-        trie.buildFromValues(variables);
-        const node = trie.search(parts);
-        if (!node) {
-            return undefined;
-        }
-
-        const range: Range = {start: textDocument.positionAt(start), end: textDocument.positionAt(end)};
-        const nodeValue = node.value;
-        return {
-            contents: {
-                kind: MarkupKind.Markdown,
-                value: `${fullPath}: ${nodeValue !== undefined ? `Variable (${valueTypeName(nodeValue)})` : 'object'}\n\n**Value Preview**\n\n${toTruncatedJsonString(nodeValue)}`
-            },
-            range
-        };
-    }
-
     function getHover(params: GetHoverParams): HoverV2 {
         const {textDocument, position, variables} = params;
         const text = textDocument.getText();
 
-        const variableHover = tryVariableHover(textDocument, position, variables);
+        // Build spans once and reuse
+        const ts = makeTokenStream(parser, text);
+        const spans = iterateTokens(ts);
+
+        const variableHover = tryVariableHoverUsingSpans(textDocument, position, variables, spans);
         if (variableHover) {
             return variableHover;
         }
 
         // Fallback to token-based hover
-        const ts = makeTokenStream(parser, text);
-        const spans = iterateTokens(ts);
 
         const offset = textDocument.offsetAt(position);
         const span = spans.find(s => offset >= s.start && offset <= s.end);
