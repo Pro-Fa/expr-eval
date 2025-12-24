@@ -18,7 +18,8 @@ export default defineConfig({
         'vitest.config.ts',
         // type-only file — exclude from coverage
         'src/language-service/language-service.types.ts',
-        'samples/**'
+        'samples/**',
+        'eslint.config.js'
       ],
       thresholds: {
         statements: 80,
