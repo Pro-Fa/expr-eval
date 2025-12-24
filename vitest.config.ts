@@ -15,7 +15,9 @@ export default defineConfig({
         '**/*.d.ts',
         'tree-shake-test.mjs',
         'vite.config.ts',
-        'vitest.config.ts'
+        'vitest.config.ts',
+        // type-only file — exclude from coverage
+        'src/language-service/language-service.types.ts'
       ],
       thresholds: {
         statements: 80,
