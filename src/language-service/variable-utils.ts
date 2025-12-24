@@ -15,6 +15,11 @@ function isDotToken(t: Token): boolean {
   return t.value === '.';
 }
 
+/**
+ * Finds the name index at the given offset. will look to the right and left of the offset, and return the first name token found.
+ * @param spans The token spans.
+ * @param offset The offset to search for.
+ */
 function findNameIndexAt(spans: Span[], offset: number): number | undefined {
   const hitIndex = spans.findIndex(s => {
     return offset >= s.start && offset <= s.end;
