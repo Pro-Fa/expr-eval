@@ -17,7 +17,8 @@ export default defineConfig({
         'vite.config.ts',
         'vitest.config.ts',
         // type-only file — exclude from coverage
-        'src/language-service/language-service.types.ts'
+        'src/language-service/language-service.types.ts',
+        'samples/**'
       ],
       thresholds: {
         statements: 80,
