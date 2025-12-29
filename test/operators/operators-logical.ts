@@ -42,15 +42,21 @@ describe('Logical Operators TypeScript Test', () => {
 
     it('skips rhs when lhs is false', () => {
       const notCalled = spy(returnFalse);
+      // Security: Functions must be registered in parser.functions before use
+      const parser = new Parser();
+      parser.functions.notCalled = notCalled;
 
-      expect(Parser.evaluate('false and notCalled()', { notCalled: notCalled })).toBe(false);
+      expect(parser.evaluate('false and notCalled()')).toBe(false);
       expect(notCalled.called).toBe(false);
     });
 
     it('evaluates rhs when lhs is true', () => {
       const called = spy(returnFalse);
+      // Security: Functions must be registered in parser.functions before use
+      const parser = new Parser();
+      parser.functions.called = called;
 
-      expect(Parser.evaluate('true and called()', { called: called })).toBe(false);
+      expect(parser.evaluate('true and called()')).toBe(false);
       expect(called.called).toBe(true);
     });
   });
@@ -82,15 +88,21 @@ describe('Logical Operators TypeScript Test', () => {
 
     it('skips rhs when lhs is true', () => {
       const notCalled = spy(returnFalse);
+      // Security: Functions must be registered in parser.functions before use
+      const parser = new Parser();
+      parser.functions.notCalled = notCalled;
 
-      expect(Parser.evaluate('true or notCalled()', { notCalled: notCalled })).toBe(true);
+      expect(parser.evaluate('true or notCalled()')).toBe(true);
       expect(notCalled.called).toBe(false);
     });
 
     it('evaluates rhs when lhs is false', () => {
       const called = spy(returnTrue);
+      // Security: Functions must be registered in parser.functions before use
+      const parser = new Parser();
+      parser.functions.called = called;
 
-      expect(Parser.evaluate('false or called()', { called: called })).toBe(true);
+      expect(parser.evaluate('false or called()')).toBe(true);
       expect(called.called).toBe(true);
     });
   });
