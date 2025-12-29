@@ -42,8 +42,11 @@ describe('Logical Operators TypeScript Test', () => {
 
     it('skips rhs when lhs is false', () => {
       const notCalled = spy(returnFalse);
+      // Security: Functions must be registered in parser.functions before use
+      const parser = new Parser();
+      parser.functions.notCalled = notCalled;
 
-      expect(Parser.evaluate('false and notCalled()', { notCalled: notCalled })).toBe(false);
+      expect(parser.evaluate('false and notCalled()')).toBe(false);
       expect(notCalled.called).toBe(false);
     });
 
@@ -85,8 +88,11 @@ describe('Logical Operators TypeScript Test', () => {
 
     it('skips rhs when lhs is true', () => {
       const notCalled = spy(returnFalse);
+      // Security: Functions must be registered in parser.functions before use
+      const parser = new Parser();
+      parser.functions.notCalled = notCalled;
 
-      expect(Parser.evaluate('true or notCalled()', { notCalled: notCalled })).toBe(true);
+      expect(parser.evaluate('true or notCalled()')).toBe(true);
       expect(notCalled.called).toBe(false);
     });
 
