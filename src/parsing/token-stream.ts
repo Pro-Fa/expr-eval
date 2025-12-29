@@ -2,11 +2,12 @@
 
 import { Token, TEOF, TOP, TNUMBER, TSTRING, TPAREN, TBRACKET, TCOMMA, TNAME, TSEMICOLON, TKEYWORD, TBRACE, TokenType, TokenValue } from './token.js';
 import { ParseError } from '../types/errors.js';
+import type { OperatorFunction } from '../types/parser.js';
 
-// Type for operator functions - they accept arrays of values and return a value
-type OperatorFunction = (...args: any[]) => any;
-
-// Basic parser interface - will define more completely when converting parser.js
+/**
+ * Parser interface defining the required properties for tokenization
+ * This interface represents the subset of Parser functionality needed by TokenStream
+ */
 interface ParserLike {
   keywords: string[];
   unaryOps: Record<string, OperatorFunction>;
@@ -21,7 +22,9 @@ interface ParserLike {
   isOperatorEnabled(op: string): boolean;
 }
 
-// Coordinates interface for error reporting
+/**
+ * Position coordinates for error reporting
+ */
 interface Coordinates {
   line: number;
   column: number;

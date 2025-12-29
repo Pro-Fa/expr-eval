@@ -1,7 +1,14 @@
+/**
+ * Expression evaluation module
+ *
+ * This module contains the core evaluation logic for executing parsed expressions.
+ * It uses a stack-based interpreter to evaluate instruction sequences produced by the parser.
+ */
+
 import { INUMBER, IOP1, IOP2, IOP3, IVAR, IVARNAME, IFUNCALL, IFUNDEF, IEXPR, IEXPREVAL, IMEMBER, IENDSTATEMENT, IARRAY, IUNDEFINED, ICASEMATCH, IWHENMATCH, ICASEELSE, ICASECOND, IWHENCOND, IOBJECT, IPROPERTY, IOBJECTEND } from '../parsing/instruction.js';
 import type { Instruction } from '../parsing/instruction.js';
 import type { Expression } from './expression.js';
-import type { Value, Values } from '../types/values.js';
+import type { Value, Values, VariableResolveResult, VariableAlias, VariableValue } from '../types/values.js';
 import { VariableError } from '../types/errors.js';
 import { ExpressionValidator } from '../validation/expression-validator.js';
 
@@ -10,23 +17,19 @@ import { ExpressionValidator } from '../validation/expression-validator.js';
 // cSpell:words IOBJECT IOBJECTEND
 // cSpell:words nstack
 
-// Resolver result types (matching parser definitions)
-interface VariableAlias {
-  alias: string;
-}
-
-interface VariableValue {
-  value: Value;
-}
-
-type VariableResolveResult = VariableAlias | VariableValue | Value | undefined;
-
+/**
+ * Wrapper for lazy expression evaluation
+ * Used for short-circuit evaluation of logical operators and conditionals
+ */
 interface ExpressionEvaluator {
   type: typeof IEXPREVAL;
   value: (scope: Values) => Value | Promise<Value>;
 }
 
+/** Type alias for evaluation context values */
 type EvaluationValues = Values;
+
+/** Type alias for the evaluation stack (stores intermediate results) */
 type EvaluationStack = any[];
 
 /**

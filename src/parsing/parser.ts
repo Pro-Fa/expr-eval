@@ -3,8 +3,9 @@ import { TEOF } from './token.js';
 import { TokenStream } from './token-stream.js';
 import { ParserState } from './parser-state.js';
 import { Expression } from '../core/expression.js';
-import type { Value } from '../types/values.js';
+import type { Value, VariableResolveResult, Values } from '../types/values.js';
 import type { Instruction } from './instruction.js';
+import type { OperatorFunction } from '../types/parser.js';
 import { atan2, condition, fac, filter, fold, gamma, hypot, indexOf, join, map, max, min, random, roundTo, sum, json, stringLength, isEmpty, stringContains, startsWith, endsWith, searchCount, trim, toUpper, toLower, toTitle, stringJoin, split, repeat, reverse, left, right, replace, replaceFirst, naturalSort, toNumber, toBoolean, padLeft, padRight } from '../functions/index.js';
 import {
   add,
@@ -62,31 +63,18 @@ import {
   log2
 } from '../operators/unary/index.js';
 
-// Type for operator functions - they accept arrays of values and return a value
-type OperatorFunction = (...args: any[]) => any;
-
-// Parser options interface
+/**
+ * Parser options configuration
+ */
 interface ParserOptions {
   allowMemberAccess?: boolean;
   operators?: Record<string, boolean>;
 }
 
-// Variable resolution result types
-interface VariableAlias {
-  alias: string;
-}
-
-interface VariableValue {
-  value: Value;
-}
-
-type VariableResolveResult = VariableAlias | VariableValue | Value | undefined;
-
-// Variable resolver function type
+/**
+ * Variable resolver function type for custom variable resolution
+ */
 type VariableResolver = (token: string) => VariableResolveResult;
-
-// Values object for evaluation
-type Values = Record<string, Value>;
 
 export class Parser {
   public options: ParserOptions;

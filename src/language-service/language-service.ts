@@ -46,7 +46,21 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
     ...DEFAULT_CONSTANT_DOCS
   } as Record<string, string>;
 
+  // Cache function details and names for performance
+  // These are computed once and reused across all calls
+  let cachedFunctions: FunctionDetails[] | null = null;
+  let cachedFunctionNames: Set<string> | null = null;
+  let cachedConstants: string[] | null = null;
+
+  /**
+   * Returns all available functions with their details
+   * Results are cached for performance
+   */
   function allFunctions(): FunctionDetails[] {
+    if (cachedFunctions !== null) {
+      return cachedFunctions;
+    }
+
     // Parser exposes built-in functions on parser.functions
     const definedFunctions = parser.functions ? Object.keys(parser.functions) : [];
     // Unary operators can also be used like functions with parens: sin(x), abs(x), ...
@@ -54,11 +68,32 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
     // Merge, prefer functions map descriptions where available
     const rawFunctions = Array.from(new Set([...definedFunctions, ...unary]));
 
-    return rawFunctions.map(name => new FunctionDetails(parser, name));
+    cachedFunctions = rawFunctions.map(name => new FunctionDetails(parser, name));
+    cachedFunctionNames = new Set(rawFunctions);
+    return cachedFunctions;
   }
 
+  /**
+   * Returns a set of function names for fast lookup
+   */
+  function functionNamesSet(): Set<string> {
+    if (cachedFunctionNames !== null) {
+      return cachedFunctionNames;
+    }
+    allFunctions(); // This populates cachedFunctionNames
+    return cachedFunctionNames!;
+  }
+
+  /**
+   * Returns all available constants
+   * Results are cached for performance
+   */
   function allConstants(): string[] {
-    return parser.consts ? Object.keys(parser.consts) : [];
+    if (cachedConstants !== null) {
+      return cachedConstants;
+    }
+    cachedConstants = parser.consts ? Object.keys(parser.consts) : [];
+    return cachedConstants;
   }
 
   function tokenKindToHighlight(t: Token): HighlightToken['type'] {
@@ -79,9 +114,8 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
         return 'punctuation';
       case TNAME:
       default: {
-        // If not matches, check if it's a function or an identifier
-        const functions = allFunctions();
-        if (t.type === TNAME && functions.find((f: FunctionDetails) => f.name == String(t.value))) {
+        // Use cached set for fast function name lookup
+        if (t.type === TNAME && functionNamesSet().has(String(t.value))) {
           return 'function';
         }
 
