@@ -2,31 +2,69 @@
 // cSpell:words IFUNDEF IUNDEFINED ICASEMATCH ICASECOND IWHENCOND IWHENMATCH ICASEELSE IPROPERTY
 // cSpell:words IOBJECT IOBJECTEND
 
-// Instruction type constants
+/**
+ * Instruction types for the expression evaluator's bytecode-style representation.
+ *
+ * The parser converts expressions into a sequence of instructions that are
+ * executed by the evaluator in a stack-based manner (reverse polish notation).
+ *
+ * Instruction type naming convention:
+ * - I = Instruction prefix
+ * - NUMBER = numeric literal
+ * - OP1/OP2/OP3 = unary/binary/ternary operators
+ * - VAR = variable reference
+ * - FUNCALL = function call
+ * - etc.
+ */
+
+/** Numeric literal instruction */
 export const INUMBER = 'INUMBER' as const;
+/** Unary operator instruction (e.g., negation, factorial) */
 export const IOP1 = 'IOP1' as const;
+/** Binary operator instruction (e.g., +, -, *, /) */
 export const IOP2 = 'IOP2' as const;
+/** Ternary operator instruction (e.g., conditional ?) */
 export const IOP3 = 'IOP3' as const;
+/** Variable reference instruction */
 export const IVAR = 'IVAR' as const;
+/** Variable name instruction (used in assignments) */
 export const IVARNAME = 'IVARNAME' as const;
+/** Function call instruction */
 export const IFUNCALL = 'IFUNCALL' as const;
+/** Function definition instruction */
 export const IFUNDEF = 'IFUNDEF' as const;
+/** Expression instruction (for lazy evaluation) */
 export const IEXPR = 'IEXPR' as const;
+/** Expression evaluator instruction (compiled expression) */
 export const IEXPREVAL = 'IEXPREVAL' as const;
+/** Member access instruction (e.g., obj.property) */
 export const IMEMBER = 'IMEMBER' as const;
+/** End of statement instruction (for multi-statement expressions) */
 export const IENDSTATEMENT = 'IENDSTATEMENT' as const;
+/** Array literal instruction */
 export const IARRAY = 'IARRAY' as const;
+/** Undefined value instruction */
 export const IUNDEFINED = 'IUNDEFINED' as const;
+/** CASE condition instruction (for CASE WHEN without input) */
 export const ICASECOND = 'ICASECOND' as const;
+/** CASE match instruction (for CASE $input WHEN) */
 export const ICASEMATCH = 'ICASEMATCH' as const;
+/** WHEN condition instruction */
 export const IWHENCOND = 'IWHENCOND' as const;
+/** WHEN match instruction */
 export const IWHENMATCH = 'IWHENMATCH' as const;
+/** CASE ELSE instruction */
 export const ICASEELSE = 'ICASEELSE' as const;
+/** Object property instruction */
 export const IPROPERTY = 'IPROPERTY' as const;
+/** Object start instruction */
 export const IOBJECT = 'IOBJECT' as const;
+/** Object end instruction */
 export const IOBJECTEND = 'IOBJECTEND' as const;
 
-// Union type for all instruction types
+/**
+ * Union type for all instruction types
+ */
 export type InstructionType =
   | typeof INUMBER
   | typeof IOP1
@@ -51,7 +89,9 @@ export type InstructionType =
   | typeof IOBJECT
   | typeof IOBJECTEND;
 
-// Discriminated union types for better type safety
+/**
+ * Discriminated union types for better type safety
+ */
 export interface NumberInstruction {
   type: typeof INUMBER;
   value: number;

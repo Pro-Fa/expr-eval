@@ -1,7 +1,5 @@
 import { Instruction, INUMBER, IOP1, IOP2, IOP3, IVAR, IVARNAME, IEXPR, IMEMBER, IARRAY } from '../parsing/instruction.js';
-
-// Type for operator functions
-type OperatorFunction = (...args: any[]) => any;
+import type { OperatorFunction } from '../types/parser.js';
 
 export default function simplify(
   tokens: Instruction[],
