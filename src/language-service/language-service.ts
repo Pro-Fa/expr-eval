@@ -175,7 +175,7 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
     const offset = textDocument.offsetAt(position);
     const span = spans.find(s => offset >= s.start && offset <= s.end);
     if (!span) {
-      return { contents: { kind: 'plaintext', value: '' } };
+      return { contents: { kind: MarkupKind.PlainText, value: '' } };
     }
 
     const token = span.token;
@@ -236,7 +236,7 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
       return { contents: { kind: MarkupKind.PlainText, value: `${valueTypeName(token.value)}` }, range };
     }
 
-    return { contents: { kind: 'plaintext', value: '' } };
+    return { contents: { kind: MarkupKind.PlainText, value: '' } };
   }
 
   function getHighlighting(textDocument: TextDocument): HighlightToken[] {

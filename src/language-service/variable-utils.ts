@@ -86,25 +86,25 @@ function extractPathFromSpans(
   return { parts, firstIndex };
 }
 
-function resolveValueAtPath(vars: Values | undefined, parts: string[]): Value | undefined {
+function resolveValueAtPath(vars: Values | undefined, parts: string[]): Value {
   if (!vars) {
     return undefined;
   }
 
   const isPlainObject = (v: unknown): v is Record<string, unknown> => {
-    return v !== null && typeof v === 'object' && !Array.isArray(v);
+    return v !== null && typeof v === 'object';
   };
 
   let node: Value = vars;
 
-  for (const segment of parts) {
+  for (const part of parts) {
     if (!isPlainObject(node)) {
+      return node; // Just return the value if it's not an object
+    }
+    if (!Object.prototype.hasOwnProperty.call(node, part)) {
       return undefined;
     }
-    if (!Object.prototype.hasOwnProperty.call(node, segment)) {
-      return undefined;
-    }
-    node = (node as ValueObject)[segment];
+    node = (node as ValueObject)[part];
   }
 
   return node;
