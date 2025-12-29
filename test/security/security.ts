@@ -76,7 +76,7 @@ describe('Security Tests', () => {
     it('should block prototype access in member expressions', () => {
       const parser = new Parser();
 
-      expect(() => parser.evaluate('x.prototype', { x: function(){} }))
+      expect(() => parser.evaluate('x.prototype', { x: function(): number { return 0; } }))
         .toThrow(); // Can throw AccessError or FunctionError depending on the function check
     });
 
