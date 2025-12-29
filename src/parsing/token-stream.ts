@@ -30,6 +30,25 @@ interface Coordinates {
   column: number;
 }
 
+/** Single-character operators that map directly to themselves */
+const SINGLE_CHAR_OPERATORS = new Set(['+', '-', '*', '/', '%', '^', ':', '.']);
+
+/** Unicode multiplication symbols that map to '*' */
+const MULTIPLICATION_SYMBOLS = new Set(['∙', '•']);
+
+/** Escape sequence mappings for string unescape */
+const ESCAPE_SEQUENCES: Record<string, string> = {
+  '\'': '\'',
+  '"': '"',
+  '\\': '\\',
+  '/': '/',
+  'b': '\b',
+  'f': '\f',
+  'n': '\n',
+  'r': '\r',
+  't': '\t'
+};
+
 export class TokenStream {
   public pos: number = 0;
   public keywords: string[];
@@ -269,6 +288,31 @@ export class TokenStream {
 
   private static readonly codePointPattern = /^[0-9a-f]{4}$/i;
 
+  /**
+   * Process a single escape sequence character and return the unescaped result
+   */
+  private processEscapeChar(c: string, v: string, currentIndex: number): { char: string; skip: number } {
+    // Check standard escape sequences first
+    if (c in ESCAPE_SEQUENCES) {
+      return { char: ESCAPE_SEQUENCES[c], skip: 0 };
+    }
+
+    // Handle unicode escape sequence
+    if (c === 'u') {
+      const codePoint = v.substring(currentIndex + 1, currentIndex + 5);
+      if (!TokenStream.codePointPattern.test(codePoint)) {
+        this.parseError('Illegal escape sequence: \\u' + codePoint);
+      }
+      return { char: String.fromCharCode(parseInt(codePoint, 16)), skip: 4 };
+    }
+
+    // Unknown escape sequence
+    throw this.parseError('Illegal escape sequence: "\\' + c + '"');
+  }
+
+  /**
+   * Unescape a string by processing escape sequences
+   */
   unescape(v: string): string {
     const index = v.indexOf('\\');
     if (index < 0) {
@@ -277,48 +321,13 @@ export class TokenStream {
 
     let buffer = v.substring(0, index);
     let currentIndex = index;
+
     while (currentIndex >= 0) {
       const c = v.charAt(++currentIndex);
-      switch (c) {
-        case '\'':
-          buffer += '\'';
-          break;
-        case '"':
-          buffer += '"';
-          break;
-        case '\\':
-          buffer += '\\';
-          break;
-        case '/':
-          buffer += '/';
-          break;
-        case 'b':
-          buffer += '\b';
-          break;
-        case 'f':
-          buffer += '\f';
-          break;
-        case 'n':
-          buffer += '\n';
-          break;
-        case 'r':
-          buffer += '\r';
-          break;
-        case 't':
-          buffer += '\t';
-          break;
-        case 'u':
-        // interpret the following 4 characters as the hex of the unicode code point
-          const codePoint = v.substring(currentIndex + 1, currentIndex + 5);
-          if (!TokenStream.codePointPattern.test(codePoint)) {
-            this.parseError('Illegal escape sequence: \\u' + codePoint);
-          }
-          buffer += String.fromCharCode(parseInt(codePoint, 16));
-          currentIndex += 4;
-          break;
-        default:
-          throw this.parseError('Illegal escape sequence: "\\' + c + '"');
-      }
+      const { char, skip } = this.processEscapeChar(c, v, currentIndex);
+      buffer += char;
+      currentIndex += skip;
+
       ++currentIndex;
       const backslash = v.indexOf('\\', currentIndex);
       buffer += v.substring(currentIndex, backslash < 0 ? v.length : backslash);
@@ -441,88 +450,164 @@ export class TokenStream {
     return valid;
   }
 
+  /**
+   * Try to match a single-character operator (+, -, *, /, %, ^, :, .)
+   */
+  private tryMatchSingleCharOperator(c: string): boolean {
+    if (SINGLE_CHAR_OPERATORS.has(c)) {
+      this.current = this.newToken(TOP, c);
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Try to match unicode multiplication symbols (∙, •)
+   */
+  private tryMatchMultiplicationSymbol(c: string): boolean {
+    if (MULTIPLICATION_SYMBOLS.has(c)) {
+      this.current = this.newToken(TOP, '*');
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Try to match the question mark operator (? or ??)
+   * Returns null if no match, false if disabled, true if matched
+   */
+  private tryMatchQuestionOperator(c: string): boolean | null {
+    if (c !== '?') {
+      return null;
+    }
+
+    if (this.expression.charAt(this.pos + 1) === '?') {
+      if (!this.isOperatorEnabled('??')) {
+        return false;
+      }
+      this.current = this.newToken(TOP, '??');
+      this.pos++;
+    } else {
+      this.current = this.newToken(TOP, c);
+    }
+    return true;
+  }
+
+  /**
+   * Try to match a two-character operator where the second char may be '='
+   * Examples: >=, <=, ==, !=
+   */
+  private tryMatchComparisonOperator(c: string, doubleOp: string): boolean {
+    if (this.expression.charAt(this.pos + 1) === '=') {
+      this.current = this.newToken(TOP, doubleOp);
+      this.pos++;
+    } else {
+      this.current = this.newToken(TOP, c);
+    }
+    return true;
+  }
+
+  /**
+   * Try to match pipe operators (| or ||)
+   */
+  private tryMatchPipeOperator(): boolean {
+    if (this.expression.charAt(this.pos + 1) === '|') {
+      this.current = this.newToken(TOP, '||');
+      this.pos++;
+    } else {
+      this.current = this.newToken(TOP, '|');
+    }
+    return true;
+  }
+
+  /**
+   * Try to match the && operator (single & is not valid)
+   */
+  private tryMatchAmpersandOperator(): boolean | null {
+    if (this.expression.charAt(this.pos + 1) === '&') {
+      this.current = this.newToken(TOP, '&&');
+      this.pos++;
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Try to match the 'as' keyword operator
+   */
+  private tryMatchAsOperator(): boolean | null {
+    if (this.expression.substring(this.pos, this.pos + 3) !== 'as ') {
+      return null;
+    }
+    if (!this.isOperatorEnabled('as')) {
+      return false;
+    }
+    this.current = this.newToken(TOP, 'as');
+    this.pos++;
+    return true;
+  }
+
+  /**
+   * Attempt to identify the current character as an operator
+   */
   isOperator(): boolean {
     const startPos = this.pos;
     const c = this.expression.charAt(this.pos);
 
-    if (c === '+' || c === '-' || c === '*' || c === '/' || c === '%' || c === '^' || c === ':' || c === '.') {
-      this.current = this.newToken(TOP, c);
-    } else if (c === '?') {
-      // ? could be a ternary operator a ? b : c or a coalesce operator a ?? b, we need to look ahead
-      // to figure out which one it is.
-      if (this.expression.charAt(this.pos + 1) === '?') {
-        if (this.isOperatorEnabled('??')) {
-          this.current = this.newToken(TOP, '??');
-          this.pos++;
-        } else {
-          // We have a ?? operator but it has been disabled.
-          return false;
-        }
-      } else {
-        this.current = this.newToken(TOP, c);
-      }
-    } else if (c === '∙' || c === '•') {
-      this.current = this.newToken(TOP, '*');
-    } else if (c === '>') {
-      if (this.expression.charAt(this.pos + 1) === '=') {
-        this.current = this.newToken(TOP, '>=');
-        this.pos++;
-      } else {
-        this.current = this.newToken(TOP, '>');
-      }
-    } else if (c === '<') {
-      if (this.expression.charAt(this.pos + 1) === '=') {
-        this.current = this.newToken(TOP, '<=');
-        this.pos++;
-      } else {
-        this.current = this.newToken(TOP, '<');
-      }
-    } else if (c === '|') {
-      if (this.expression.charAt(this.pos + 1) === '|') {
-        this.current = this.newToken(TOP, '||');
-        this.pos++;
-      } else {
-        this.current = this.newToken(TOP, '|');
-      }
-    } else if (c === '&') {
-      if (this.expression.charAt(this.pos + 1) === '&') {
-        this.current = this.newToken(TOP, '&&');
-        this.pos++;
-      } else {
-        return false;
-      }
-    } else if (c === '=') {
-      if (this.expression.charAt(this.pos + 1) === '=') {
-        this.current = this.newToken(TOP, '==');
-        this.pos++;
-      } else {
-        this.current = this.newToken(TOP, c);
-      }
-    } else if (c === '!') {
-      if (this.expression.charAt(this.pos + 1) === '=') {
-        this.current = this.newToken(TOP, '!=');
-        this.pos++;
-      } else {
-        this.current = this.newToken(TOP, c);
-      }
-    } else if (c === 'a' && this.expression.substring(this.pos, this.pos + 3) === 'as ') {
-      if (this.isOperatorEnabled('as')) {
-        this.current = this.newToken(TOP, 'as');
-        this.pos++;
-      } else {
-        return false;
-      }
-    } else {
+    // Try single-character operators
+    if (this.tryMatchSingleCharOperator(c)) {
+      // matched
+    }
+    // Try unicode multiplication symbols
+    else if (this.tryMatchMultiplicationSymbol(c)) {
+      // matched
+    }
+    // Try question mark operators (? and ??)
+    else if (c === '?') {
+      const result = this.tryMatchQuestionOperator(c);
+      if (result === false) return false;
+    }
+    // Try comparison operators with optional '='
+    else if (c === '>') {
+      this.tryMatchComparisonOperator(c, '>=');
+    }
+    else if (c === '<') {
+      this.tryMatchComparisonOperator(c, '<=');
+    }
+    else if (c === '=') {
+      this.tryMatchComparisonOperator(c, '==');
+    }
+    else if (c === '!') {
+      this.tryMatchComparisonOperator(c, '!=');
+    }
+    // Try pipe operators
+    else if (c === '|') {
+      this.tryMatchPipeOperator();
+    }
+    // Try ampersand operator
+    else if (c === '&') {
+      const result = this.tryMatchAmpersandOperator();
+      if (result === false) return false;
+    }
+    // Try 'as' keyword operator
+    else if (c === 'a') {
+      const result = this.tryMatchAsOperator();
+      if (!result) return false;
+    }
+    // No operator matched
+    else {
       return false;
     }
+
     this.pos++;
 
-    if (this.isOperatorEnabled(this.current.value as string)) {
+    // All successful branches above set this.current, so it's safe to access
+    if (this.current && this.isOperatorEnabled(this.current.value as string)) {
       return true;
-    } else {
-      this.pos = startPos;
-      return false;
     }
+
+    this.pos = startPos;
+    return false;
   }
 
   isOperatorEnabled(op: string): boolean {
