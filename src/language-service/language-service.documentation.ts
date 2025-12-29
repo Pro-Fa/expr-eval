@@ -1,60 +1,228 @@
 ﻿// Built-in lightweight docs for known functions and keywords
 
-export const BUILTIN_FUNCTION_DOCS: Record<string, string> = {
-    random: 'random(n): Get a random number in the range [0, n). If n is zero or missing, defaults to 1.',
-    fac: 'fac(n): Factorial of n. Deprecated; prefer the ! operator.',
-    min: 'min(a, b, …): Smallest number in the list.',
-    max: 'max(a, b, …): Largest number in the list.',
-    hypot: 'hypot(a, b): Hypotenuse √(a² + b²).',
-    pyt: 'pyt(a, b): Alias for hypot(a, b).',
-    pow: 'pow(x, y): Equivalent to x^y.',
-    atan2: 'atan2(y, x): Arc tangent of x/y.',
-    roundTo: 'roundTo(x, n): Round x to n decimal places.',
-    map: 'map(f, a): Array map; returns [f(x,i) for x of a].',
-    fold: 'fold(f, y, a): Array reduce; y = f(y, x, i) for each x of a.',
-    filter: 'filter(f, a): Array filter.',
-    indexOf: 'indexOf(x, a): First index of x in a (array/string), -1 if not found.',
-    join: 'join(sep, a): Join array a with separator sep.',
-    if: 'if(c, a, b): c ? a : b (both branches evaluate).',
-    json: 'json(x): Returns JSON string for x.',
-    sum: 'sum(a): Sum of all elements in a.',
-    // String functions
-    stringLength: 'stringLength(str): Returns the length of a string.',
-    isEmpty: 'isEmpty(str): Returns true if the string is empty (length === 0).',
-    contains: 'contains(str, substring): Returns true if str contains substring.',
-    startsWith: 'startsWith(str, substring): Returns true if str starts with substring.',
-    endsWith: 'endsWith(str, substring): Returns true if str ends with substring.',
-    searchCount: 'searchCount(str, substring): Counts non-overlapping occurrences of substring in str.',
-    trim: 'trim(str): Removes whitespace from both ends of a string.',
-    toUpper: 'toUpper(str): Converts a string to uppercase.',
-    toLower: 'toLower(str): Converts a string to lowercase.',
-    toTitle: 'toTitle(str): Converts a string to title case (first letter of each word capitalized).',
-    split: 'split(str, delimiter): Splits a string by a delimiter, returns an array.',
-    repeat: 'repeat(str, n): Repeats a string n times.',
-    reverse: 'reverse(str): Reverses a string.',
-    left: 'left(str, n): Returns the leftmost n characters from a string.',
-    right: 'right(str, n): Returns the rightmost n characters from a string.',
-    replace: 'replace(str, old, new): Replaces all occurrences of old with new in str.',
-    replaceFirst: 'replaceFirst(str, old, new): Replaces the first occurrence of old with new in str.',
-    naturalSort: 'naturalSort(arr): Sorts an array of strings using natural sort order (alphanumeric aware).',
-    toNumber: 'toNumber(str): Converts a string to a number.',
-    toBoolean: 'toBoolean(str): Converts a string to a boolean (recognizes true/false, yes/no, on/off, 1/0).',
-    padLeft: 'padLeft(str, length, padStr?): Pads a string on the left to reach the target length.',
-    padRight: 'padRight(str, length, padStr?): Pads a string on the right to reach the target length.',
+export interface FunctionParamDoc {
+    name: string;
+    description: string;
+    optional?: boolean;
+    isVariadic?: boolean;
+}
+
+export interface FunctionDoc {
+    name: string;
+    description: string;
+    params?: FunctionParamDoc[];
+}
+
+export const BUILTIN_FUNCTION_DOCS: Record<string, FunctionDoc> = {
+  random: {
+    name: 'random',
+    description: 'Get a random number in the range [0, n). Defaults to 1 if n is missing or zero.',
+    params: [
+      { name: 'n', description: 'Upper bound (exclusive).', optional: true }
+    ]
+  },
+  fac: {
+    name: 'fac',
+    description: 'Factorial of n. Deprecated; prefer the ! operator.',
+    params: [
+      { name: 'n', description: 'Non-negative integer.' }
+    ]
+  },
+  min: {
+    name: 'min',
+    description: 'Smallest number in the list.',
+    params: [
+      { name: 'values', description: 'Numbers to compare.', isVariadic: true }
+    ]
+  },
+  max: {
+    name: 'max',
+    description: 'Largest number in the list.',
+    params: [
+      { name: 'values', description: 'Numbers to compare.', isVariadic: true }
+    ]
+  },
+  hypot: {
+    name: 'hypot',
+    description: 'Hypotenuse √(a² + b²).',
+    params: [
+      { name: 'a', description: 'First side.' },
+      { name: 'b', description: 'Second side.' }
+    ]
+  },
+  pyt: {
+    name: 'pyt',
+    description: 'Alias for hypot(a, b).',
+    params: [
+      { name: 'a', description: 'First side.' },
+      { name: 'b', description: 'Second side.' }
+    ]
+  },
+  pow: {
+    name: 'pow',
+    description: 'Raise x to the power of y.',
+    params: [
+      { name: 'x', description: 'Base.' },
+      { name: 'y', description: 'Exponent.' }
+    ]
+  },
+  atan2: {
+    name: 'atan2',
+    description: 'Arc tangent of y / x.',
+    params: [
+      { name: 'y', description: 'Y coordinate.' },
+      { name: 'x', description: 'X coordinate.' }
+    ]
+  },
+  roundTo: {
+    name: 'roundTo',
+    description: 'Round x to n decimal places.',
+    params: [
+      { name: 'x', description: 'Number to round.' },
+      { name: 'n', description: 'Number of decimal places.' }
+    ]
+  },
+  map: {
+    name: 'map',
+    description: 'Apply function f to each element of array a.',
+    params: [
+      { name: 'f', description: 'Mapping function (value, index).' },
+      { name: 'a', description: 'Input array.' }
+    ]
+  },
+  fold: {
+    name: 'fold',
+    description: 'Reduce array a using function f, starting with accumulator y.',
+    params: [
+      { name: 'f', description: 'Reducer function. Eg: `f(acc, x, i) = acc + x`.' },
+      { name: 'y', description: 'Initial accumulator value.' },
+      { name: 'a', description: 'Input array.' }
+    ]
+  },
+  filter: {
+    name: 'filter',
+    description: 'Filter array a using predicate f.',
+    params: [
+      { name: 'f', description: 'Filter function. Eg:`f(x) = x % 2 == 0`' },
+      { name: 'a', description: 'Input array.' }
+    ]
+  },
+  indexOf: {
+    name: 'indexOf',
+    description: 'First index of x in a (array or string), or -1 if not found.',
+    params: [
+      { name: 'x', description: 'Value to search for.' },
+      { name: 'a', description: 'Array or string to search.' }
+    ]
+  },
+  join: {
+    name: 'join',
+    description: 'Join array a using separator sep.',
+    params: [
+      { name: 'sep', description: 'Separator string.' },
+      { name: 'a', description: 'Array to join.' }
+    ]
+  },
+  if: {
+    name: 'if',
+    description: 'Conditional expression: condition ? trueValue : falseValue (both branches evaluate).',
+    params: [
+      { name: 'condition', description: 'A boolean condition.' },
+      { name: 'trueValue', description: 'Value if condition is true.' },
+      { name: 'falseValue', description: 'Value if condition is false.' }
+    ]
+  },
+  json: {
+    name: 'json',
+    description: 'Return JSON string representation of x.',
+    params: [
+      { name: 'x', description: 'Value to stringify.' }
+    ]
+  },
+  sum: {
+    name: 'sum',
+    description: 'Sum of all elements in an array.',
+    params: [
+      { name: 'a', description: 'Array of numbers.' }
+    ]
+  },
+  /**
+     * String functions
+     */
+  stringLength: {
+    name: 'stringLength',
+    description: 'Return the length of a string.',
+    params: [{ name: 'str', description: 'Input string.' }]
+  },
+  isEmpty: {
+    name: 'isEmpty',
+    description: 'Return true if the string is empty.',
+    params: [{ name: 'str', description: 'Input string.' }]
+  },
+  contains: {
+    name: 'contains',
+    description: 'Return true if str contains substring.',
+    params: [
+      { name: 'str', description: 'Input string.' },
+      { name: 'substring', description: 'Substring to search for.' }
+    ]
+  },
+  startsWith: {
+    name: 'startsWith',
+    description: 'Return true if str starts with substring.',
+    params: [
+      { name: 'str', description: 'Input string.' },
+      { name: 'substring', description: 'Prefix to check.' }
+    ]
+  },
+  endsWith: {
+    name: 'endsWith',
+    description: 'Return true if str ends with substring.',
+    params: [
+      { name: 'str', description: 'Input string.' },
+      { name: 'substring', description: 'Suffix to check.' }
+    ]
+  },
+  split: {
+    name: 'split',
+    description: 'Split string by delimiter into an array.',
+    params: [
+      { name: 'str', description: 'Input string.' },
+      { name: 'delimiter', description: 'Delimiter string.' }
+    ]
+  },
+  padLeft: {
+    name: 'padLeft',
+    description: 'Pad string on the left to reach target length.',
+    params: [
+      { name: 'str', description: 'Input string.' },
+      { name: 'length', description: 'Target length.' },
+      { name: 'padStr', description: 'Padding string.', optional: true }
+    ]
+  },
+  padRight: {
+    name: 'padRight',
+    description: 'Pad string on the right to reach target length.',
+    params: [
+      { name: 'str', description: 'Input string.' },
+      { name: 'length', description: 'Target length.' },
+      { name: 'padStr', description: 'Padding string.', optional: true }
+    ]
+  }
 };
 
 export const BUILTIN_KEYWORD_DOCS: Record<string, string> = {
-    undefined: 'Represents an undefined value.',
-    case: 'Start of a case-when-then-else-end block.',
-    when: 'Case branch condition.',
-    then: 'Then branch result.',
-    else: 'Else branch result.',
-    end: 'End of case block.'
+  undefined: 'Represents an undefined value.',
+  case: 'Start of a case-when-then-else-end block.',
+  when: 'Case branch condition.',
+  then: 'Then branch result.',
+  else: 'Else branch result.',
+  end: 'End of case block.'
 };
 
 export const DEFAULT_CONSTANT_DOCS: Record<string, string> = {
-    E: 'Math.E',
-    PI: 'Math.PI',
-    true: 'Logical true',
-    false: 'Logical false'
+  E: 'Math.E',
+  PI: 'Math.PI',
+  true: 'Logical true',
+  false: 'Logical false'
 };

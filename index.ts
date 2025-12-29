@@ -11,7 +11,7 @@
 
 import { Expression } from './src/core/expression.js';
 import { Parser } from './src/parsing/parser.js';
-import { createLanguageService } from "./src/language-service";
+import { createLanguageService } from './src/language-service/index.js';
 
 // Re-export types for public API
 export type {
@@ -38,8 +38,13 @@ export {
   FunctionError
 } from './src/types/errors.js';
 
-export {
-  Expression,
-  Parser,
-    createLanguageService
-};
+export type {
+    LanguageServiceApi,
+    HoverV2,
+    GetCompletionsParams,
+    GetHoverParams,
+    HighlightToken,
+    LanguageServiceOptions
+} from "./src/language-service/index.js";
+
+export { createLanguageService, Expression, Parser };
