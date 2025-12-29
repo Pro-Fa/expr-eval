@@ -101,15 +101,28 @@ require(['vs/editor/editor.main'], function () {
     // Set initial theme
     const currentTheme = html.classList.contains('dark') ? 'vs-dark' : 'vs';
 
-    // Default values
-    const defaultExpression = 'sum([1, 2, 3]) + max(x, y) * multiplier';
+    // Default values - showcasing nested path access and deeper objects
+    const defaultExpression = 'user.profile.score + config.timeout / 1000';
     const defaultContext = JSON.stringify({
         x: 42,
         y: 100,
         multiplier: 2,
         user: {
             name: "Ada",
-            score: 95
+            profile: {
+                email: "ada@example.com",
+                score: 95,
+                level: 5
+            },
+            preferences: {
+                theme: "dark",
+                notifications: true
+            }
+        },
+        config: {
+            timeout: 5000,
+            retries: 3,
+            maxConnections: 10
         },
         items: [1, 2, 3, 4, 5]
     }, null, 2);
@@ -187,8 +200,9 @@ require(['vs/editor/editor.main'], function () {
         }
     }
 
-    // Completions provider
+    // Completions provider with trigger characters and snippet support
     monaco.languages.registerCompletionItemProvider(languageId, {
+        triggerCharacters: ['.'],
         provideCompletionItems: function (model, position) {
             const doc = makeTextDocument(model);
             const variables = getContextVariables() || {};
@@ -197,9 +211,6 @@ require(['vs/editor/editor.main'], function () {
                 position: toLspPosition(position),
                 variables
             }) || [];
-
-            const word = model.getWordUntilPosition(position);
-            const range = new monaco.Range(position.lineNumber, word.startColumn, position.lineNumber, word.endColumn);
 
             function mapKind(k) {
                 const map = {
@@ -211,20 +222,41 @@ require(['vs/editor/editor.main'], function () {
                 return map[k] || monaco.languages.CompletionItemKind.Text;
             }
 
-            const suggestions = items.map(it => ({
-                label: it.label,
-                kind: mapKind(it.kind),
-                detail: it.detail,
-                documentation: it.documentation,
-                insertText: it.insertText || it.label,
-                range
-            }));
+            const suggestions = items.map(it => {
+                // Handle textEdit.range if present
+                let range;
+                if (it.textEdit?.range) {
+                    range = new monaco.Range(
+                        it.textEdit.range.start.line + 1,
+                        it.textEdit.range.start.character + 1,
+                        it.textEdit.range.end.line + 1,
+                        it.textEdit.range.end.character + 1
+                    );
+                } else {
+                    // Default range - word at position
+                    const word = model.getWordUntilPosition(position);
+                    range = new monaco.Range(position.lineNumber, word.startColumn, position.lineNumber, word.endColumn);
+                }
+
+                return {
+                    label: it.label,
+                    kind: mapKind(it.kind),
+                    detail: it.detail,
+                    documentation: it.documentation,
+                    insertText: it.textEdit?.newText || it.insertText || it.label,
+                    // Add snippet support when insertTextFormat is 2
+                    insertTextRules: it.insertTextFormat === 2 
+                        ? monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet 
+                        : undefined,
+                    range
+                };
+            });
 
             return {suggestions};
         }
     });
 
-    // Hover provider
+    // Hover provider with MarkupContent support
     monaco.languages.registerHoverProvider(languageId, {
         provideHover: function (model, position) {
             const doc = makeTextDocument(model);
@@ -232,12 +264,10 @@ require(['vs/editor/editor.main'], function () {
             const hover = ls.getHover({textDocument: doc, position: toLspPosition(position), variables});
             if (!hover || !hover.contents) return {contents: []};
 
+            // HoverV2 always returns MarkupContent format
             let contents = [];
-            if (typeof hover.contents === 'string') {
-                contents = [{value: hover.contents}];
-            } else if (hover.contents && typeof hover.contents === 'object') {
-                const val = hover.contents.value || '';
-                contents = [{value: val}];
+            if (hover.contents && hover.contents.value) {
+                contents = [{value: hover.contents.value}];
             }
 
             let range = undefined;
