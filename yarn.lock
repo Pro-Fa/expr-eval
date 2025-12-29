@@ -47,10 +47,10 @@
   dependencies:
     "@jridgewell/trace-mapping" "0.3.9"
 
-"@esbuild/linux-x64@0.25.10":
+"@esbuild/win32-x64@0.25.10":
   version "0.25.10"
-  resolved "https://registry.npmjs.org/@esbuild/linux-x64/-/linux-x64-0.25.10.tgz"
-  integrity sha512-QSX81KhFoZGwenVyPoberggdW1nrQZSvfVDAIUXr3WqLRZGZqWk/P4T8p2SP+de2Sr5HPcvjhcJzEiulKgnxtA==
+  resolved "https://registry.npmjs.org/@esbuild/win32-x64/-/win32-x64-0.25.10.tgz"
+  integrity sha512-9KpxSVFCu0iK1owoez6aC/s/EdUQLDN3adTxGCqxMVhrPDj6bt5dbrHDXUuq+Bs2vATFBBrQS5vdQ/Ed2P+nbw==
 
 "@eslint-community/eslint-utils@^4.1.2", "@eslint-community/eslint-utils@^4.4.0", "@eslint-community/eslint-utils@^4.5.0", "@eslint-community/eslint-utils@^4.7.0", "@eslint-community/eslint-utils@^4.8.0":
   version "4.9.0"
@@ -303,15 +303,15 @@
     estree-walker "^2.0.2"
     picomatch "^4.0.2"
 
-"@rollup/rollup-linux-x64-gnu@4.52.0":
+"@rollup/rollup-win32-x64-gnu@4.52.0":
   version "4.52.0"
-  resolved "https://registry.npmjs.org/@rollup/rollup-linux-x64-gnu/-/rollup-linux-x64-gnu-4.52.0.tgz"
-  integrity sha512-nmSVN+F2i1yKZ7rJNKO3G7ZzmxJgoQBQZ/6c4MuS553Grmr7WqR7LLDcYG53Z2m9409z3JLt4sCOhLdbKQ3HmA==
+  resolved "https://registry.npmjs.org/@rollup/rollup-win32-x64-gnu/-/rollup-win32-x64-gnu-4.52.0.tgz"
+  integrity sha512-fGk03kQylNaCOQ96HDMeT7E2n91EqvCDd3RwvT5k+xNdFCeMGnj5b5hEgTGrQuyidqSsD3zJDQ21QIaxXqTBJw==
 
-"@rollup/rollup-linux-x64-musl@4.52.0":
+"@rollup/rollup-win32-x64-msvc@4.52.0":
   version "4.52.0"
-  resolved "https://registry.npmjs.org/@rollup/rollup-linux-x64-musl/-/rollup-linux-x64-musl-4.52.0.tgz"
-  integrity sha512-2d0qRo33G6TfQVjaMR71P+yJVGODrt5V6+T0BDYH4EMfGgdC/2HWDVjSSFw888GSzAZUwuska3+zxNUCDco6rQ==
+  resolved "https://registry.npmjs.org/@rollup/rollup-win32-x64-msvc/-/rollup-win32-x64-msvc-4.52.0.tgz"
+  integrity sha512-6iKDCVSIUQ8jPMoIV0OytRKniaYyy5EbY/RRydmLW8ZR3cEBhxbWl5ro0rkUNe0ef6sScvhbY79HrjRm8i3vDQ==
 
 "@rtsao/scc@^1.1.0":
   version "1.1.0"
@@ -515,10 +515,10 @@
     "@typescript-eslint/types" "8.44.0"
     eslint-visitor-keys "^4.2.1"
 
-"@typescript/native-preview-linux-x64@7.0.0-dev.20250920.1":
+"@typescript/native-preview-win32-x64@7.0.0-dev.20250920.1":
   version "7.0.0-dev.20250920.1"
-  resolved "https://registry.npmjs.org/@typescript/native-preview-linux-x64/-/native-preview-linux-x64-7.0.0-dev.20250920.1.tgz"
-  integrity sha512-6slYt8MKVAOZDbs2GXznPJ7KVmMLssqvmTJOmmNNyNJt/0MBJqwgL1b/TlxS9UgUTuBsNyKJbLtJgjvBVixIAA==
+  resolved "https://registry.npmjs.org/@typescript/native-preview-win32-x64/-/native-preview-win32-x64-7.0.0-dev.20250920.1.tgz"
+  integrity sha512-arxNEOP4LMr+rxCxbitG9ejEkmvvj7pkjMFTAFHfWJC0mKuT+1cQu79iZBhY16oHB4HLCziJRBRdMQhIB2Wf+w==
 
 "@typescript/native-preview@^7.0.0-dev.20250920.1":
   version "7.0.0-dev.20250920.1"

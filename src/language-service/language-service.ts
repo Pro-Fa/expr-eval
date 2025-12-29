@@ -46,15 +46,16 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
     ...DEFAULT_CONSTANT_DOCS
   } as Record<string, string>;
 
-  // Cache function details and names for performance
-  // These are computed once and reused across all calls
+  // Instance-level cache for function details and names
+  // Each language service instance maintains its own cache, making this thread-safe
+  // as concurrent uses will operate on separate instances
   let cachedFunctions: FunctionDetails[] | null = null;
   let cachedFunctionNames: Set<string> | null = null;
   let cachedConstants: string[] | null = null;
 
   /**
    * Returns all available functions with their details
-   * Results are cached for performance
+   * Results are cached for performance within this instance
    */
   function allFunctions(): FunctionDetails[] {
     if (cachedFunctions !== null) {
@@ -75,18 +76,22 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
 
   /**
    * Returns a set of function names for fast lookup
+   * This ensures the cache is populated before returning
    */
   function functionNamesSet(): Set<string> {
     if (cachedFunctionNames !== null) {
       return cachedFunctionNames;
     }
-    allFunctions(); // This populates cachedFunctionNames
-    return cachedFunctionNames!;
+    // Calling allFunctions() ensures cachedFunctionNames is populated
+    allFunctions();
+    // After allFunctions(), cachedFunctionNames is guaranteed to be non-null
+    // We return a fallback empty set only as a defensive measure
+    return cachedFunctionNames ?? new Set<string>();
   }
 
   /**
    * Returns all available constants
-   * Results are cached for performance
+   * Results are cached for performance within this instance
    */
   function allConstants(): string[] {
     if (cachedConstants !== null) {
