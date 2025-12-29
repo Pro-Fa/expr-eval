@@ -2,7 +2,7 @@
 
 This document lists breaking changes in the library to help users migrate between versions.
 
-## Version 4.3.0 → 4.4.0
+## Version 5.0.0
 
 ### Security: Functions Must Be Registered Explicitly
 
