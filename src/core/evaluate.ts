@@ -170,6 +170,8 @@ function evaluateExpressionToken(expr: Expression, values: EvaluationValues, tok
       let valueResolved = false;
       if (variableName in values) {
         const variableValue = values[variableName];
+        // Security: Validate that functions from context are allowed before pushing onto stack
+        ExpressionValidator.validateAllowedFunction(variableValue, expr.functions, expr.toString());
         nstack.push(variableValue);
         valueResolved = true;
       } else {
@@ -184,13 +186,19 @@ function evaluateExpressionToken(expr: Expression, values: EvaluationValues, tok
           // The parser's resolver function returned { alias: "xxx" }, we want to use
           // resolved.alias in place of token.value.
           if (resolvedVariable.alias in values) {
-            nstack.push(values[resolvedVariable.alias]);
+            const aliasValue = values[resolvedVariable.alias];
+            // Security: Validate that functions from context are allowed
+            ExpressionValidator.validateAllowedFunction(aliasValue, expr.functions, expr.toString());
+            nstack.push(aliasValue);
             valueResolved = true;
           }
         } else if (typeof resolvedVariable === 'object' && resolvedVariable && 'value' in resolvedVariable) {
           // The parser's resolver function returned { value: <something> }, use <something>
           // as the value of the token.
-          nstack.push(resolvedVariable.value);
+          const resolvedValue = resolvedVariable.value;
+          // Security: Validate that functions from context are allowed
+          ExpressionValidator.validateAllowedFunction(resolvedValue, expr.functions, expr.toString());
+          nstack.push(resolvedValue);
           valueResolved = true;
         }
       }
@@ -238,6 +246,9 @@ function evaluateExpressionToken(expr: Expression, values: EvaluationValues, tok
         value: functionName,
         writable: false
       });
+      // Security: Register the inline-defined function as allowed
+      // This is safe because inline functions can only use what's available in the expression scope
+      expr.functions[`_inline_${functionName}`] = userDefinedFunction;
       values[functionName] = userDefinedFunction;
       return userDefinedFunction;
     })());
@@ -247,7 +258,13 @@ function evaluateExpressionToken(expr: Expression, values: EvaluationValues, tok
     nstack.push(token);
   } else if (type === IMEMBER) {
     const memberParent = nstack.pop();
-    nstack.push(memberParent === undefined || token === undefined || token.value === undefined ? undefined : memberParent[token.value]);
+    const propertyName = token.value as string;
+    // Security: Block access to dangerous prototype properties
+    ExpressionValidator.validateMemberAccess(propertyName, expr.toString());
+    const memberValue = memberParent === undefined || token === undefined || token.value === undefined ? undefined : memberParent[propertyName];
+    // Security: Validate that member functions are allowed before pushing onto stack
+    ExpressionValidator.validateAllowedFunction(memberValue, expr.functions, expr.toString());
+    nstack.push(memberValue);
   } else if (type === IENDSTATEMENT) {
     nstack.pop();
   } else if (type === IARRAY) {
