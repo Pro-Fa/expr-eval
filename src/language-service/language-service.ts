@@ -4,6 +4,7 @@
 import {
   TOP,
   TNUMBER,
+  TCONST,
   TSTRING,
   TPAREN,
   TBRACKET,
@@ -97,7 +98,9 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
     if (cachedConstants !== null) {
       return cachedConstants;
     }
-    cachedConstants = parser.consts ? Object.keys(parser.consts) : [];
+    cachedConstants = parser.numericConstants ? Object.keys(parser.numericConstants) : [];
+    cachedConstants = [...cachedConstants, ...Object.keys(parser.buildInLiterals)];
+
     return cachedConstants;
   }
 
@@ -107,6 +110,8 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
         return 'number';
       case TSTRING:
         return 'string';
+      case TCONST:
+        return 'constant';
       case TKEYWORD:
         return 'keyword';
       case TOP:
@@ -144,7 +149,7 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
     return allConstants().map(name => ({
       label: name,
       kind: CompletionItemKind.Constant,
-      detail: valueTypeName(parser.consts[name]),
+      detail: valueTypeName(parser.numericConstants[name] ?? parser.buildInLiterals[name]),
       documentation: constantDocs[name],
       textEdit: { range: rangeFull, newText: name }
     }));
@@ -237,12 +242,12 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
 
       // Constant hover
       if (allConstants().includes(label)) {
-        const v = parser.consts[label];
+        const v = parser.numericConstants[label] ?? parser.buildInLiterals[label];
         const doc = constantDocs[label];
         const range: Range = {
           start: textDocument.positionAt(span.start),
           end: textDocument.positionAt(span.end)
-        };
+        }
         return {
           contents: {
             kind: MarkupKind.PlainText,
@@ -270,7 +275,7 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
     }
 
     // Numbers/strings
-    if (token.type === TNUMBER || token.type === TSTRING) {
+    if (token.type === TNUMBER || token.type === TSTRING || token.type === TCONST) {
       const range: Range = { start: textDocument.positionAt(span.start), end: textDocument.positionAt(span.end) };
       return { contents: { kind: MarkupKind.PlainText, value: `${valueTypeName(token.value)}` }, range };
     }

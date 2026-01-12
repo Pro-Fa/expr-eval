@@ -1,46 +1,46 @@
 import { describe, it, expect } from 'vitest';
 import {
-  Instruction,
-  unaryInstruction,
-  binaryInstruction,
-  ternaryInstruction,
-  numberInstruction,
-  variableInstruction,
-  functionCallInstruction,
-  arrayInstruction,
-  memberInstruction,
-  INUMBER,
-  IOP1,
-  IOP2,
-  IOP3,
-  IVAR,
-  IVARNAME,
-  IFUNCALL,
-  IFUNDEF,
-  IARRAY,
-  IMEMBER,
-  IUNDEFINED,
-  IENDSTATEMENT,
-  ICASECOND,
-  ICASEMATCH,
-  IWHENCOND,
-  IWHENMATCH,
-  ICASEELSE,
-  IPROPERTY,
-  IOBJECT
+    Instruction,
+    unaryInstruction,
+    binaryInstruction,
+    ternaryInstruction,
+    numberInstruction,
+    variableInstruction,
+    functionCallInstruction,
+    arrayInstruction,
+    memberInstruction,
+    ISCALAR,
+    IOP1,
+    IOP2,
+    IOP3,
+    IVAR,
+    IVARNAME,
+    IFUNCALL,
+    IFUNDEF,
+    IARRAY,
+    IMEMBER,
+    IUNDEFINED,
+    IENDSTATEMENT,
+    ICASECOND,
+    ICASEMATCH,
+    IWHENCOND,
+    IWHENMATCH,
+    ICASEELSE,
+    IPROPERTY,
+    IOBJECT, scalarInstruction
 } from '../../src/parsing/instruction.js';
 
 describe('Instruction', () => {
   describe('constructor and basic properties', () => {
     it('should create instruction with type and value', () => {
-      const instruction = new Instruction(INUMBER, 42);
-      expect(instruction.type).toBe(INUMBER);
+      const instruction = new Instruction(ISCALAR, 42);
+      expect(instruction.type).toBe(ISCALAR);
       expect(instruction.value).toBe(42);
     });
 
-    it('should handle null value correctly', () => {
-      const instruction = new Instruction(INUMBER, null);
-      expect(instruction.value).toBe(0);
+    it('should preserve null value', () => {
+      const instruction = new Instruction(ISCALAR, null);
+      expect(instruction.value).toBe(null);
     });
 
     it('should preserve undefined value', () => {
@@ -49,25 +49,25 @@ describe('Instruction', () => {
     });
 
     it('should preserve zero value', () => {
-      const instruction = new Instruction(INUMBER, 0);
+      const instruction = new Instruction(ISCALAR, 0);
       expect(instruction.value).toBe(0);
     });
   });
 
   describe('is() type guard method', () => {
     it('should correctly identify matching instruction type', () => {
-      const instruction = new Instruction(INUMBER, 42);
-      expect(instruction.is(INUMBER)).toBe(true);
+      const instruction = new Instruction(ISCALAR, 42);
+      expect(instruction.is(ISCALAR)).toBe(true);
     });
 
     it('should correctly reject non-matching instruction type', () => {
-      const instruction = new Instruction(INUMBER, 42);
+      const instruction = new Instruction(ISCALAR, 42);
       expect(instruction.is(IVAR)).toBe(false);
     });
 
     it('should work with all instruction types', () => {
       const types = [
-        INUMBER, IOP1, IOP2, IOP3, IVAR, IVARNAME, IFUNCALL, IFUNDEF,
+        ISCALAR, IOP1, IOP2, IOP3, IVAR, IVARNAME, IFUNCALL, IFUNDEF,
         IARRAY, IMEMBER, IUNDEFINED, IENDSTATEMENT, ICASECOND, ICASEMATCH,
         IWHENCOND, IWHENMATCH, ICASEELSE, IPROPERTY, IOBJECT
       ];
@@ -77,7 +77,7 @@ describe('Instruction', () => {
         expect(instruction.is(type)).toBe(true);
 
         // Test that it returns false for a different type
-        const otherType = types.find(t => t !== type) || INUMBER;
+        const otherType = types.find(t => t !== type) || ISCALAR;
         expect(instruction.is(otherType)).toBe(false);
       });
     });
@@ -85,13 +85,13 @@ describe('Instruction', () => {
 
   describe('getValue() method', () => {
     it('should return value when type matches', () => {
-      const instruction = new Instruction(INUMBER, 42);
-      expect(instruction.getValue(INUMBER)).toBe(42);
+      const instruction = new Instruction(ISCALAR, 42);
+      expect(instruction.getValue(ISCALAR)).toBe(42);
     });
 
     it('should throw error when type does not match', () => {
-      const instruction = new Instruction(INUMBER, 42);
-      expect(() => instruction.getValue(IVAR)).toThrow('Expected instruction type IVAR, got INUMBER');
+      const instruction = new Instruction(ISCALAR, 42);
+      expect(() => instruction.getValue(IVAR)).toThrow('Expected instruction type IVAR, got ISCALAR');
     });
 
     it('should work with string values', () => {
@@ -106,8 +106,8 @@ describe('Instruction', () => {
   });
 
   describe('toString() method', () => {
-    it('should return value string for INUMBER', () => {
-      const instruction = new Instruction(INUMBER, 42);
+    it('should return value string for ISCALAR', () => {
+      const instruction = new Instruction(ISCALAR, 42);
       expect(instruction.toString()).toBe(42);
     });
 
@@ -228,8 +228,14 @@ describe('Instruction', () => {
 
     it('should create number instruction', () => {
       const instruction = numberInstruction(42);
-      expect(instruction.type).toBe(INUMBER);
+      expect(instruction.type).toBe(ISCALAR);
       expect(instruction.value).toBe(42);
+    });
+
+    it('should create scalar instruction', () => {
+      const instruction = scalarInstruction(true);
+      expect(instruction.type).toBe(ISCALAR);
+      expect(instruction.value).toBe(true);
     });
 
     it('should create variable instruction', () => {
@@ -288,7 +294,9 @@ describe('Instruction', () => {
 
     it('should handle all instruction types with type guards', () => {
       const testCases = [
-        { type: INUMBER, value: 42 },
+        { type: ISCALAR, value: 42 },
+        { type: ISCALAR, value: false },
+        { type: ISCALAR, value: null },
         { type: IOP1, value: 'abs' },
         { type: IOP2, value: '*' },
         { type: IOP3, value: '?' },

@@ -1,4 +1,4 @@
-// cSpell:words INUMBER IVAR IVARNAME IFUNCALL IEXPR IEXPREVAL IMEMBER IENDSTATEMENT IARRAY
+// cSpell:words ISCALAR IVAR IVARNAME IFUNCALL IEXPR IEXPREVAL IMEMBER IENDSTATEMENT IARRAY
 // cSpell:words IFUNDEF IUNDEFINED ICASEMATCH ICASECOND IWHENCOND IWHENMATCH ICASEELSE IPROPERTY
 // cSpell:words IOBJECT IOBJECTEND
 
@@ -10,15 +10,15 @@
  *
  * Instruction type naming convention:
  * - I = Instruction prefix
- * - NUMBER = numeric literal
+ * - SCALAR = scalar literal
  * - OP1/OP2/OP3 = unary/binary/ternary operators
  * - VAR = variable reference
  * - FUNCALL = function call
  * - etc.
  */
 
-/** Numeric literal instruction */
-export const INUMBER = 'INUMBER' as const;
+/** Scalar literal instruction */
+export const ISCALAR = 'ISCALAR' as const;
 /** Unary operator instruction (e.g., negation, factorial) */
 export const IOP1 = 'IOP1' as const;
 /** Binary operator instruction (e.g., +, -, *, /) */
@@ -66,7 +66,7 @@ export const IOBJECTEND = 'IOBJECTEND' as const;
  * Union type for all instruction types
  */
 export type InstructionType =
-  | typeof INUMBER
+  | typeof ISCALAR
   | typeof IOP1
   | typeof IOP2
   | typeof IOP3
@@ -93,7 +93,7 @@ export type InstructionType =
  * Discriminated union types for better type safety
  */
 export interface NumberInstruction {
-  type: typeof INUMBER;
+  type: typeof ISCALAR;
   value: number;
 }
 
@@ -234,13 +234,7 @@ export class Instruction {
 
   constructor(type: InstructionType, value?: any) {
     this.type = type;
-    if (type === IUNDEFINED) {
-      this.value = undefined;
-    } else {
-      // this.value = (value !== undefined && value !== null) ? value : 0;
-      // We want to allow undefined values.
-      this.value = (value !== null) ? value : 0;
-    }
+    this.value = (type === IUNDEFINED) ? undefined : value;
   }
 
   /**
@@ -262,7 +256,7 @@ export class Instruction {
 
   toString(): string {
     switch (this.type) {
-      case INUMBER:
+      case ISCALAR:
       case IOP1:
       case IOP2:
       case IOP3:
@@ -314,7 +308,11 @@ export function ternaryInstruction(value: string): Instruction {
 }
 
 export function numberInstruction(value: number): Instruction {
-  return new Instruction(INUMBER, value);
+  return new Instruction(ISCALAR, value);
+}
+
+export function scalarInstruction(value: boolean | null): Instruction {
+  return new Instruction(ISCALAR, value);
 }
 
 export function variableInstruction(value: string): Instruction {

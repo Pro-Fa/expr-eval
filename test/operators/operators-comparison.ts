@@ -34,8 +34,20 @@ describe('Comparison Operators TypeScript Test', () => {
       expect(Parser.evaluate('\'3\' == \'3\'')).toBe(true);
     });
 
-    it('null == null', () => {
+    it('null == null (variables)', () => {
       expect(Parser.evaluate('null == alsoNull', { null: null, alsoNull: null })).toBe(true);
+    });
+    it('null == null (single variable)', () => {
+        expect(Parser.evaluate('null == alsoNull', { alsoNull: null })).toBe(true);
+    });
+    it('null == null (no variables)', () => {
+        expect(Parser.evaluate('null == null')).toBe(true);
+    });
+    it('null cannot be overridden', () => {
+      expect(Parser.evaluate('null == alsoNull', { null: 100, alsoNull: null })).toBe(true);
+    });
+    it('null differs from 0', () => {
+      expect(Parser.evaluate('null == zero', { zero: 0 })).toBe(false);
     });
   });
 

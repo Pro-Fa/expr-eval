@@ -1,9 +1,9 @@
-// cSpell:words INUMBER IVAR IVARNAME IFUNCALL IEXPR IEXPREVAL IMEMBER IENDSTATEMENT IARRAY
+// cSpell:words ISCALAR IVAR IVARNAME IFUNCALL IEXPR IEXPREVAL IMEMBER IENDSTATEMENT IARRAY
 // cSpell:words IFUNDEF IUNDEFINED ICASEMATCH ICASECOND IWHENCOND IWHENMATCH ICASEELSE IPROPERTY
 // cSpell:words IOBJECT IOBJECTEND
 // cSpell:words nstack
 
-import { INUMBER, IOP1, IOP2, IOP3, IVAR, IVARNAME, IFUNCALL, IFUNDEF, IEXPR, IMEMBER, IENDSTATEMENT, IARRAY, IUNDEFINED, ICASEMATCH, ICASECOND, IWHENCOND, IWHENMATCH, ICASEELSE, IOBJECT, IOBJECTEND, IPROPERTY } from '../parsing/instruction.js';
+import { ISCALAR, IOP1, IOP2, IOP3, IVAR, IVARNAME, IFUNCALL, IFUNDEF, IEXPR, IMEMBER, IENDSTATEMENT, IARRAY, IUNDEFINED, ICASEMATCH, ICASECOND, IWHENCOND, IWHENMATCH, ICASEELSE, IOBJECT, IOBJECTEND, IPROPERTY } from '../parsing/instruction.js';
 import type { Instruction } from '../parsing/instruction.js';
 
 export default function expressionToString(tokens: Instruction[], toJS?: boolean): string {
@@ -15,7 +15,7 @@ export default function expressionToString(tokens: Instruction[], toJS?: boolean
     const item = tokens[i];
     const { type } = item;
 
-    if (type === INUMBER) {
+    if (type === ISCALAR) {
       if (typeof item.value === 'number' && item.value < 0) {
         nstack.push('(' + item.value + ')');
       } else if (Array.isArray(item.value)) {
