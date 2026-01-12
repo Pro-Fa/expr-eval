@@ -1,4 +1,4 @@
-import { Instruction, INUMBER, IOP1, IOP2, IOP3, IVAR, IVARNAME, IEXPR, IMEMBER, IARRAY } from '../parsing/instruction.js';
+import { Instruction, ISCALAR, IOP1, IOP2, IOP3, IVAR, IVARNAME, IEXPR, IMEMBER, IARRAY } from '../parsing/instruction.js';
 import type { OperatorFunction } from '../types/parser.js';
 
 export default function simplify(
@@ -17,10 +17,10 @@ export default function simplify(
     const item = tokens[i];
     const { type } = item;
 
-    if (type === INUMBER || type === IVARNAME) {
+    if (type === ISCALAR || type === IVARNAME) {
       if (Array.isArray(item.value)) {
         nstack.push(...simplify(
-          item.value.map((x) => new Instruction(INUMBER, x)).concat(new Instruction(IARRAY, item.value.length)),
+          item.value.map((x) => new Instruction(ISCALAR, x)).concat(new Instruction(IARRAY, item.value.length)),
           unaryOps,
           binaryOps,
           ternaryOps,
@@ -30,13 +30,13 @@ export default function simplify(
         nstack.push(item);
       }
     } else if (type === IVAR && Object.prototype.hasOwnProperty.call(values, item.value)) {
-      const newItem = new Instruction(INUMBER, values[item.value]);
+      const newItem = new Instruction(ISCALAR, values[item.value]);
       nstack.push(newItem);
     } else if (type === IOP2 && nstack.length > 1) {
       n2 = nstack.pop()!;
       n1 = nstack.pop()!;
       f = binaryOps[item.value];
-      const newItem = new Instruction(INUMBER, f(n1.value, n2.value));
+      const newItem = new Instruction(ISCALAR, f(n1.value, n2.value));
       nstack.push(newItem);
     } else if (type === IOP3 && nstack.length > 2) {
       n3 = nstack.pop()!;
@@ -46,13 +46,13 @@ export default function simplify(
         nstack.push(n1.value ? n2.value : n3.value);
       } else {
         f = ternaryOps[item.value];
-        const newItem = new Instruction(INUMBER, f(n1.value, n2.value, n3.value));
+        const newItem = new Instruction(ISCALAR, f(n1.value, n2.value, n3.value));
         nstack.push(newItem);
       }
     } else if (type === IOP1 && nstack.length > 0) {
       n1 = nstack.pop()!;
       f = unaryOps[item.value];
-      const newItem = new Instruction(INUMBER, f(n1.value));
+      const newItem = new Instruction(ISCALAR, f(n1.value));
       nstack.push(newItem);
     } else if (type === IEXPR) {
       while (nstack.length > 0) {
@@ -61,7 +61,7 @@ export default function simplify(
       newexpression.push(new Instruction(IEXPR, simplify(item.value as Instruction[], unaryOps, binaryOps, ternaryOps, values)));
     } else if (type === IMEMBER && nstack.length > 0) {
       n1 = nstack.pop()!;
-      nstack.push(new Instruction(INUMBER, n1.value[item.value]));
+      nstack.push(new Instruction(ISCALAR, n1.value[item.value]));
     } else {
       while (nstack.length > 0) {
         newexpression.push(nstack.shift()!);

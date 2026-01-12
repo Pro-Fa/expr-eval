@@ -5,14 +5,14 @@
  * It uses a stack-based interpreter to evaluate instruction sequences produced by the parser.
  */
 
-import { INUMBER, IOP1, IOP2, IOP3, IVAR, IVARNAME, IFUNCALL, IFUNDEF, IEXPR, IEXPREVAL, IMEMBER, IENDSTATEMENT, IARRAY, IUNDEFINED, ICASEMATCH, IWHENMATCH, ICASEELSE, ICASECOND, IWHENCOND, IOBJECT, IPROPERTY, IOBJECTEND } from '../parsing/instruction.js';
+import { ISCALAR, IOP1, IOP2, IOP3, IVAR, IVARNAME, IFUNCALL, IFUNDEF, IEXPR, IEXPREVAL, IMEMBER, IENDSTATEMENT, IARRAY, IUNDEFINED, ICASEMATCH, IWHENMATCH, ICASEELSE, ICASECOND, IWHENCOND, IOBJECT, IPROPERTY, IOBJECTEND } from '../parsing/instruction.js';
 import type { Instruction } from '../parsing/instruction.js';
 import type { Expression } from './expression.js';
 import type { Value, Values, VariableResolveResult, VariableAlias, VariableValue } from '../types/values.js';
 import { VariableError } from '../types/errors.js';
 import { ExpressionValidator } from '../validation/expression-validator.js';
 
-// cSpell:words INUMBER IVAR IVARNAME IFUNCALL IEXPR IEXPREVAL IMEMBER IENDSTATEMENT IARRAY
+// cSpell:words ISCALAR IVAR IVARNAME IFUNCALL IEXPR IEXPREVAL IMEMBER IENDSTATEMENT IARRAY
 // cSpell:words IFUNDEF IUNDEFINED ICASEMATCH ICASECOND IWHENCOND IWHENMATCH ICASEELSE IPROPERTY
 // cSpell:words IOBJECT IOBJECTEND
 // cSpell:words nstack
@@ -131,7 +131,7 @@ function evaluateExpressionToken(expr: Expression, values: EvaluationValues, tok
   let operatorFunction: Function, functionArgs: any[], argumentCount: number;
 
   const { type } = token;
-  if (type === INUMBER || type === IVARNAME) {
+  if (type === ISCALAR || type === IVARNAME) {
     nstack.push(token.value);
   } else if (type === IOP2) {
     rightOperand = nstack.pop();

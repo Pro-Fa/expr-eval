@@ -26,7 +26,7 @@ export interface LanguageServiceApi {
 }
 
 export interface HighlightToken {
-    type: 'number' | 'string' | 'name' | 'keyword' | 'operator' | 'function' | 'punctuation';
+    type: 'number' | 'string' | 'name' | 'keyword' | 'operator' | 'function' | 'punctuation' | 'constant';
     start: number;
     end: number;
     value?: string | number | boolean | undefined;

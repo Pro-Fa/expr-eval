@@ -1,6 +1,22 @@
 // cSpell:words TEOF TNUMBER TSTRING TPAREN TBRACKET TCOMMA TNAME TSEMICOLON TUNDEFINED TKEYWORD TBRACE
 
-import { Token, TEOF, TOP, TNUMBER, TSTRING, TPAREN, TBRACKET, TCOMMA, TNAME, TSEMICOLON, TKEYWORD, TBRACE, TokenType, TokenValue } from './token.js';
+import {
+    Token,
+    TEOF,
+    TOP,
+    TNUMBER,
+    TSTRING,
+    TPAREN,
+    TBRACKET,
+    TCOMMA,
+    TNAME,
+    TSEMICOLON,
+    TKEYWORD,
+    TBRACE,
+    TokenType,
+    TokenValue,
+    TCONST
+} from './token.js';
 import { ParseError } from '../types/errors.js';
 import type { OperatorFunction } from '../types/parser.js';
 
@@ -13,7 +29,8 @@ interface ParserLike {
   unaryOps: Record<string, OperatorFunction>;
   binaryOps: Record<string, OperatorFunction>;
   ternaryOps: Record<string, OperatorFunction>;
-  consts: Record<string, any>;
+  numericConstants: Record<string, any>;
+  buildInLiterals: Record<string, any>;
   options: {
     allowMemberAccess?: boolean;
     operators?: Record<string, any>;
@@ -56,7 +73,8 @@ export class TokenStream {
   public unaryOps: Record<string, OperatorFunction>;
   public binaryOps: Record<string, OperatorFunction>;
   public ternaryOps: Record<string, OperatorFunction>;
-  public consts: Record<string, any>;
+  public numericConstants: Record<string, any>;
+  public buildInLiterals: Record<string, any>;
   public expression: string;
   public savedPosition: number = 0;
   public savedCurrent: Token | null = null;
@@ -68,7 +86,8 @@ export class TokenStream {
     this.unaryOps = parser.unaryOps;
     this.binaryOps = parser.binaryOps;
     this.ternaryOps = parser.ternaryOps;
-    this.consts = parser.consts;
+    this.numericConstants = parser.numericConstants;
+    this.buildInLiterals = parser.buildInLiterals;
     this.expression = expression;
     this.options = parser.options;
     this.parser = parser;
@@ -197,8 +216,13 @@ export class TokenStream {
     }
     if (i > startPos) {
       const str = this.expression.substring(startPos, i);
-      if (str in this.consts) {
-        this.current = this.newToken(TNUMBER, this.consts[str]);
+      if (str in this.numericConstants) {
+        this.current = this.newToken(TNUMBER, this.numericConstants[str]);
+        this.pos += str.length;
+        return true;
+      }
+      if (str in this.buildInLiterals) {
+        this.current = this.newToken(TCONST, this.buildInLiterals[str]);
         this.pos += str.length;
         return true;
       }

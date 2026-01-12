@@ -1,4 +1,4 @@
-// cSpell:words TEOF TNUMBER TSTRING TPAREN TBRACKET TCOMMA TNAME TSEMICOLON TUNDEFINED TKEYWORD TBRACE
+// cSpell:words TEOF TNUMBER TSTRING TCONST TPAREN TBRACKET TCOMMA TNAME TSEMICOLON TUNDEFINED TKEYWORD TBRACE
 
 /**
  * Token types for the expression lexer/tokenizer.
@@ -22,6 +22,8 @@ export const TOP = 'TOP' as const;
 export const TNUMBER = 'TNUMBER' as const;
 /** String literal token */
 export const TSTRING = 'TSTRING' as const;
+/** Constant literal token */
+export const TCONST = 'TCONST' as const;
 /** Parenthesis token ( or ) */
 export const TPAREN = 'TPAREN' as const;
 /** Bracket token [ or ] */
@@ -45,6 +47,7 @@ export type TokenType =
   | typeof TOP
   | typeof TNUMBER
   | typeof TSTRING
+  | typeof TCONST
   | typeof TPAREN
   | typeof TBRACKET
   | typeof TCOMMA

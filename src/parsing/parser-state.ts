@@ -1,10 +1,13 @@
-// cSpell:words TEOF TNUMBER TSTRING TPAREN TBRACKET TCOMMA TNAME TSEMICOLON TUNDEFINED TKEYWORD TBRACE
-// cSpell:words INUMBER IVAR IFUNCALL IEXPREVAL IMEMBER IARRAY
+// cSpell:words TEOF TNUMBER TSTRING TCONST TPAREN TBRACKET TCOMMA TNAME TSEMICOLON TUNDEFINED TKEYWORD TBRACE
+// cSpell:words ISCALAR IVAR IFUNCALL IEXPREVAL IMEMBER IARRAY
 // cSpell:words IUNDEFINED ICASEMATCH ICASECOND IWHENCOND IWHENMATCH ICASEELSE IPROPERTY
 // cSpell:words IOBJECT IOBJECTEND
 
-import { TOP, TNUMBER, TSTRING, TPAREN, TBRACKET, TCOMMA, TNAME, TSEMICOLON, TEOF, TKEYWORD, TBRACE, Token, TokenType } from './token.js';
-import { Instruction, INUMBER, IVAR, IFUNCALL, IMEMBER, IARRAY, IUNDEFINED, binaryInstruction, unaryInstruction, IWHENMATCH, ICASEMATCH, ICASEELSE, ICASECOND, IWHENCOND, IPROPERTY, IOBJECT, IOBJECTEND, InstructionType } from './instruction.js';
+import {
+    TOP, TNUMBER, TSTRING, TPAREN, TBRACKET, TCOMMA, TNAME, TSEMICOLON, TEOF, TKEYWORD, TBRACE, Token, TokenType,
+    TCONST
+} from './token.js';
+import { Instruction, ISCALAR, IVAR, IFUNCALL, IMEMBER, IARRAY, IUNDEFINED, binaryInstruction, unaryInstruction, IWHENMATCH, ICASEMATCH, ICASEELSE, ICASECOND, IWHENCOND, IPROPERTY, IOBJECT, IOBJECTEND, InstructionType } from './instruction.js';
 import contains from '../core/contains.js';
 import { TokenStream } from './token-stream.js';
 import { ParseError, AccessError } from '../types/errors.js';
@@ -118,10 +121,8 @@ export class ParserState {
       } else {
         instr.push(new Instruction(IVAR, this.current!.value));
       }
-    } else if (this.accept(TNUMBER)) {
-      instr.push(new Instruction(INUMBER, this.current!.value));
-    } else if (this.accept(TSTRING)) {
-      instr.push(new Instruction(INUMBER, this.current!.value));
+    } else if (this.accept(TNUMBER) ||this.accept(TSTRING) || this.accept(TCONST)) {
+      instr.push(new Instruction(ISCALAR, this.current!.value));
     } else if (this.accept(TPAREN, '(')) {
       this.parseExpression(instr);
       this.expect(TPAREN, ')');

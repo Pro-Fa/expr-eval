@@ -83,7 +83,8 @@ export class Parser {
   public binaryOps: Record<string, OperatorFunction>;
   public ternaryOps: Record<string, OperatorFunction>;
   public functions: Record<string, OperatorFunction>;
-  public consts: Record<string, Value>;
+  public numericConstants: Record<string, Value>;
+  public buildInLiterals: Record<string, Value>;
   public resolve: VariableResolver;
 
   /**
@@ -220,11 +221,15 @@ export class Parser {
       padRight: padRight
     };
 
-    this.consts = {
+    this.numericConstants = {
       E: Math.E,
       PI: Math.PI,
-      'true': true,
-      'false': false
+    };
+
+    this.buildInLiterals = {
+      true: true,
+      false: false,
+      null: null,
     };
 
     // A callback that evaluate will call if it doesn't recognize a variable.  The default

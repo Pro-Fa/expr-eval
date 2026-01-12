@@ -224,5 +224,6 @@ export const DEFAULT_CONSTANT_DOCS: Record<string, string> = {
   E: 'Math.E',
   PI: 'Math.PI',
   true: 'Logical true',
-  false: 'Logical false'
+  false: 'Logical false',
+  null: 'Null value'
 };
