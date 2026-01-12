@@ -1,21 +1,21 @@
 // cSpell:words TEOF TNUMBER TSTRING TPAREN TBRACKET TCOMMA TNAME TSEMICOLON TUNDEFINED TKEYWORD TBRACE
 
 import {
-    Token,
-    TEOF,
-    TOP,
-    TNUMBER,
-    TSTRING,
-    TPAREN,
-    TBRACKET,
-    TCOMMA,
-    TNAME,
-    TSEMICOLON,
-    TKEYWORD,
-    TBRACE,
-    TokenType,
-    TokenValue,
-    TCONST
+  Token,
+  TEOF,
+  TOP,
+  TCONST,
+  TNUMBER,
+  TSTRING,
+  TPAREN,
+  TBRACKET,
+  TCOMMA,
+  TNAME,
+  TSEMICOLON,
+  TKEYWORD,
+  TBRACE,
+  TokenType,
+  TokenValue
 } from './token.js';
 import { ParseError } from '../types/errors.js';
 import type { OperatorFunction } from '../types/parser.js';

@@ -1,33 +1,33 @@
 import { describe, it, expect } from 'vitest';
 import {
-  Instruction,
-  unaryInstruction,
-  binaryInstruction,
-  ternaryInstruction,
-  numberInstruction,
-  variableInstruction,
-  functionCallInstruction,
-  arrayInstruction,
-  memberInstruction,
-  ISCALAR,
-  IOP1,
-  IOP2,
-  IOP3,
-  IVAR,
-  IVARNAME,
-  IFUNCALL,
-  IFUNDEF,
-  IARRAY,
-  IMEMBER,
-  IUNDEFINED,
-  IENDSTATEMENT,
-  ICASECOND,
-  ICASEMATCH,
-  IWHENCOND,
-  IWHENMATCH,
-  ICASEELSE,
-  IPROPERTY,
-  IOBJECT
+    Instruction,
+    unaryInstruction,
+    binaryInstruction,
+    ternaryInstruction,
+    numberInstruction,
+    variableInstruction,
+    functionCallInstruction,
+    arrayInstruction,
+    memberInstruction,
+    ISCALAR,
+    IOP1,
+    IOP2,
+    IOP3,
+    IVAR,
+    IVARNAME,
+    IFUNCALL,
+    IFUNDEF,
+    IARRAY,
+    IMEMBER,
+    IUNDEFINED,
+    IENDSTATEMENT,
+    ICASECOND,
+    ICASEMATCH,
+    IWHENCOND,
+    IWHENMATCH,
+    ICASEELSE,
+    IPROPERTY,
+    IOBJECT, scalarInstruction
 } from '../../src/parsing/instruction.js';
 
 describe('Instruction', () => {
@@ -38,7 +38,7 @@ describe('Instruction', () => {
       expect(instruction.value).toBe(42);
     });
 
-    it('should handle null value correctly', () => {
+    it('should preserve null value', () => {
       const instruction = new Instruction(ISCALAR, null);
       expect(instruction.value).toBe(null);
     });
@@ -232,6 +232,12 @@ describe('Instruction', () => {
       expect(instruction.value).toBe(42);
     });
 
+    it('should create scalar instruction', () => {
+      const instruction = scalarInstruction(true);
+      expect(instruction.type).toBe(ISCALAR);
+      expect(instruction.value).toBe(true);
+    });
+
     it('should create variable instruction', () => {
       const instruction = variableInstruction('myVar');
       expect(instruction.type).toBe(IVAR);
@@ -289,6 +295,8 @@ describe('Instruction', () => {
     it('should handle all instruction types with type guards', () => {
       const testCases = [
         { type: ISCALAR, value: 42 },
+        { type: ISCALAR, value: false },
+        { type: ISCALAR, value: null },
         { type: IOP1, value: 'abs' },
         { type: IOP2, value: '*' },
         { type: IOP3, value: '?' },

@@ -311,6 +311,10 @@ export function numberInstruction(value: number): Instruction {
   return new Instruction(ISCALAR, value);
 }
 
+export function scalarInstruction(value: boolean | null): Instruction {
+  return new Instruction(ISCALAR, value);
+}
+
 export function variableInstruction(value: string): Instruction {
   return new Instruction(IVAR, value);
 }

@@ -2,17 +2,18 @@
 // Provides: completions, hover, and syntax highlighting using the existing tokenizer
 
 import {
-    TOP,
-    TNUMBER,
-    TSTRING,
-    TPAREN,
-    TBRACKET,
-    TCOMMA,
-    TNAME,
-    TSEMICOLON,
-    TKEYWORD,
-    TBRACE,
-    Token, TCONST
+  TOP,
+  TNUMBER,
+  TCONST,
+  TSTRING,
+  TPAREN,
+  TBRACKET,
+  TCOMMA,
+  TNAME,
+  TSEMICOLON,
+  TKEYWORD,
+  TBRACE,
+  Token
 } from '../parsing';
 import { Parser } from '../parsing/parser';
 import type {

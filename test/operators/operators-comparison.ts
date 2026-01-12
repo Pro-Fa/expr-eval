@@ -43,6 +43,12 @@ describe('Comparison Operators TypeScript Test', () => {
     it('null == null (no variables)', () => {
         expect(Parser.evaluate('null == null')).toBe(true);
     });
+    it('null cannot be overridden', () => {
+      expect(Parser.evaluate('null == alsoNull', { null: 100, alsoNull: null })).toBe(true);
+    });
+    it('null differs from 0', () => {
+      expect(Parser.evaluate('null == zero', { zero: 0 })).toBe(false);
+    });
   });
 
   describe('!= operator', () => {
