@@ -1,6 +1,10 @@
 import { Instruction, ISCALAR, IOP1, IOP2, IOP3, IVAR, IVARNAME, IEXPR, IMEMBER, IARRAY } from '../parsing/instruction.js';
 import type { OperatorFunction } from '../types/parser.js';
 
+function flushStack(stack: Instruction[], out: Instruction[]) {
+  out.push(...stack.splice(0));
+}
+
 export default function simplify(
   tokens: Instruction[],
   unaryOps: Record<string, OperatorFunction>,
@@ -9,70 +13,60 @@ export default function simplify(
   values: Record<string, any>
 ): Instruction[] {
   const nstack: Instruction[] = [];
-  const newexpression: Instruction[] = [];
-  let n1: Instruction, n2: Instruction, n3: Instruction;
-  let f: OperatorFunction;
+  const newExpression: Instruction[] = [];
 
-  for (let i = 0; i < tokens.length; i++) {
-    const item = tokens[i];
+  for (const item of tokens) {
     const { type } = item;
 
     if (type === ISCALAR || type === IVARNAME) {
       if (Array.isArray(item.value)) {
-        nstack.push(...simplify(
-          item.value.map((x) => new Instruction(ISCALAR, x)).concat(new Instruction(IARRAY, item.value.length)),
-          unaryOps,
-          binaryOps,
-          ternaryOps,
-          values
-        ));
+        nstack.push(
+          ...simplify(
+            [...item.value.map(x => new Instruction(ISCALAR, x)), new Instruction(IARRAY, item.value.length)],
+            unaryOps,
+            binaryOps,
+            ternaryOps,
+            values
+          )
+        );
       } else {
         nstack.push(item);
       }
-    } else if (type === IVAR && Object.prototype.hasOwnProperty.call(values, item.value)) {
-      const newItem = new Instruction(ISCALAR, values[item.value]);
-      nstack.push(newItem);
+    } else if (type === IVAR && item.value in values) {
+      nstack.push(new Instruction(ISCALAR, values[item.value]));
     } else if (type === IOP2 && nstack.length > 1) {
-      n2 = nstack.pop()!;
-      n1 = nstack.pop()!;
-      f = binaryOps[item.value];
-      const newItem = new Instruction(ISCALAR, f(n1.value, n2.value));
-      nstack.push(newItem);
+      const n2 = nstack.pop()!;
+      const n1 = nstack.pop()!;
+      const f = binaryOps[item.value];
+      nstack.push(new Instruction(ISCALAR, f(n1.value, n2.value)));
     } else if (type === IOP3 && nstack.length > 2) {
-      n3 = nstack.pop()!;
-      n2 = nstack.pop()!;
-      n1 = nstack.pop()!;
+      const n3 = nstack.pop()!;
+      const n2 = nstack.pop()!;
+      const n1 = nstack.pop()!;
       if (item.value === '?') {
-        nstack.push(n1.value ? n2.value : n3.value);
+        nstack.push(new Instruction(ISCALAR, n1.value ? n2.value : n3.value));
       } else {
-        f = ternaryOps[item.value];
-        const newItem = new Instruction(ISCALAR, f(n1.value, n2.value, n3.value));
-        nstack.push(newItem);
+        const f = ternaryOps[item.value];
+        nstack.push(new Instruction(ISCALAR, f(n1.value, n2.value, n3.value)));
       }
     } else if (type === IOP1 && nstack.length > 0) {
-      n1 = nstack.pop()!;
-      f = unaryOps[item.value];
-      const newItem = new Instruction(ISCALAR, f(n1.value));
-      nstack.push(newItem);
+      const n1 = nstack.pop()!;
+      const f = unaryOps[item.value];
+      nstack.push(new Instruction(ISCALAR, f(n1.value)));
     } else if (type === IEXPR) {
-      while (nstack.length > 0) {
-        newexpression.push(nstack.shift()!);
-      }
-      newexpression.push(new Instruction(IEXPR, simplify(item.value as Instruction[], unaryOps, binaryOps, ternaryOps, values)));
+      flushStack(nstack, newExpression);
+      const simplified = simplify(item.value as Instruction[], unaryOps, binaryOps, ternaryOps, values);
+      newExpression.push(new Instruction(IEXPR, simplified));
     } else if (type === IMEMBER && nstack.length > 0) {
-      n1 = nstack.pop()!;
+      const n1 = nstack.pop()!;
       nstack.push(new Instruction(ISCALAR, n1.value[item.value]));
     } else {
-      while (nstack.length > 0) {
-        newexpression.push(nstack.shift()!);
-      }
-      newexpression.push(item);
+      flushStack(nstack, newExpression);
+      newExpression.push(item);
     }
   }
 
-  while (nstack.length > 0) {
-    newexpression.push(nstack.shift()!);
-  }
+  flushStack(nstack, newExpression);
 
-  return newexpression;
+  return newExpression;
 }

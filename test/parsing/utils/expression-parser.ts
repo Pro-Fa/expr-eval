@@ -17,9 +17,9 @@ describe('ExpressionParser', () => {
       unaryOps: {},
       binaryOps: {},
       ternaryOps: {},
-      consts: {},
-      options: { allowMemberAccess: true },
-      isOperatorEnabled: (op: string) => false
+      numericConstants: {},
+      buildInLiterals: {},
+      options: { allowMemberAccess: true }
     };
 
     tokenStream = new TokenStream(mockParser, 'test');

@@ -39,12 +39,12 @@ export {
 } from './src/types/errors.js';
 
 export type {
-    LanguageServiceApi,
-    HoverV2,
-    GetCompletionsParams,
-    GetHoverParams,
-    HighlightToken,
-    LanguageServiceOptions
-} from "./src/language-service/index.js";
+  LanguageServiceApi,
+  HoverV2,
+  GetCompletionsParams,
+  GetHoverParams,
+  HighlightToken,
+  LanguageServiceOptions
+} from './src/language-service/index.js';
 
 export { createLanguageService, Expression, Parser };

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import {
   neg,
   pos,
@@ -202,7 +202,7 @@ describe('Unary Arithmetic Operators', () => {
     // Test fallback implementation
     it('should work with fallback implementation', () => {
       const originalSign = Math.sign;
-      // @ts-ignore - temporarily remove Math.sign to test fallback
+      // temporarily remove Math.sign to test fallback
       delete (Math as any).sign;
 
       expect(sign(5)).toBe(1);
@@ -260,7 +260,7 @@ describe('Unary Arithmetic Operators', () => {
     // Test fallback implementation
     it('should work with fallback implementation', () => {
       const originalTrunc = Math.trunc;
-      // @ts-ignore - temporarily remove Math.trunc to test fallback
+      // temporarily remove Math.trunc to test fallback
       delete (Math as any).trunc;
 
       expect(trunc(3.2)).toBe(3);
@@ -293,7 +293,7 @@ describe('Unary Arithmetic Operators', () => {
     // Test fallback implementation
     it('should work with fallback implementation', () => {
       const originalCbrt = Math.cbrt;
-      // @ts-ignore - temporarily remove Math.cbrt to test fallback
+      // temporarily remove Math.cbrt to test fallback
       delete (Math as any).cbrt;
 
       expect(cbrt(8)).toBeCloseTo(2);
@@ -338,7 +338,7 @@ describe('Unary Arithmetic Operators', () => {
     // Test fallback implementation
     it('should work with fallback implementation', () => {
       const originalExpm1 = Math.expm1;
-      // @ts-ignore - temporarily remove Math.expm1 to test fallback
+      // temporarily remove Math.expm1 to test fallback
       delete (Math as any).expm1;
 
       expect(expm1(0)).toBe(0);
@@ -379,7 +379,7 @@ describe('Unary Arithmetic Operators', () => {
     // Test fallback implementation
     it('should work with fallback implementation', () => {
       const originalLog1p = Math.log1p;
-      // @ts-ignore - temporarily remove Math.log1p to test fallback
+      // temporarily remove Math.log1p to test fallback
       delete (Math as any).log1p;
 
       expect(log1p(0)).toBe(0);
@@ -404,7 +404,7 @@ describe('Unary Arithmetic Operators', () => {
     // Test fallback implementation
     it('should work with fallback implementation', () => {
       const originalLog2 = Math.log2;
-      // @ts-ignore - temporarily remove Math.log2 to test fallback
+      // temporarily remove Math.log2 to test fallback
       delete (Math as any).log2;
 
       expect(log2(1)).toBe(0);
@@ -430,7 +430,7 @@ describe('Unary Arithmetic Operators', () => {
     // Test fallback implementation
     it('should work with fallback implementation', () => {
       const originalLog10 = Math.log10;
-      // @ts-ignore - temporarily remove Math.log10 to test fallback
+      // temporarily remove Math.log10 to test fallback
       delete (Math as any).log10;
 
       expect(log10(1)).toBe(0);

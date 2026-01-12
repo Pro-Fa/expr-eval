@@ -90,7 +90,6 @@ describe('variable-utils', () => {
       expect(hover).toBeUndefined();
     });
 
-
     it('on trailing dot resolves to the left name', () => {
       const text = '$a.';
       const doc = TextDocument.create('file://test', 'plaintext', 1, text);

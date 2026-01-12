@@ -247,7 +247,7 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
         const range: Range = {
           start: textDocument.positionAt(span.start),
           end: textDocument.positionAt(span.end)
-        }
+        };
         return {
           contents: {
             kind: MarkupKind.PlainText,

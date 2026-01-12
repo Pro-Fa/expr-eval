@@ -6,7 +6,7 @@ import { Expression } from '../core/expression.js';
 import type { Value, VariableResolveResult, Values } from '../types/values.js';
 import type { Instruction } from './instruction.js';
 import type { OperatorFunction } from '../types/parser.js';
-import { atan2, condition, fac, filter, fold, gamma, hypot, indexOf, join, map, max, min, random, roundTo, sum, json, stringLength, isEmpty, stringContains, startsWith, endsWith, searchCount, trim, toUpper, toLower, toTitle, stringJoin, split, repeat, reverse, left, right, replace, replaceFirst, naturalSort, toNumber, toBoolean, padLeft, padRight } from '../functions/index.js';
+import { atan2, condition, fac, filter, fold, gamma, hypot, indexOf, join, map, max, min, random, roundTo, sum, json, stringLength, isEmpty, stringContains, startsWith, endsWith, searchCount, trim, toUpper, toLower, toTitle, split, repeat, reverse, left, right, replace, replaceFirst, naturalSort, toNumber, toBoolean, padLeft, padRight } from '../functions/index.js';
 import {
   add,
   sub,
@@ -223,13 +223,13 @@ export class Parser {
 
     this.numericConstants = {
       E: Math.E,
-      PI: Math.PI,
+      PI: Math.PI
     };
 
     this.buildInLiterals = {
       true: true,
       false: false,
-      null: null,
+      null: null
     };
 
     // A callback that evaluate will call if it doesn't recognize a variable.  The default

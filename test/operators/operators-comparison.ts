@@ -38,10 +38,10 @@ describe('Comparison Operators TypeScript Test', () => {
       expect(Parser.evaluate('null == alsoNull', { null: null, alsoNull: null })).toBe(true);
     });
     it('null == null (single variable)', () => {
-        expect(Parser.evaluate('null == alsoNull', { alsoNull: null })).toBe(true);
+      expect(Parser.evaluate('null == alsoNull', { alsoNull: null })).toBe(true);
     });
     it('null == null (no variables)', () => {
-        expect(Parser.evaluate('null == null')).toBe(true);
+      expect(Parser.evaluate('null == null')).toBe(true);
     });
     it('null cannot be overridden', () => {
       expect(Parser.evaluate('null == alsoNull', { null: 100, alsoNull: null })).toBe(true);
