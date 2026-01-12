@@ -223,6 +223,19 @@ add(a, b) = a + b
 factorial(x) = x < 2 ? 1 : x * factorial(x - 1)
 ```
 
+These functions can than be used in other functions that require a function argument, such as `map`, `filter` or `fold`:
+
+```js
+name(u) = u.name; map(name, users)
+add(a, b) = a+b; fold(add, 0, [1, 2, 3])
+```
+
+You can also define the functions inline:
+
+```js
+filter(isEven(x) = x % 2 == 0, [1, 2, 3, 4, 5])
+```
+
 ## Custom JavaScript Functions
 
 If you need additional functions that aren't supported out of the box, you can easily add them in your own code. Instances of the `Parser` class have a property called `functions` that's simply an object with all the functions that are in scope. You can add, replace, or delete any of the properties to customize what's available in the expressions. For example:
