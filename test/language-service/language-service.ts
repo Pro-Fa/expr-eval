@@ -199,13 +199,95 @@ describe('Language Service', () => {
         position: { line: 0, character: 0 }
       });
 
-      expect(completions.find(c => c.label === 'numVar')?.detail).toBe('number');
-      expect(completions.find(c => c.label === 'strVar')?.detail).toBe('string');
-      expect(completions.find(c => c.label === 'arrVar')?.detail).toBe('array');
-      expect(completions.find(c => c.label === 'boolVar')?.detail).toBe('boolean');
-      expect(completions.find(c => c.label === 'nullVar')?.detail).toBe('null');
+            expect(completions.find(c => c.label === 'numVar')?.detail).toBe('number');
+            expect(completions.find(c => c.label === 'strVar')?.detail).toBe('string');
+            expect(completions.find(c => c.label === 'arrVar')?.detail).toBe('array');
+            expect(completions.find(c => c.label === 'boolVar')?.detail).toBe('boolean');
+            expect(completions.find(c => c.label === 'nullVar')?.detail).toBe('null');
+        });
+
+        it('should suggest array selector when variable is an array', () => {
+            const text = 'arr';
+            const doc = TextDocument.create('file://test', 'plaintext', 1, text);
+
+            const completions = ls.getCompletions({
+                textDocument: doc,
+                variables: {
+                    arr: [10, 20, 30]
+                },
+                position: { line: 0, character: 3 }
+            });
+
+            const arrayItem = completions.find(c => c.label === 'arr[]');
+            expect(arrayItem).toBeDefined();
+
+            // Insert only the selector
+            expect(arrayItem?.insertTextFormat).toBe(2); // Snippet
+            expect(arrayItem?.textEdit?.newText).toContain('arr[');
+        });
+
+        it('should autocomplete children after indexed array access', () => {
+            const text = 'arr[0].';
+            const doc = TextDocument.create('file://test', 'plaintext', 1, text);
+
+            const completions = ls.getCompletions({
+                textDocument: doc,
+                variables: {
+                    arr: [
+                        { foo: 1, bar: 2 }
+                    ]
+                },
+                position: { line: 0, character: text.length }
+            });
+
+            expect(completions.length).toBeGreaterThan(0);
+
+            const fooItem = completions.find(c => c.label === 'arr[0].foo');
+            expect(fooItem).toBeDefined();
+            expect(fooItem?.insertText).toBe('foo');
+        });
+
+        it('should support multi-dimensional array selectors', () => {
+            const text = 'matrix[0][1].';
+            const doc = TextDocument.create('file://test', 'plaintext', 1, text);
+
+            const completions = ls.getCompletions({
+                textDocument: doc,
+                variables: {
+                    matrix: [
+                        [
+                            { value: 42 }
+                        ]
+                    ]
+                },
+                position: { line: 0, character: text.length }
+            });
+
+            const valueItem = completions.find(c => c.label === 'matrix[0][1].value');
+            expect(valueItem).toBeDefined();
+            expect(valueItem?.insertText).toBe('value');
+        });
+
+        it('should place cursor inside array brackets', () => {
+            const text = 'arr';
+            const doc = TextDocument.create('file://test', 'plaintext', 1, text);
+
+            const completions = ls.getCompletions({
+                textDocument: doc,
+                variables: {
+                    arr: [1, 2, 3]
+                },
+                position: { line: 0, character: 3 }
+            });
+
+            const arrayItem = completions.find(c => c.label === 'arr[]');
+            const newText = arrayItem?.textEdit?.newText as string | undefined;
+
+            expect(newText).toContain('[');
+            expect(newText).toContain(']');
+            expect(newText).toContain('${1}');
+        });
     });
-  });
 
   describe('getHover', () => {
     it('should show type information for variables', () => {
