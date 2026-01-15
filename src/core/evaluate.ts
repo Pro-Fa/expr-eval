@@ -8,7 +8,7 @@
 import { ISCALAR, IOP1, IOP2, IOP3, IVAR, IVARNAME, IFUNCALL, IFUNDEF, IEXPR, IEXPREVAL, IMEMBER, IENDSTATEMENT, IARRAY, IUNDEFINED, ICASEMATCH, IWHENMATCH, ICASEELSE, ICASECOND, IWHENCOND, IOBJECT, IPROPERTY, IOBJECTEND } from '../parsing/instruction.js';
 import type { Instruction } from '../parsing/instruction.js';
 import type { Expression } from './expression.js';
-import type { Value, Values, VariableResolveResult, VariableAlias, VariableValue } from '../types/values.js';
+import type { Value, Values, VariableResolveResult } from '../types/values.js';
 import { VariableError } from '../types/errors.js';
 import { ExpressionValidator } from '../validation/expression-validator.js';
 

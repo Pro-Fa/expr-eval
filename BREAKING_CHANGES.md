@@ -2,6 +2,10 @@
 
 This document lists breaking changes in the library to help users migrate between versions.
 
+## Version 6.0.0
+
+`null` is no longer silently casted to `0`. This means that from version 6 onwards, `null == 0` will no longer be true and `null == someVariable` with `someVariable` having a null value will become true. (This was not the case before.)
+
 ## Version 5.0.0
 
 ### Security: Functions Must Be Registered Explicitly

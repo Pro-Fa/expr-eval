@@ -19,7 +19,7 @@ describe('ExpressionParser', () => {
       ternaryOps: {},
       consts: {},
       options: { allowMemberAccess: true },
-      isOperatorEnabled: (op: string) => false
+      isOperatorEnabled: () => false
     };
 
     tokenStream = new TokenStream(mockParser, 'test');
