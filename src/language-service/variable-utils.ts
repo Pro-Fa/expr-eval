@@ -171,7 +171,7 @@ function resolveValueByBracketPath(root: unknown, path: string): unknown {
   for (const seg of segments) {
     if (!isObj(node)) return undefined;
     // parse leading name and bracket chains
-    let i = seg.indexOf('[');
+    const i = seg.indexOf('[');
     const name = i >= 0 ? seg.slice(0, i) : seg;
     let rest = i >= 0 ? seg.slice(i) : '';
     if (name) {

@@ -8,7 +8,3 @@ insert_final_newline = true
 trim_trailing_whitespace = true
 indent_style = space
 indent_size = 2
-
-[*.{js,jsx,ts,tsx}]
-ij_javascript_spaces_within_object_literal_braces = true
-ij_typescript_spaces_within_object_literal_braces = true

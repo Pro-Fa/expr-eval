@@ -20,7 +20,7 @@ export function valueTypeName(value: Value): string {
 
 export function isPathChar(ch: string): boolean {
   // Include square brackets to keep array selectors within the detected prefix
-  return /[A-Za-z0-9_$\.\[\]]/.test(ch);
+  return /[A-Za-z0-9_$.\[\]]/.test(ch);
 }
 
 export function extractPathPrefix(text: string, position: number): { start: number; prefix: string } {

@@ -1,7 +1,7 @@
-﻿import {describe, it, expect, beforeEach} from 'vitest';
-import {TextDocument} from 'vscode-languageserver-textdocument';
-import {createLanguageService} from '../../src/language-service/language-service';
-import {CompletionItemKind, MarkupKind} from 'vscode-languageserver-types';
+﻿import { describe, it, expect, beforeEach } from 'vitest';
+import { TextDocument } from 'vscode-languageserver-textdocument';
+import { createLanguageService } from '../../src/language-service/language-service';
+import { CompletionItemKind, MarkupKind } from 'vscode-languageserver-types';
 
 function getContentsValue(contents: any): string {
   if (typeof contents === 'string') {
