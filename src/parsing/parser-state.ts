@@ -4,8 +4,8 @@
 // cSpell:words IOBJECT IOBJECTEND
 
 import {
-    TOP, TNUMBER, TSTRING, TPAREN, TBRACKET, TCOMMA, TNAME, TSEMICOLON, TEOF, TKEYWORD, TBRACE, Token, TokenType,
-    TCONST
+  TOP, TNUMBER, TSTRING, TPAREN, TBRACKET, TCOMMA, TNAME, TSEMICOLON, TEOF, TKEYWORD, TBRACE, Token, TokenType,
+  TCONST
 } from './token.js';
 import { Instruction, ISCALAR, IVAR, IFUNCALL, IMEMBER, IARRAY, IUNDEFINED, binaryInstruction, unaryInstruction, IWHENMATCH, ICASEMATCH, ICASEELSE, ICASECOND, IWHENCOND, IPROPERTY, IOBJECT, IOBJECTEND, InstructionType } from './instruction.js';
 import contains from '../core/contains.js';
@@ -121,7 +121,7 @@ export class ParserState {
       } else {
         instr.push(new Instruction(IVAR, this.current!.value));
       }
-    } else if (this.accept(TNUMBER) ||this.accept(TSTRING) || this.accept(TCONST)) {
+    } else if (this.accept(TNUMBER) || this.accept(TSTRING) || this.accept(TCONST)) {
       instr.push(new Instruction(ISCALAR, this.current!.value));
     } else if (this.accept(TPAREN, '(')) {
       this.parseExpression(instr);

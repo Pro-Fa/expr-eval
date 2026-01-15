@@ -1,6 +1,6 @@
 {
   "name": "@pro-fa/expr-eval",
-  "version": "5.0.0",
+  "version": "6.0.0",
   "description": "Mathematical expression evaluator",
   "keywords": [
     "expression",
@@ -43,7 +43,6 @@
   ],
   "scripts": {
     "test": "npm run build && vitest run",
-    "test:ts": "vitest run test/expression/expression-core-partial.ts test/expression/expression-advanced-partial.ts test/expression/expression-fork-partial.ts test/expression/expression-methods-partial.ts test/functions/functions-binary-ops-partial.ts test/functions/functions-unary-ops-partial.ts test/functions/functions-advanced-partial.ts test/functions/functions-array-string-partial.ts test/functions/functions-logical-partial.ts test/functions/functions-higher-order-partial.ts test/parser/parser-core-partial.ts test/parser/parser-numbers-partial.ts test/parser/parser-options-partial.ts test/operators/operators-comparison-partial.ts test/operators/operators-logical-partial.ts test/operators/operators-math-trig-partial.ts test/operators/operators-math-basic-partial.ts test/operators/operators-misc-partial.ts",
     "test:ts:watch": "vitest --testNamePattern=partial",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
@@ -57,7 +56,6 @@
     "bench:ci": "npm run build && tsx benchmarks/index.bench.ts",
     "lint": "eslint **/*.ts --ignore-pattern parser.d.ts",
     "tsgo": "tsgo",
-    "check-types": "tsgo --noEmit",
     "type-check": "tsgo --noEmit",
     "build:types": "tsgo -p tsconfig.build.json --emitDeclarationOnly",
     "build:esm": "cross-env BUILD_TARGET=esm vite build",
@@ -68,7 +66,7 @@
     "watch": "cross-env BUILD_TARGET=esm vite build --watch",
     "clean": "rimraf dist",
     "prepublish": "npm run build",
-    "monaco-sample:serve": "npm run build:umd && node samples/language-service-sample/serve-sample.cjs"
+    "playground": "npm run build:umd && node samples/language-service-sample/serve-sample.cjs"
   },
   "devDependencies": {
     "@eslint/js": "^9.15.0",
@@ -83,6 +81,7 @@
     "eslint-plugin-n": "^17.0.0",
     "eslint-plugin-promise": "^7.0.0",
     "rimraf": "^6.0.1",
+    "terser": "^5.44.1",
     "tinybench": "^5.0.1",
     "ts-node": "^10.9.2",
     "tslib": "^2.8.1",

@@ -47,7 +47,7 @@ A complete working example of Monaco Editor integration is included in the repos
 
 ```bash
 # Build the UMD bundle and start the sample server
-npm run monaco-sample:serve
+npm run playground
 ```
 
 Then open http://localhost:8080 in your browser. The sample demonstrates:

@@ -93,7 +93,7 @@ export function searchCount(text: string | undefined, substring: string | undefi
   if (substring.length === 0) {
     return 0;
   }
-  
+
   let count = 0;
   let position = 0;
   while ((position = text.indexOf(substring, position)) !== -1) {
@@ -310,12 +310,12 @@ export function naturalSort(arr: string[] | undefined): string[] | undefined {
   if (!Array.isArray(arr)) {
     throw new Error('Argument to naturalSort must be an array');
   }
-  
+
   const collator = new Intl.Collator(undefined, {
     numeric: true,
     sensitivity: 'base'
   });
-  
+
   return [...arr].sort(collator.compare);
 }
 
@@ -348,16 +348,16 @@ export function toBoolean(str: string | undefined): boolean | undefined {
   if (typeof str !== 'string') {
     throw new Error('Argument to toBoolean must be a string');
   }
-  
+
   const lower = str.toLowerCase().trim();
-  
+
   if (lower === 'true' || lower === '1' || lower === 'yes' || lower === 'on') {
     return true;
   }
   if (lower === 'false' || lower === '0' || lower === 'no' || lower === 'off' || lower === '') {
     return false;
   }
-  
+
   throw new Error(`Cannot convert "${str}" to a boolean`);
 }
 

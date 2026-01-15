@@ -86,7 +86,7 @@ export class ExpressionValidator {
   static validateMemberAccess(propertyName: string, expressionString: string): void {
     if (DANGEROUS_PROPERTIES.has(propertyName)) {
       throw new AccessError(
-        `Prototype access detected in member expression`,
+        'Prototype access detected in member expression',
         {
           propertyName,
           expression: expressionString
