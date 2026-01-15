@@ -1,5 +1,5 @@
 import { TextDocument } from 'vscode-languageserver-textdocument';
-import { Position, Range, MarkupKind, CompletionItem, CompletionItemKind } from 'vscode-languageserver-types';
+import { Position, Range, MarkupKind, CompletionItem, CompletionItemKind, InsertTextFormat } from 'vscode-languageserver-types';
 import { Values, Value, ValueObject } from '../types';
 import { TNAME, Token } from '../parsing';
 import { HoverV2 } from './language-service.types';
@@ -160,6 +160,72 @@ class VarTrie {
 }
 
 /**
+ * Resolve value by a mixed dot/bracket path like foo[0][1].bar starting from a given root.
+ * For arrays, when an index is accessed, we treat it as the element shape and use the first element if present.
+ */
+function resolveValueByBracketPath(root: unknown, path: string): unknown {
+  const isObj = (v: unknown): v is Record<string, unknown> => v !== null && typeof v === 'object';
+  let node: unknown = root as unknown;
+  if (!path) return node;
+  const segments = path.split('.');
+  for (const seg of segments) {
+    if (!isObj(node)) return undefined;
+    // parse leading name and bracket chains
+    let i = seg.indexOf('[');
+    const name = i >= 0 ? seg.slice(0, i) : seg;
+    let rest = i >= 0 ? seg.slice(i) : '';
+    if (name) {
+      node = (node as Record<string, unknown>)[name];
+    }
+    // walk bracket chains, treat any index as the element shape (use first element)
+    while (rest.startsWith('[')) {
+      const closeIdx = rest.indexOf(']');
+      if (closeIdx < 0) break; // malformed, stop here
+      rest = rest.slice(closeIdx + 1);
+      if (Array.isArray(node)) {
+        node = node.length > 0 ? node[0] : undefined;
+      } else {
+        node = undefined;
+      }
+    }
+  }
+  return node;
+}
+
+/**
+ * Pushes standard key completion and (if applicable) an array selector snippet completion.
+ */
+function pushVarKeyCompletions(
+  items: CompletionItem[],
+  key: string,
+  label: string,
+  detail: string,
+  val: unknown,
+  rangePartial?: Range
+): void {
+  // Regular key/variable completion
+  items.push({
+    label,
+    kind: CompletionItemKind.Variable,
+    detail,
+    insertText: key,
+    textEdit: rangePartial ? { range: rangePartial, newText: key } : undefined
+  });
+
+  // If the value is an array, suggest selector snippet as an extra item
+  if (Array.isArray(val)) {
+    const snippet = key + '[${1}]';
+    items.push({
+      label: `${label}[]`,
+      kind: CompletionItemKind.Variable,
+      detail: 'array',
+      insertTextFormat: InsertTextFormat.Snippet,
+      textEdit: rangePartial ? { range: rangePartial, newText: snippet } : undefined
+    });
+  }
+}
+
+/**
  * Tries to resolve a variable hover using spans.
  * @param textDocument The document containing the variable name.
  * @param position The current position of the cursor.
@@ -257,6 +323,27 @@ export function pathVariableCompletions(vars: Values | undefined, prefix: string
   const partial = endsWithDot ? '' : prefix.slice(lastDot + 1);
   const lowerPartial = partial.toLowerCase();
 
+  // If there are bracket selectors anywhere in the basePath, use bracket-aware resolution
+  if (basePath.includes('[')) {
+    const baseValue = resolveValueByBracketPath(vars, basePath);
+    const items: CompletionItem[] = [];
+
+    // If the baseValue is an object, offer its keys
+    if (baseValue && typeof baseValue === 'object' && !Array.isArray(baseValue)) {
+      const obj = baseValue as Record<string, unknown>;
+      for (const key of Object.keys(obj)) {
+        if (partial && !key.toLowerCase().startsWith(lowerPartial)) continue;
+        const fullLabel = basePath ? `${basePath}.${key}` : key;
+        const val = obj[key] as Value;
+        const detail = valueTypeName(val);
+        pushVarKeyCompletions(items, key, fullLabel, detail, val, rangePartial);
+      }
+    }
+
+    return items;
+  }
+
+  // Dot-only path: use trie for speed and existing behavior
   const baseNode = trie.search(baseParts);
   if (!baseNode) {
     return [];
@@ -272,14 +359,7 @@ export function pathVariableCompletions(vars: Values | undefined, prefix: string
     const child = baseNode.children[key];
     const label = [...baseParts, key].join('.');
     const detail = child.value !== undefined ? valueTypeName(child.value) : 'object';
-
-    items.push({
-      label,
-      kind: CompletionItemKind.Variable,
-      detail,
-      insertText: key,
-      textEdit: rangePartial ? { range: rangePartial, newText: key } : undefined
-    });
+    pushVarKeyCompletions(items, key, label, detail, child.value, rangePartial);
   }
 
   return items;
