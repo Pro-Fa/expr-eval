@@ -29,8 +29,8 @@ describe('Language Service', () => {
       const doc = TextDocument.create('file://test', 'plaintext', 1, text);
       const completions = ls.getCompletions({
         textDocument: doc,
-        variables: {foo: 123, bar: 'test'},
-        position: {line: 0, character: 3}
+        variables: { foo: 123, bar: 'test' },
+        position: { line: 0, character: 3 }
       });
       const labels = completions.map(c => c.label);
       expect(labels).toContain('foo');
@@ -41,8 +41,8 @@ describe('Language Service', () => {
       const doc = TextDocument.create('file://test', 'plaintext', 1, text);
       const completions = ls.getCompletions({
         textDocument: doc,
-        variables: {max: 10, min: 5, foo: 1},
-        position: {line: 0, character: 2}
+        variables: { max: 10, min: 5, foo: 1 },
+        position: { line: 0, character: 2 }
       });
       const labels = completions.map(c => c.label);
       expect(labels).toContain('max');
@@ -55,8 +55,8 @@ describe('Language Service', () => {
       const doc = TextDocument.create('file://test', 'plaintext', 1, text);
       const completions = ls.getCompletions({
         textDocument: doc,
-        variables: {max: 10, foo: 1},
-        position: {line: 0, character: 2}
+        variables: { max: 10, foo: 1 },
+        position: { line: 0, character: 2 }
       });
       const labels = completions.map(c => c.label);
       expect(labels).toContain('max');
@@ -67,8 +67,8 @@ describe('Language Service', () => {
       const doc = TextDocument.create('file://test', 'plaintext', 1, text);
       const completions = ls.getCompletions({
         textDocument: doc,
-        variables: {foo: 1, bar: 2},
-        position: {line: 0, character: 0}
+        variables: { foo: 1, bar: 2 },
+        position: { line: 0, character: 0 }
       });
       const labels = completions.map(c => c.label);
       expect(labels).toContain('foo');
@@ -82,7 +82,7 @@ describe('Language Service', () => {
       const completions = ls.getCompletions({
         textDocument: doc,
         variables: undefined,
-        position: {line: 0, character: 3}
+        position: { line: 0, character: 3 }
       });
       const labels = completions.map(c => c.label);
       expect(labels).not.toContain('foo');
@@ -93,7 +93,7 @@ describe('Language Service', () => {
       const doc = TextDocument.create('file://test', 'plaintext', 1, text);
       const completions = ls.getCompletions({
         textDocument: doc,
-        position: {line: 0, character: 3}
+        position: { line: 0, character: 3 }
       });
       const labels = completions.map(c => c.label);
       expect(labels).toContain('sin');
@@ -104,7 +104,7 @@ describe('Language Service', () => {
       const doc = TextDocument.create('file://test', 'plaintext', 1, text);
       const completions = ls.getCompletions({
         textDocument: doc,
-        position: {line: 0, character: 2}
+        position: { line: 0, character: 2 }
       });
       const labels = completions.map(c => c.label);
       expect(labels).toContain('PI');
@@ -115,7 +115,7 @@ describe('Language Service', () => {
       const doc = TextDocument.create('file://test', 'plaintext', 1, text);
       const completions = ls.getCompletions({
         textDocument: doc,
-        position: {line: 0, character: 2}
+        position: { line: 0, character: 2 }
       });
       const labels = completions.map(c => c.label);
       expect(labels).toContain('case');
@@ -126,8 +126,8 @@ describe('Language Service', () => {
       const doc = TextDocument.create('file://test', 'plaintext', 1, text);
       const completions = ls.getCompletions({
         textDocument: doc,
-        variables: {foo: {bar: 1}},
-        position: {line: 0, character: 4}
+        variables: { foo: { bar: 1 } },
+        position: { line: 0, character: 4 }
       });
       expect(completions.length).toBeGreaterThan(0);
       const item = completions.find(c => c.label === 'foo.bar');
@@ -140,8 +140,8 @@ describe('Language Service', () => {
       const doc = TextDocument.create('file://test', 'plaintext', 1, text);
       const completions = ls.getCompletions({
         textDocument: doc,
-        variables: {sine: 1},
-        position: {line: 0, character: 2}
+        variables: { sine: 1 },
+        position: { line: 0, character: 2 }
       });
 
       const sinFunc = completions.find(c => c.label === 'sin');
@@ -161,8 +161,8 @@ describe('Language Service', () => {
       const doc = TextDocument.create('file://test', 'plaintext', 1, text);
       const completions = ls.getCompletions({
         textDocument: doc,
-        variables: {myVar: 42},
-        position: {line: 0, character: 2}
+        variables: { myVar: 42 },
+        position: { line: 0, character: 2 }
       });
 
       const varCompletion = completions.find(c => c.label === 'myVar');
@@ -176,7 +176,7 @@ describe('Language Service', () => {
       const doc = TextDocument.create('file://test', 'plaintext', 1, text);
       const completions = ls.getCompletions({
         textDocument: doc,
-        position: {line: 0, character: 1}
+        position: { line: 0, character: 1 }
       });
 
       const eConst = completions.find(c => c.label === 'E');
@@ -196,7 +196,7 @@ describe('Language Service', () => {
           boolVar: true,
           nullVar: null
         },
-        position: {line: 0, character: 0}
+        position: { line: 0, character: 0 }
       });
 
       expect(completions.find(c => c.label === 'numVar')?.detail).toBe('number');
@@ -215,7 +215,7 @@ describe('Language Service', () => {
         variables: {
           arr: [10, 20, 30]
         },
-        position: {line: 0, character: 3}
+        position: { line: 0, character: 3 }
       });
 
       const arrayItem = completions.find(c => c.label === 'arr[]');
@@ -234,10 +234,10 @@ describe('Language Service', () => {
         textDocument: doc,
         variables: {
           arr: [
-            {foo: 1, bar: 2}
+            { foo: 1, bar: 2 }
           ]
         },
-        position: {line: 0, character: text.length}
+        position: { line: 0, character: text.length }
       });
 
       expect(completions.length).toBeGreaterThan(0);
@@ -256,11 +256,11 @@ describe('Language Service', () => {
         variables: {
           matrix: [
             [
-              {value: 42}
+              { value: 42 }
             ]
           ]
         },
-        position: {line: 0, character: text.length}
+        position: { line: 0, character: text.length }
       });
 
       const valueItem = completions.find(c => c.label === 'matrix[0][1].value');
@@ -277,7 +277,7 @@ describe('Language Service', () => {
         variables: {
           arr: [1, 2, 3]
         },
-        position: {line: 0, character: 3}
+        position: { line: 0, character: 3 }
       });
 
       const arrayItem = completions.find(c => c.label === 'arr[]');
@@ -295,8 +295,8 @@ describe('Language Service', () => {
       const doc = TextDocument.create('file://test', 'plaintext', 1, text);
       const hover = ls.getHover({
         textDocument: doc,
-        position: {line: 0, character: 1},
-        variables: {foo: 42}
+        position: { line: 0, character: 1 },
+        variables: { foo: 42 }
       });
 
       const contents = getContentsValue(hover.contents);
@@ -309,7 +309,7 @@ describe('Language Service', () => {
       const doc = TextDocument.create('file://test', 'plaintext', 1, text);
       const hover = ls.getHover({
         textDocument: doc,
-        position: {line: 0, character: 1},
+        position: { line: 0, character: 1 },
         variables: {}
       });
 
@@ -322,7 +322,7 @@ describe('Language Service', () => {
       const doc = TextDocument.create('file://test', 'plaintext', 1, text);
       const hover = ls.getHover({
         textDocument: doc,
-        position: {line: 0, character: 1},
+        position: { line: 0, character: 1 },
         variables: {}
       });
 
@@ -336,7 +336,7 @@ describe('Language Service', () => {
       const doc = TextDocument.create('file://test', 'plaintext', 1, text);
       const hover = ls.getHover({
         textDocument: doc,
-        position: {line: 0, character: 1},
+        position: { line: 0, character: 1 },
         variables: {}
       });
 
@@ -349,7 +349,7 @@ describe('Language Service', () => {
       const doc = TextDocument.create('file://test', 'plaintext', 1, text);
       const hover = ls.getHover({
         textDocument: doc,
-        position: {line: 0, character: 2},
+        position: { line: 0, character: 2 },
         variables: {}
       });
 
@@ -363,7 +363,7 @@ describe('Language Service', () => {
       const doc = TextDocument.create('file://test', 'plaintext', 1, text);
       const hover = ls.getHover({
         textDocument: doc,
-        position: {line: 0, character: 1},
+        position: { line: 0, character: 1 },
         variables: {}
       });
 
@@ -376,7 +376,7 @@ describe('Language Service', () => {
       const doc = TextDocument.create('file://test', 'plaintext', 1, text);
       const hover = ls.getHover({
         textDocument: doc,
-        position: {line: 0, character: 2},
+        position: { line: 0, character: 2 },
         variables: {}
       });
 
@@ -389,7 +389,7 @@ describe('Language Service', () => {
       const doc = TextDocument.create('file://test', 'plaintext', 1, text);
       const hover = ls.getHover({
         textDocument: doc,
-        position: {line: 0, character: 0},
+        position: { line: 0, character: 0 },
         variables: {}
       });
 
@@ -401,8 +401,8 @@ describe('Language Service', () => {
       const doc = TextDocument.create('file://test', 'plaintext', 1, text);
       const hover = ls.getHover({
         textDocument: doc,
-        position: {line: 0, character: 1},
-        variables: {myFunc: 'my-variable'}
+        position: { line: 0, character: 1 },
+        variables: { myFunc: 'my-variable' }
       });
 
       const contents = getContentsValue(hover.contents);
@@ -416,7 +416,7 @@ describe('Language Service', () => {
       const doc = TextDocument.create('file://test', 'plaintext', 1, text);
       const hover = ls.getHover({
         textDocument: doc,
-        position: {line: 0, character: 1}
+        position: { line: 0, character: 1 }
       });
 
       const contents = hover.contents as any;
@@ -434,8 +434,8 @@ describe('Language Service', () => {
       const doc = TextDocument.create('file://test', 'plaintext', 1, text);
       const hover = ls.getHover({
         textDocument: doc,
-        position: {line: 0, character: 1},
-        variables: {foo: 42}
+        position: { line: 0, character: 1 },
+        variables: { foo: 42 }
       });
 
       const contents = hover.contents as any;
@@ -558,13 +558,13 @@ describe('Language Service', () => {
 
       const completions = ls.getCompletions({
         textDocument: doc,
-        position: {line: 0, character: 0}
+        position: { line: 0, character: 0 }
       });
       expect(Array.isArray(completions)).toBe(true);
 
       const hover = ls.getHover({
         textDocument: doc,
-        position: {line: 0, character: 0}
+        position: { line: 0, character: 0 }
       });
       expect(hover).toBeDefined();
 
@@ -602,7 +602,7 @@ describe('Language Service', () => {
 
       const completions = ls.getCompletions({
         textDocument: doc,
-        position: {line: 0, character: text.length}
+        position: { line: 0, character: text.length }
       });
       expect(Array.isArray(completions)).toBe(true);
     });
@@ -613,7 +613,7 @@ describe('Language Service', () => {
 
       const completions = ls.getCompletions({
         textDocument: doc,
-        position: {line: 0, character: 0}
+        position: { line: 0, character: 0 }
       });
       expect(Array.isArray(completions)).toBe(true);
     });
@@ -630,7 +630,7 @@ describe('Language Service', () => {
 
     it('should create service with custom options', () => {
       const service = createLanguageService({
-        operators: {'+': true, '-': false}
+        operators: { '+': true, '-': false }
       });
       expect(service).toBeDefined();
     });
