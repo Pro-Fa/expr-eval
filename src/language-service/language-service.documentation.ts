@@ -208,6 +208,15 @@ export const BUILTIN_FUNCTION_DOCS: Record<string, FunctionDoc> = {
       { name: 'length', description: 'Target length.' },
       { name: 'padStr', description: 'Padding string.', optional: true }
     ]
+  },
+  padBoth: {
+    name: 'padBoth',
+    description: 'Pad string on both sides to reach target length. Extra padding goes on the right.',
+    params: [
+      { name: 'str', description: 'Input string.' },
+      { name: 'length', description: 'Target length.' },
+      { name: 'padStr', description: 'Padding string.', optional: true }
+    ]
   }
 };
 
