@@ -39,7 +39,7 @@ The `|` (pipe) operator concatenates arrays or strings:
 
 | Operator | Description |
 |:-------- |:----------- |
-| a \| b   | Concatenates `a` and `b`. Both operands must be arrays or both must be strings. |
+| a \| b   | Concatenates `a` and `b` if both are arrays or both are strings; otherwise returns `undefined`. |
 
 ### Array Concatenation
 
@@ -64,7 +64,7 @@ parser.evaluate('"hello" | " " | "world"');   // "hello world"
 parser.evaluate('"a" | "b" | "c"');           // "abc"
 ```
 
-> **Note:** Mixing types (e.g., array with string, or number with string) will return `undefined`.
+> **Note:** Mixing types (e.g., an array with a string) will return `undefined`.
 
 ## Unary Operators
 
