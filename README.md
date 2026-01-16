@@ -55,6 +55,14 @@ Parser.evaluate('6 * x', { x: 7 }) // 42
 - **Object Construction** - Create objects and arrays in expressions
 - **Language Service** - IDE integration with completions, hover info, and highlighting
 
+## Playground Example
+
+Try out the expression evaluator and its language server capabilities directly in your browser at the [Playground](https://pro-fa.github.io/expr-eval/). The playground provides an interactive environment with:
+- Live expression evaluation
+- Code completions and IntelliSense
+- Syntax highlighting
+- Hover information for functions and variables
+
 ## Running Tests
 
 ```bash
