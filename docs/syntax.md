@@ -162,6 +162,7 @@ The parser includes comprehensive string manipulation capabilities.
 | slice(s, start, end?) | Extracts a portion of a string or array. Supports negative indices (e.g., -1 for last element). |
 | urlEncode(str)        | URL-encodes a string using `encodeURIComponent`. |
 | base64Encode(str)     | Base64-encodes a string with proper UTF-8 support. |
+| base64Decode(str)     | Base64-decodes a string with proper UTF-8 support. |
 
 ### Utility Functions
 
@@ -225,6 +226,7 @@ parser.evaluate('slice([1, 2, 3, 4, 5], -2)'); // [4, 5]
 // Encoding
 parser.evaluate('urlEncode("foo=bar&baz")'); // "foo%3Dbar%26baz"
 parser.evaluate('base64Encode("hello")'); // "aGVsbG8="
+parser.evaluate('base64Decode("aGVsbG8=")'); // "hello"
 
 // Coalesce
 parser.evaluate('coalesce("", null, "found")'); // "found"

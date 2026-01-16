@@ -503,9 +503,13 @@ export function urlEncode(str: string | undefined): string | undefined {
   return encodeURIComponent(str);
 }
 
+// Global declarations for btoa/atob (available in Node.js 16+ and browsers)
+declare function btoa(data: string): string;
+declare function atob(data: string): string;
+
 /**
  * Base64-encodes a string
- * Handles UTF-8 encoding properly
+ * Handles UTF-8 encoding properly using btoa
  */
 export function base64Encode(str: string | undefined): string | undefined {
   if (str === undefined) {
@@ -514,53 +518,30 @@ export function base64Encode(str: string | undefined): string | undefined {
   if (typeof str !== 'string') {
     throw new Error('Argument to base64Encode must be a string');
   }
+  // Encode UTF-8 string to base64 using btoa
+  // First encode as UTF-8 bytes, then convert to binary string for btoa
+  const utf8Str = unescape(encodeURIComponent(str));
+  return btoa(utf8Str);
+}
 
-  // Base64 alphabet
-  const base64Chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-  
-  // Convert string to UTF-8 bytes
-  const utf8: number[] = [];
-  for (let i = 0; i < str.length; i++) {
-    let code = str.charCodeAt(i);
-    if (code < 0x80) {
-      utf8.push(code);
-    } else if (code < 0x800) {
-      utf8.push(0xc0 | (code >> 6), 0x80 | (code & 0x3f));
-    } else if (code >= 0xd800 && code < 0xdc00 && i + 1 < str.length) {
-      // Surrogate pair - check bounds before accessing next character
-      const low = str.charCodeAt(i + 1);
-      if (low >= 0xdc00 && low < 0xe000) {
-        i++;
-        code = 0x10000 + ((code - 0xd800) << 10) + (low - 0xdc00);
-        utf8.push(
-          0xf0 | (code >> 18),
-          0x80 | ((code >> 12) & 0x3f),
-          0x80 | ((code >> 6) & 0x3f),
-          0x80 | (code & 0x3f)
-        );
-      } else {
-        // Unpaired high surrogate - encode as-is (will produce invalid UTF-8, but matches typical behavior)
-        utf8.push(0xe0 | (code >> 12), 0x80 | ((code >> 6) & 0x3f), 0x80 | (code & 0x3f));
-      }
-    } else {
-      utf8.push(0xe0 | (code >> 12), 0x80 | ((code >> 6) & 0x3f), 0x80 | (code & 0x3f));
-    }
+/**
+ * Base64-decodes a string
+ * Handles UTF-8 decoding properly using atob
+ */
+export function base64Decode(str: string | undefined): string | undefined {
+  if (str === undefined) {
+    return undefined;
   }
-
-  // Encode bytes to base64
-  let result = '';
-  for (let i = 0; i < utf8.length; i += 3) {
-    const b1 = utf8[i];
-    const b2 = utf8[i + 1];
-    const b3 = utf8[i + 2];
-
-    result += base64Chars[b1 >> 2];
-    result += base64Chars[((b1 & 0x03) << 4) | ((b2 ?? 0) >> 4)];
-    result += b2 !== undefined ? base64Chars[((b2 & 0x0f) << 2) | ((b3 ?? 0) >> 6)] : '=';
-    result += b3 !== undefined ? base64Chars[b3 & 0x3f] : '=';
+  if (typeof str !== 'string') {
+    throw new Error('Argument to base64Decode must be a string');
   }
-
-  return result;
+  try {
+    // Decode base64 to binary string, then decode UTF-8
+    const binaryStr = atob(str);
+    return decodeURIComponent(escape(binaryStr));
+  } catch {
+    throw new Error('Invalid base64 string');
+  }
 }
 
 /**

@@ -763,6 +763,47 @@ describe('String Functions TypeScript Test', function () {
     });
   });
 
+  describe('base64Decode(str)', function () {
+    it('should Base64-decode a string', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('base64Decode("aGVsbG8=")'), 'hello');
+      assert.strictEqual(parser.evaluate('base64Decode("SGVsbG8gV29ybGQ=")'), 'Hello World');
+      assert.strictEqual(parser.evaluate('base64Decode("dGVzdA==")'), 'test');
+    });
+
+    it('should handle empty string', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('base64Decode("")'), '');
+    });
+
+    it('should handle UTF-8 characters', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('base64Decode("aMOpbGxv")'), 'héllo');
+      assert.strictEqual(parser.evaluate('base64Decode("5pel5pys6Kqe")'), '日本語');
+    });
+
+    it('should return undefined if argument is undefined', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('base64Decode(undefined)'), undefined);
+    });
+
+    it('should throw error for non-string argument', function () {
+      const parser = new Parser();
+      assert.throws(() => parser.evaluate('base64Decode(123)'), /must be a string/);
+    });
+
+    it('should throw error for invalid base64 string', function () {
+      const parser = new Parser();
+      assert.throws(() => parser.evaluate('base64Decode("!!invalid!!")'), /Invalid base64 string/);
+    });
+
+    it('should roundtrip with base64Encode', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('base64Decode(base64Encode("hello"))'), 'hello');
+      assert.strictEqual(parser.evaluate('base64Decode(base64Encode("日本語"))'), '日本語');
+    });
+  });
+
   describe('coalesce(a, b, ...)', function () {
     it('should return the first non-null, non-empty string value', function () {
       const parser = new Parser();

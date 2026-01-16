@@ -249,6 +249,13 @@ export const BUILTIN_FUNCTION_DOCS: Record<string, FunctionDoc> = {
       { name: 'str', description: 'String to encode.' }
     ]
   },
+  base64Decode: {
+    name: 'base64Decode',
+    description: 'Base64-decode a string with UTF-8 support.',
+    params: [
+      { name: 'str', description: 'Base64 string to decode.' }
+    ]
+  },
   coalesce: {
     name: 'coalesce',
     description: 'Return the first non-null and non-empty string value from the arguments.',
