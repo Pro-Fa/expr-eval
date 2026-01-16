@@ -220,7 +220,6 @@ export class Parser {
       padLeft: padLeft,
       padRight: padRight,
       padBoth: padBoth,
-      // New functions
       slice: slice,
       urlEncode: urlEncode,
       base64Encode: base64Encode,

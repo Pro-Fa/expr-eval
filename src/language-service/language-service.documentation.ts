@@ -225,6 +225,36 @@ export const BUILTIN_FUNCTION_DOCS: Record<string, FunctionDoc> = {
       { name: 'length', description: 'Target length.' },
       { name: 'padStr', description: 'Padding string.', optional: true }
     ]
+  },
+  slice: {
+    name: 'slice',
+    description: 'Extract a portion of a string or array. Supports negative indices.',
+    params: [
+      { name: 's', description: 'Input string or array.' },
+      { name: 'start', description: 'Start index (negative counts from end).' },
+      { name: 'end', description: 'End index (negative counts from end).', optional: true }
+    ]
+  },
+  urlEncode: {
+    name: 'urlEncode',
+    description: 'URL-encode a string using encodeURIComponent.',
+    params: [
+      { name: 'str', description: 'String to encode.' }
+    ]
+  },
+  base64Encode: {
+    name: 'base64Encode',
+    description: 'Base64-encode a string with UTF-8 support.',
+    params: [
+      { name: 'str', description: 'String to encode.' }
+    ]
+  },
+  coalesce: {
+    name: 'coalesce',
+    description: 'Return the first non-null and non-empty string value from the arguments.',
+    params: [
+      { name: 'values', description: 'Values to check.', isVariadic: true }
+    ]
   }
 };
 
