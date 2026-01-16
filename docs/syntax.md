@@ -12,7 +12,7 @@ The parser accepts a pretty basic grammar. It's similar to normal JavaScript exp
 | ^                        | Right         | Exponentiation |
 | +, -, not, sqrt, etc.    | Right         | Unary prefix operators (see below for the full list) |
 | \*, /, %                 | Left          | Multiplication, division, remainder |
-| +, -, \|\|               | Left          | Addition, subtraction, array/list concatenation |
+| +, -, \|                 | Left          | Addition, subtraction, array/string concatenation |
 | ==, !=, >=, <=, >, <, in | Left          | Equals, not equals, etc. "in" means "is the left operand included in the right array operand?" |
 | and                      | Left          | Logical AND |
 | or                       | Left          | Logical OR |
@@ -29,6 +29,35 @@ const parser = new Parser({
 });
 // Now parser supports 'x in array' and 'y = 2*x' expressions
 ```
+
+## Concatenation Operator
+
+The `|` (pipe) operator concatenates arrays or strings.
+
+| Operator | Description |
+|:-------- |:----------- |
+| a \| b   | Concatenates arrays or strings. Both operands must be of the same type. |
+
+### Array Concatenation
+
+```js
+const parser = new Parser();
+
+parser.evaluate('[1, 2] | [3, 4]');           // [1, 2, 3, 4]
+parser.evaluate('[1] | [2] | [3]');           // [1, 2, 3]
+parser.evaluate('["a", "b"] | ["c", "d"]');   // ["a", "b", "c", "d"]
+```
+
+### String Concatenation
+
+```js
+const parser = new Parser();
+
+parser.evaluate('"hello" | " " | "world"');   // "hello world"
+parser.evaluate('"a" | "b" | "c"');           // "abc"
+```
+
+> **Note:** Both operands must be of the same type (both arrays or both strings). Mixing types will return `undefined`.
 
 ## Unary Operators
 
