@@ -460,3 +460,113 @@ export function padBoth(str: string | undefined, targetLength: number | undefine
 
   return leftPad + str + rightPad;
 }
+
+/**
+ * Extracts a portion of a string or array
+ * Supports negative indices (counting from the end)
+ * @param s - The string or array to slice
+ * @param start - Start index (negative counts from end)
+ * @param end - End index (optional, negative counts from end)
+ */
+export function slice(
+  s: string | any[] | undefined,
+  start: number | undefined,
+  end?: number
+): string | any[] | undefined {
+  if (s === undefined || start === undefined) {
+    return undefined;
+  }
+  if (typeof s !== 'string' && !Array.isArray(s)) {
+    throw new Error('First argument to slice must be a string or array');
+  }
+  if (typeof start !== 'number') {
+    throw new Error('Second argument to slice must be a number');
+  }
+  if (end !== undefined && typeof end !== 'number') {
+    throw new Error('Third argument to slice must be a number');
+  }
+
+  return s.slice(start, end);
+}
+
+/**
+ * URL-encodes a string
+ * Uses encodeURIComponent for safe encoding
+ */
+export function urlEncode(str: string | undefined): string | undefined {
+  if (str === undefined) {
+    return undefined;
+  }
+  if (typeof str !== 'string') {
+    throw new Error('Argument to urlEncode must be a string');
+  }
+  return encodeURIComponent(str);
+}
+
+/**
+ * Base64-encodes a string
+ * Handles UTF-8 encoding properly
+ */
+export function base64Encode(str: string | undefined): string | undefined {
+  if (str === undefined) {
+    return undefined;
+  }
+  if (typeof str !== 'string') {
+    throw new Error('Argument to base64Encode must be a string');
+  }
+
+  // Base64 alphabet
+  const base64Chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+  
+  // Convert string to UTF-8 bytes
+  const utf8: number[] = [];
+  for (let i = 0; i < str.length; i++) {
+    let code = str.charCodeAt(i);
+    if (code < 0x80) {
+      utf8.push(code);
+    } else if (code < 0x800) {
+      utf8.push(0xc0 | (code >> 6), 0x80 | (code & 0x3f));
+    } else if (code >= 0xd800 && code < 0xdc00) {
+      // Surrogate pair
+      i++;
+      const low = str.charCodeAt(i);
+      code = 0x10000 + ((code - 0xd800) << 10) + (low - 0xdc00);
+      utf8.push(
+        0xf0 | (code >> 18),
+        0x80 | ((code >> 12) & 0x3f),
+        0x80 | ((code >> 6) & 0x3f),
+        0x80 | (code & 0x3f)
+      );
+    } else {
+      utf8.push(0xe0 | (code >> 12), 0x80 | ((code >> 6) & 0x3f), 0x80 | (code & 0x3f));
+    }
+  }
+
+  // Encode bytes to base64
+  let result = '';
+  for (let i = 0; i < utf8.length; i += 3) {
+    const b1 = utf8[i];
+    const b2 = utf8[i + 1];
+    const b3 = utf8[i + 2];
+
+    result += base64Chars[b1 >> 2];
+    result += base64Chars[((b1 & 0x03) << 4) | ((b2 ?? 0) >> 4)];
+    result += b2 !== undefined ? base64Chars[((b2 & 0x0f) << 2) | ((b3 ?? 0) >> 6)] : '=';
+    result += b3 !== undefined ? base64Chars[b3 & 0x3f] : '=';
+  }
+
+  return result;
+}
+
+/**
+ * Returns the first non-null and non-empty string value from the arguments
+ * @param args - Any number of values to check
+ */
+export function coalesceString(...args: any[]): any {
+  for (const arg of args) {
+    if (arg !== undefined && arg !== null && arg !== '') {
+      return arg;
+    }
+  }
+  return args.length > 0 ? args[args.length - 1] : undefined;
+}
