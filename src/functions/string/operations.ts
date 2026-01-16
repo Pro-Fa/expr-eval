@@ -526,17 +526,22 @@ export function base64Encode(str: string | undefined): string | undefined {
       utf8.push(code);
     } else if (code < 0x800) {
       utf8.push(0xc0 | (code >> 6), 0x80 | (code & 0x3f));
-    } else if (code >= 0xd800 && code < 0xdc00) {
-      // Surrogate pair
-      i++;
-      const low = str.charCodeAt(i);
-      code = 0x10000 + ((code - 0xd800) << 10) + (low - 0xdc00);
-      utf8.push(
-        0xf0 | (code >> 18),
-        0x80 | ((code >> 12) & 0x3f),
-        0x80 | ((code >> 6) & 0x3f),
-        0x80 | (code & 0x3f)
-      );
+    } else if (code >= 0xd800 && code < 0xdc00 && i + 1 < str.length) {
+      // Surrogate pair - check bounds before accessing next character
+      const low = str.charCodeAt(i + 1);
+      if (low >= 0xdc00 && low < 0xe000) {
+        i++;
+        code = 0x10000 + ((code - 0xd800) << 10) + (low - 0xdc00);
+        utf8.push(
+          0xf0 | (code >> 18),
+          0x80 | ((code >> 12) & 0x3f),
+          0x80 | ((code >> 6) & 0x3f),
+          0x80 | (code & 0x3f)
+        );
+      } else {
+        // Unpaired high surrogate - encode as-is (will produce invalid UTF-8, but matches typical behavior)
+        utf8.push(0xe0 | (code >> 12), 0x80 | ((code >> 6) & 0x3f), 0x80 | (code & 0x3f));
+      }
     } else {
       utf8.push(0xe0 | (code >> 12), 0x80 | ((code >> 6) & 0x3f), 0x80 | (code & 0x3f));
     }
