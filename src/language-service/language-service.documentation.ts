@@ -191,6 +191,14 @@ export const BUILTIN_FUNCTION_DOCS: Record<string, FunctionDoc> = {
       { name: 'delimiter', description: 'Delimiter string.' }
     ]
   },
+  trim: {
+    name: 'trim',
+    description: 'Remove whitespace (or specified characters) from both ends of a string.',
+    params: [
+      { name: 'str', description: 'Input string.' },
+      { name: 'chars', description: 'Characters to trim.', optional: true }
+    ]
+  },
   padLeft: {
     name: 'padLeft',
     description: 'Pad string on the left to reach target length.',
@@ -203,6 +211,15 @@ export const BUILTIN_FUNCTION_DOCS: Record<string, FunctionDoc> = {
   padRight: {
     name: 'padRight',
     description: 'Pad string on the right to reach target length.',
+    params: [
+      { name: 'str', description: 'Input string.' },
+      { name: 'length', description: 'Target length.' },
+      { name: 'padStr', description: 'Padding string.', optional: true }
+    ]
+  },
+  padBoth: {
+    name: 'padBoth',
+    description: 'Pad string on both sides to reach target length. Extra padding goes on the right.',
     params: [
       { name: 'str', description: 'Input string.' },
       { name: 'length', description: 'Target length.' },

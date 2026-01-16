@@ -112,7 +112,7 @@ The parser includes comprehensive string manipulation capabilities.
 
 | Function         | Description |
 |:---------------- |:----------- |
-| trim(str)        | Removes whitespace from both ends of a string. |
+| trim(str, chars?)| Removes whitespace (or specified characters) from both ends of a string. |
 | toUpper(str)     | Converts a string to uppercase. |
 | toLower(str)     | Converts a string to lowercase. |
 | toTitle(str)     | Converts a string to title case (capitalizes first letter of each word). |
@@ -151,8 +151,9 @@ The parser includes comprehensive string manipulation capabilities.
 
 | Function              | Description |
 |:--------------------- |:----------- |
-| padLeft(str, len)     | Pads a string on the left with spaces to reach the target length. |
-| padRight(str, len)    | Pads a string on the right with spaces to reach the target length. |
+| padLeft(str, len, padChar?)     | Pads a string on the left with spaces (or optional padding character) to reach the target length. |
+| padRight(str, len, padChar?)    | Pads a string on the right with spaces (or optional padding character) to reach the target length. |
+| padBoth(str, len, padChar?)     | Pads a string on both sides with spaces (or optional padding character) to reach the target length. If an odd number of padding characters is needed, the extra character is added on the right. |
 
 ### String Function Examples
 
@@ -169,6 +170,7 @@ parser.evaluate('searchCount("hello hello", "hello")'); // 2
 
 // String transformation
 parser.evaluate('trim("  hello  ")'); // "hello"
+parser.evaluate('trim("**hello**", "*")'); // "hello"
 parser.evaluate('toUpper("hello")'); // "HELLO"
 parser.evaluate('toLower("HELLO")'); // "hello"
 parser.evaluate('toTitle("hello world")'); // "Hello World"
@@ -195,7 +197,11 @@ parser.evaluate('toBoolean("0")'); // false
 
 // Padding
 parser.evaluate('padLeft("5", 3)'); // "  5"
+parser.evaluate('padLeft("5", 3, "0")'); // "005"
 parser.evaluate('padRight("5", 3)'); // "5  "
+parser.evaluate('padRight("5", 3, "0")'); // "500"
+parser.evaluate('padBoth("hi", 6)'); // "  hi  "
+parser.evaluate('padBoth("hi", 6, "-")'); // "--hi--"
 
 // Complex string operations
 parser.evaluate('toUpper(trim(left("  hello world  ", 10)))'); // "HELLO WOR"

@@ -128,12 +128,24 @@ describe('String Functions TypeScript Test', function () {
     });
   });
 
-  describe('trim(str)', function () {
+  describe('trim(str, chars?)', function () {
     it('should remove whitespace from both ends', function () {
       const parser = new Parser();
       assert.strictEqual(parser.evaluate('trim("  hello  ")'), 'hello');
       assert.strictEqual(parser.evaluate('trim("\\n\\ttest\\n")'), 'test');
       assert.strictEqual(parser.evaluate('trim("test")'), 'test');
+    });
+
+    it('should remove specified characters from both ends', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('trim("**hello**", "*")'), 'hello');
+      assert.strictEqual(parser.evaluate('trim("---test---", "-")'), 'test');
+      assert.strictEqual(parser.evaluate('trim("abchelloabc", "abc")'), 'hello');
+    });
+
+    it('should handle mixed characters to trim', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('trim("*-hello-*", "*-")'), 'hello');
     });
 
     it('should return undefined if argument is undefined', function () {
@@ -143,7 +155,12 @@ describe('String Functions TypeScript Test', function () {
 
     it('should throw error for non-string argument', function () {
       const parser = new Parser();
-      assert.throws(() => parser.evaluate('trim(123)'), /must be a string/);
+      assert.throws(() => parser.evaluate('trim(123)'), /First argument.*must be a string/);
+    });
+
+    it('should throw error for non-string second argument', function () {
+      const parser = new Parser();
+      assert.throws(() => parser.evaluate('trim("test", 123)'), /Second argument.*must be a string/);
     });
   });
 
@@ -467,11 +484,22 @@ describe('String Functions TypeScript Test', function () {
     });
   });
 
-  describe('padLeft(str, targetLength)', function () {
+  describe('padLeft(str, targetLength, padChar?)', function () {
     it('should pad string on the left with spaces by default', function () {
       const parser = new Parser();
       assert.strictEqual(parser.evaluate('padLeft("5", 3)'), '  5');
       assert.strictEqual(parser.evaluate('padLeft("test", 10)'), '      test');
+    });
+
+    it('should pad string on the left with custom padding character', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('padLeft("5", 3, "0")'), '005');
+      assert.strictEqual(parser.evaluate('padLeft("test", 10, "-")'), '------test');
+    });
+
+    it('should handle multi-character padding string', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('padLeft("5", 6, "ab")'), 'ababa5');
     });
 
     it('should not pad if string is already at target length', function () {
@@ -497,13 +525,29 @@ describe('String Functions TypeScript Test', function () {
       assert.throws(() => parser.evaluate('padLeft(123, 5)'), /First argument.*must be a string/);
       assert.throws(() => parser.evaluate('padLeft("test", "5")'), /Second argument.*must be a number/);
     });
+
+    it('should throw error for non-string padding character', function () {
+      const parser = new Parser();
+      assert.throws(() => parser.evaluate('padLeft("test", 5, 0)'), /Third argument.*must be a string/);
+    });
   });
 
-  describe('padRight(str, targetLength)', function () {
+  describe('padRight(str, targetLength, padChar?)', function () {
     it('should pad string on the right with spaces by default', function () {
       const parser = new Parser();
       assert.strictEqual(parser.evaluate('padRight("5", 3)'), '5  ');
       assert.strictEqual(parser.evaluate('padRight("test", 10)'), 'test      ');
+    });
+
+    it('should pad string on the right with custom padding character', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('padRight("5", 3, "0")'), '500');
+      assert.strictEqual(parser.evaluate('padRight("test", 10, "-")'), 'test------');
+    });
+
+    it('should handle multi-character padding string', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('padRight("5", 6, "ab")'), '5ababa');
     });
 
     it('should not pad if string is already at target length', function () {
@@ -528,6 +572,65 @@ describe('String Functions TypeScript Test', function () {
       const parser = new Parser();
       assert.throws(() => parser.evaluate('padRight(123, 5)'), /First argument.*must be a string/);
       assert.throws(() => parser.evaluate('padRight("test", "5")'), /Second argument.*must be a number/);
+    });
+
+    it('should throw error for non-string padding character', function () {
+      const parser = new Parser();
+      assert.throws(() => parser.evaluate('padRight("test", 5, 0)'), /Third argument.*must be a string/);
+    });
+  });
+
+  describe('padBoth(str, targetLength, padChar?)', function () {
+    it('should pad string on both sides with spaces by default', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('padBoth("hi", 6)'), '  hi  ');
+      assert.strictEqual(parser.evaluate('padBoth("test", 10)'), '   test   ');
+    });
+
+    it('should pad string on both sides with custom padding character', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('padBoth("hi", 6, "-")'), '--hi--');
+      assert.strictEqual(parser.evaluate('padBoth("test", 10, "*")'), '***test***');
+    });
+
+    it('should add extra padding on the right when odd number of padding characters needed', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('padBoth("hi", 5)'), ' hi  ');
+      assert.strictEqual(parser.evaluate('padBoth("x", 4)'), ' x  ');
+    });
+
+    it('should handle multi-character padding string', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('padBoth("x", 5, "ab")'), 'abxab');
+    });
+
+    it('should not pad if string is already at target length', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('padBoth("hello", 5)'), 'hello');
+      assert.strictEqual(parser.evaluate('padBoth("hello", 3)'), 'hello');
+    });
+
+    it('should return undefined if any argument is undefined', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('padBoth(undefined, 5)'), undefined);
+      assert.strictEqual(parser.evaluate('padBoth("test", undefined)'), undefined);
+    });
+
+    it('should throw error for negative or non-integer target length', function () {
+      const parser = new Parser();
+      assert.throws(() => parser.evaluate('padBoth("test", -1)'), /non-negative integer/);
+      assert.throws(() => parser.evaluate('padBoth("test", 2.5)'), /non-negative integer/);
+    });
+
+    it('should throw error for non-string or non-number arguments', function () {
+      const parser = new Parser();
+      assert.throws(() => parser.evaluate('padBoth(123, 5)'), /First argument.*must be a string/);
+      assert.throws(() => parser.evaluate('padBoth("test", "5")'), /Second argument.*must be a number/);
+    });
+
+    it('should throw error for non-string padding character', function () {
+      const parser = new Parser();
+      assert.throws(() => parser.evaluate('padBoth("test", 5, 0)'), /Third argument.*must be a string/);
     });
   });
 });

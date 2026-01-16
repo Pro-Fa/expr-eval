@@ -104,16 +104,36 @@ export function searchCount(text: string | undefined, substring: string | undefi
 }
 
 /**
- * Removes whitespace from both ends of a string
+ * Removes whitespace (or specified characters) from both ends of a string
  */
-export function trim(str: string | undefined): string | undefined {
+export function trim(str: string | undefined, chars?: string): string | undefined {
   if (str === undefined) {
     return undefined;
   }
   if (typeof str !== 'string') {
-    throw new Error('Argument to trim must be a string');
+    throw new Error('First argument to trim must be a string');
   }
-  return str.trim();
+  if (chars !== undefined && typeof chars !== 'string') {
+    throw new Error('Second argument to trim must be a string');
+  }
+
+  if (chars === undefined) {
+    return str.trim();
+  }
+
+  // Trim custom characters from both ends
+  let start = 0;
+  let end = str.length;
+
+  while (start < end && chars.includes(str[start])) {
+    start++;
+  }
+
+  while (end > start && chars.includes(str[end - 1])) {
+    end--;
+  }
+
+  return str.slice(start, end);
 }
 
 /**
@@ -377,6 +397,9 @@ export function padLeft(str: string | undefined, targetLength: number | undefine
   if (targetLength < 0 || !Number.isInteger(targetLength)) {
     throw new Error('Second argument to padLeft must be a non-negative integer');
   }
+  if (padString !== undefined && typeof padString !== 'string') {
+    throw new Error('Third argument to padLeft must be a string');
+  }
   return str.padStart(targetLength, padString);
 }
 
@@ -396,5 +419,44 @@ export function padRight(str: string | undefined, targetLength: number | undefin
   if (targetLength < 0 || !Number.isInteger(targetLength)) {
     throw new Error('Second argument to padRight must be a non-negative integer');
   }
+  if (padString !== undefined && typeof padString !== 'string') {
+    throw new Error('Third argument to padRight must be a string');
+  }
   return str.padEnd(targetLength, padString);
+}
+
+/**
+ * Pads a string on both sides to reach the target length
+ * If an odd number of padding characters is needed, the extra character is added on the right
+ */
+export function padBoth(str: string | undefined, targetLength: number | undefined, padString?: string): string | undefined {
+  if (str === undefined || targetLength === undefined) {
+    return undefined;
+  }
+  if (typeof str !== 'string') {
+    throw new Error('First argument to padBoth must be a string');
+  }
+  if (typeof targetLength !== 'number') {
+    throw new Error('Second argument to padBoth must be a number');
+  }
+  if (targetLength < 0 || !Number.isInteger(targetLength)) {
+    throw new Error('Second argument to padBoth must be a non-negative integer');
+  }
+  if (padString !== undefined && typeof padString !== 'string') {
+    throw new Error('Third argument to padBoth must be a string');
+  }
+
+  const totalPadding = targetLength - str.length;
+  if (totalPadding <= 0) {
+    return str;
+  }
+
+  const leftPadding = Math.floor(totalPadding / 2);
+  const rightPadding = totalPadding - leftPadding;
+
+  const actualPadString = padString ?? ' ';
+  const leftPad = actualPadString.repeat(Math.ceil(leftPadding / actualPadString.length)).slice(0, leftPadding);
+  const rightPad = actualPadString.repeat(Math.ceil(rightPadding / actualPadString.length)).slice(0, rightPadding);
+
+  return leftPad + str + rightPad;
 }
