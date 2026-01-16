@@ -112,7 +112,7 @@ The parser includes comprehensive string manipulation capabilities.
 
 | Function         | Description |
 |:---------------- |:----------- |
-| trim(str)        | Removes whitespace from both ends of a string. |
+| trim(str, chars?)| Removes whitespace (or specified characters) from both ends of a string. |
 | toUpper(str)     | Converts a string to uppercase. |
 | toLower(str)     | Converts a string to lowercase. |
 | toTitle(str)     | Converts a string to title case (capitalizes first letter of each word). |
@@ -170,6 +170,7 @@ parser.evaluate('searchCount("hello hello", "hello")'); // 2
 
 // String transformation
 parser.evaluate('trim("  hello  ")'); // "hello"
+parser.evaluate('trim("**hello**", "*")'); // "hello"
 parser.evaluate('toUpper("hello")'); // "HELLO"
 parser.evaluate('toLower("HELLO")'); // "hello"
 parser.evaluate('toTitle("hello world")'); // "Hello World"

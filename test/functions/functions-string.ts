@@ -128,12 +128,24 @@ describe('String Functions TypeScript Test', function () {
     });
   });
 
-  describe('trim(str)', function () {
+  describe('trim(str, chars?)', function () {
     it('should remove whitespace from both ends', function () {
       const parser = new Parser();
       assert.strictEqual(parser.evaluate('trim("  hello  ")'), 'hello');
       assert.strictEqual(parser.evaluate('trim("\\n\\ttest\\n")'), 'test');
       assert.strictEqual(parser.evaluate('trim("test")'), 'test');
+    });
+
+    it('should remove specified characters from both ends', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('trim("**hello**", "*")'), 'hello');
+      assert.strictEqual(parser.evaluate('trim("---test---", "-")'), 'test');
+      assert.strictEqual(parser.evaluate('trim("abchelloabc", "abc")'), 'hello');
+    });
+
+    it('should handle mixed characters to trim', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('trim("*-hello-*", "*-")'), 'hello');
     });
 
     it('should return undefined if argument is undefined', function () {
@@ -143,7 +155,12 @@ describe('String Functions TypeScript Test', function () {
 
     it('should throw error for non-string argument', function () {
       const parser = new Parser();
-      assert.throws(() => parser.evaluate('trim(123)'), /must be a string/);
+      assert.throws(() => parser.evaluate('trim(123)'), /First argument.*must be a string/);
+    });
+
+    it('should throw error for non-string second argument', function () {
+      const parser = new Parser();
+      assert.throws(() => parser.evaluate('trim("test", 123)'), /Second argument.*must be a string/);
     });
   });
 

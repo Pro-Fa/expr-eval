@@ -104,16 +104,36 @@ export function searchCount(text: string | undefined, substring: string | undefi
 }
 
 /**
- * Removes whitespace from both ends of a string
+ * Removes whitespace (or specified characters) from both ends of a string
  */
-export function trim(str: string | undefined): string | undefined {
+export function trim(str: string | undefined, chars?: string): string | undefined {
   if (str === undefined) {
     return undefined;
   }
   if (typeof str !== 'string') {
-    throw new Error('Argument to trim must be a string');
+    throw new Error('First argument to trim must be a string');
   }
-  return str.trim();
+  if (chars !== undefined && typeof chars !== 'string') {
+    throw new Error('Second argument to trim must be a string');
+  }
+
+  if (chars === undefined) {
+    return str.trim();
+  }
+
+  // Trim custom characters from both ends
+  let start = 0;
+  let end = str.length;
+
+  while (start < end && chars.includes(str[start])) {
+    start++;
+  }
+
+  while (end > start && chars.includes(str[end - 1])) {
+    end--;
+  }
+
+  return str.slice(start, end);
 }
 
 /**
