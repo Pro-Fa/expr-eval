@@ -32,13 +32,18 @@ const parser = new Parser({
 
 ## Concatenation Operator
 
-The `|` (pipe) operator concatenates arrays or strings.
+The `|` (pipe) operator concatenates arrays or strings:
+- If both operands are arrays, they are concatenated as arrays
+- If both operands are strings, they are concatenated as strings
+- If operands are of different types, the result is `undefined`
 
 | Operator | Description |
 |:-------- |:----------- |
-| a \| b   | Concatenates arrays or strings. Both operands must be of the same type. |
+| a \| b   | Concatenates `a` and `b`. Both operands must be arrays or both must be strings. |
 
 ### Array Concatenation
+
+When both operands are arrays, the `|` operator returns a new array containing all elements from both arrays:
 
 ```js
 const parser = new Parser();
@@ -50,6 +55,8 @@ parser.evaluate('["a", "b"] | ["c", "d"]');   // ["a", "b", "c", "d"]
 
 ### String Concatenation
 
+When both operands are strings, the `|` operator returns a new string combining both:
+
 ```js
 const parser = new Parser();
 
@@ -57,7 +64,7 @@ parser.evaluate('"hello" | " " | "world"');   // "hello world"
 parser.evaluate('"a" | "b" | "c"');           // "abc"
 ```
 
-> **Note:** Both operands must be of the same type (both arrays or both strings). Mixing types will return `undefined`.
+> **Note:** Mixing types (e.g., array with string, or number with string) will return `undefined`.
 
 ## Unary Operators
 
