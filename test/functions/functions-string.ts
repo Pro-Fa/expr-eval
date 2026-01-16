@@ -633,4 +633,223 @@ describe('String Functions TypeScript Test', function () {
       assert.throws(() => parser.evaluate('padBoth("test", 5, 0)'), /Third argument.*must be a string/);
     });
   });
+
+  describe('slice(s, start, end?)', function () {
+    describe('with strings', function () {
+      it('should extract a portion of a string', function () {
+        const parser = new Parser();
+        assert.strictEqual(parser.evaluate('slice("hello world", 0, 5)'), 'hello');
+        assert.strictEqual(parser.evaluate('slice("hello world", 6, 11)'), 'world');
+        assert.strictEqual(parser.evaluate('slice("hello world", 6)'), 'world');
+      });
+
+      it('should handle negative indices', function () {
+        const parser = new Parser();
+        assert.strictEqual(parser.evaluate('slice("hello world", -5)'), 'world');
+        assert.strictEqual(parser.evaluate('slice("hello world", -5, -1)'), 'worl');
+        assert.strictEqual(parser.evaluate('slice("hello world", 0, -6)'), 'hello');
+      });
+
+      it('should return empty string when start >= end', function () {
+        const parser = new Parser();
+        assert.strictEqual(parser.evaluate('slice("hello", 3, 2)'), '');
+        assert.strictEqual(parser.evaluate('slice("hello", 5, 5)'), '');
+      });
+
+      it('should return undefined if string is undefined', function () {
+        const parser = new Parser();
+        assert.strictEqual(parser.evaluate('slice(undefined, 0, 5)'), undefined);
+      });
+
+      it('should return undefined if start is undefined', function () {
+        const parser = new Parser();
+        assert.strictEqual(parser.evaluate('slice("hello", undefined)'), undefined);
+      });
+
+      it('should throw error for non-string and non-array first argument', function () {
+        const parser = new Parser();
+        assert.throws(() => parser.evaluate('slice(123, 0, 5)'), /First argument.*must be a string or array/);
+      });
+
+      it('should throw error for non-number start', function () {
+        const parser = new Parser();
+        assert.throws(() => parser.evaluate('slice("hello", "0", 5)'), /Second argument.*must be a number/);
+      });
+
+      it('should throw error for non-number end', function () {
+        const parser = new Parser();
+        assert.throws(() => parser.evaluate('slice("hello", 0, "5")'), /Third argument.*must be a number/);
+      });
+    });
+
+    describe('with arrays', function () {
+      it('should extract a portion of an array', function () {
+        const parser = new Parser();
+        assert.deepStrictEqual(parser.evaluate('slice([1,2,3,4,5], 0, 3)'), [1, 2, 3]);
+        assert.deepStrictEqual(parser.evaluate('slice([1,2,3,4,5], 2)'), [3, 4, 5]);
+      });
+
+      it('should handle negative indices with arrays', function () {
+        const parser = new Parser();
+        assert.deepStrictEqual(parser.evaluate('slice([1,2,3,4,5], -2)'), [4, 5]);
+        assert.deepStrictEqual(parser.evaluate('slice([1,2,3,4,5], -3, -1)'), [3, 4]);
+      });
+
+      it('should return empty array when start >= end', function () {
+        const parser = new Parser();
+        assert.deepStrictEqual(parser.evaluate('slice([1,2,3], 2, 1)'), []);
+      });
+    });
+  });
+
+  describe('urlEncode(str)', function () {
+    it('should URL-encode a string', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('urlEncode("hello world")'), 'hello%20world');
+      assert.strictEqual(parser.evaluate('urlEncode("foo=bar&baz=qux")'), 'foo%3Dbar%26baz%3Dqux');
+      assert.strictEqual(parser.evaluate('urlEncode("test")'), 'test');
+    });
+
+    it('should handle special characters', function () {
+      const parser = new Parser();
+      // encodeURIComponent encodes @, #, $, %, ^, &, but not !, *, (, )
+      assert.strictEqual(parser.evaluate('urlEncode("!@#$%^&*()")'), '!%40%23%24%25%5E%26*()');
+      assert.strictEqual(parser.evaluate('urlEncode("a/b/c")'), 'a%2Fb%2Fc');
+    });
+
+    it('should return empty string for empty input', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('urlEncode("")'), '');
+    });
+
+    it('should return undefined if argument is undefined', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('urlEncode(undefined)'), undefined);
+    });
+
+    it('should throw error for non-string argument', function () {
+      const parser = new Parser();
+      assert.throws(() => parser.evaluate('urlEncode(123)'), /must be a string/);
+    });
+  });
+
+  describe('base64Encode(str)', function () {
+    it('should Base64-encode a string', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('base64Encode("hello")'), 'aGVsbG8=');
+      assert.strictEqual(parser.evaluate('base64Encode("Hello World")'), 'SGVsbG8gV29ybGQ=');
+      assert.strictEqual(parser.evaluate('base64Encode("test")'), 'dGVzdA==');
+    });
+
+    it('should handle empty string', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('base64Encode("")'), '');
+    });
+
+    it('should handle UTF-8 characters', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('base64Encode("héllo")'), 'aMOpbGxv');
+      assert.strictEqual(parser.evaluate('base64Encode("日本語")'), '5pel5pys6Kqe');
+    });
+
+    it('should return undefined if argument is undefined', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('base64Encode(undefined)'), undefined);
+    });
+
+    it('should throw error for non-string argument', function () {
+      const parser = new Parser();
+      assert.throws(() => parser.evaluate('base64Encode(123)'), /must be a string/);
+    });
+  });
+
+  describe('base64Decode(str)', function () {
+    it('should Base64-decode a string', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('base64Decode("aGVsbG8=")'), 'hello');
+      assert.strictEqual(parser.evaluate('base64Decode("SGVsbG8gV29ybGQ=")'), 'Hello World');
+      assert.strictEqual(parser.evaluate('base64Decode("dGVzdA==")'), 'test');
+    });
+
+    it('should handle empty string', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('base64Decode("")'), '');
+    });
+
+    it('should handle UTF-8 characters', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('base64Decode("aMOpbGxv")'), 'héllo');
+      assert.strictEqual(parser.evaluate('base64Decode("5pel5pys6Kqe")'), '日本語');
+    });
+
+    it('should return undefined if argument is undefined', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('base64Decode(undefined)'), undefined);
+    });
+
+    it('should throw error for non-string argument', function () {
+      const parser = new Parser();
+      assert.throws(() => parser.evaluate('base64Decode(123)'), /must be a string/);
+    });
+
+    it('should throw error for invalid base64 string', function () {
+      const parser = new Parser();
+      assert.throws(() => parser.evaluate('base64Decode("!!invalid!!")'), /Invalid base64 string/);
+    });
+
+    it('should roundtrip with base64Encode', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('base64Decode(base64Encode("hello"))'), 'hello');
+      assert.strictEqual(parser.evaluate('base64Decode(base64Encode("日本語"))'), '日本語');
+    });
+  });
+
+  describe('coalesce(a, b, ...)', function () {
+    it('should return the first non-null, non-empty string value', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('coalesce("hello", "world")'), 'hello');
+      assert.strictEqual(parser.evaluate('coalesce("", "world")'), 'world');
+      assert.strictEqual(parser.evaluate('coalesce(null, "world")'), 'world');
+      assert.strictEqual(parser.evaluate('coalesce(undefined, "world")'), 'world');
+    });
+
+    it('should work with multiple arguments', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('coalesce("", null, undefined, "found")'), 'found');
+      assert.strictEqual(parser.evaluate('coalesce(null, null, null, "last")'), 'last');
+    });
+
+    it('should return non-string values if they are first non-null/non-empty', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('coalesce(null, 42)'), 42);
+      assert.strictEqual(parser.evaluate('coalesce("", true)'), true);
+      assert.deepStrictEqual(parser.evaluate('coalesce(null, [1,2,3])'), [1, 2, 3]);
+    });
+
+    it('should return 0 as a valid value (not empty)', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('coalesce(0, 42)'), 0);
+      assert.strictEqual(parser.evaluate('coalesce(null, 0, 42)'), 0);
+    });
+
+    it('should return false as a valid value (not empty)', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('coalesce(false, true)'), false);
+      assert.strictEqual(parser.evaluate('coalesce(null, false, true)'), false);
+    });
+
+    it('should return last value if all are null/undefined/empty', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('coalesce(null, undefined, "")'), '');
+      assert.strictEqual(parser.evaluate('coalesce("", "", "")'), '');
+      assert.strictEqual(parser.evaluate('coalesce(null, null, null)'), null);
+    });
+
+    it('should handle single argument', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('coalesce("hello")'), 'hello');
+      assert.strictEqual(parser.evaluate('coalesce(null)'), null);
+      assert.strictEqual(parser.evaluate('coalesce("")'), '');
+    });
+  });
 });

@@ -460,3 +460,99 @@ export function padBoth(str: string | undefined, targetLength: number | undefine
 
   return leftPad + str + rightPad;
 }
+
+/**
+ * Extracts a portion of a string or array
+ * Supports negative indices (counting from the end)
+ * @param s - The string or array to slice
+ * @param start - Start index (negative counts from end)
+ * @param end - End index (optional, negative counts from end)
+ */
+export function slice(
+  s: string | any[] | undefined,
+  start: number | undefined,
+  end?: number
+): string | any[] | undefined {
+  if (s === undefined || start === undefined) {
+    return undefined;
+  }
+  if (typeof s !== 'string' && !Array.isArray(s)) {
+    throw new Error('First argument to slice must be a string or array');
+  }
+  if (typeof start !== 'number') {
+    throw new Error('Second argument to slice must be a number');
+  }
+  if (end !== undefined && typeof end !== 'number') {
+    throw new Error('Third argument to slice must be a number');
+  }
+
+  return s.slice(start, end);
+}
+
+/**
+ * URL-encodes a string
+ * Uses encodeURIComponent for safe encoding
+ */
+export function urlEncode(str: string | undefined): string | undefined {
+  if (str === undefined) {
+    return undefined;
+  }
+  if (typeof str !== 'string') {
+    throw new Error('Argument to urlEncode must be a string');
+  }
+  return encodeURIComponent(str);
+}
+
+// Global declarations for btoa/atob (available in Node.js 16+ and browsers)
+declare function btoa(data: string): string;
+declare function atob(data: string): string;
+
+/**
+ * Base64-encodes a string
+ * Handles UTF-8 encoding properly using btoa
+ */
+export function base64Encode(str: string | undefined): string | undefined {
+  if (str === undefined) {
+    return undefined;
+  }
+  if (typeof str !== 'string') {
+    throw new Error('Argument to base64Encode must be a string');
+  }
+  // Encode UTF-8 string to base64 using btoa
+  // First encode as UTF-8 bytes, then convert to binary string for btoa
+  const utf8Str = unescape(encodeURIComponent(str));
+  return btoa(utf8Str);
+}
+
+/**
+ * Base64-decodes a string
+ * Handles UTF-8 decoding properly using atob
+ */
+export function base64Decode(str: string | undefined): string | undefined {
+  if (str === undefined) {
+    return undefined;
+  }
+  if (typeof str !== 'string') {
+    throw new Error('Argument to base64Decode must be a string');
+  }
+  try {
+    // Decode base64 to binary string, then decode UTF-8
+    const binaryStr = atob(str);
+    return decodeURIComponent(escape(binaryStr));
+  } catch {
+    throw new Error('Invalid base64 string');
+  }
+}
+
+/**
+ * Returns the first non-null and non-empty string value from the arguments
+ * @param args - Any number of values to check
+ */
+export function coalesceString(...args: any[]): any {
+  for (const arg of args) {
+    if (arg !== undefined && arg !== null && arg !== '') {
+      return arg;
+    }
+  }
+  return args.length > 0 ? args[args.length - 1] : undefined;
+}

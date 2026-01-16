@@ -6,7 +6,7 @@ import { Expression } from '../core/expression.js';
 import type { Value, VariableResolveResult, Values } from '../types/values.js';
 import type { Instruction } from './instruction.js';
 import type { OperatorFunction } from '../types/parser.js';
-import { atan2, condition, fac, filter, fold, gamma, hypot, indexOf, join, map, max, min, random, roundTo, sum, json, stringLength, isEmpty, stringContains, startsWith, endsWith, searchCount, trim, toUpper, toLower, toTitle, split, repeat, reverse, left, right, replace, replaceFirst, naturalSort, toNumber, toBoolean, padLeft, padRight, padBoth } from '../functions/index.js';
+import { atan2, condition, fac, filter, fold, gamma, hypot, indexOf, join, map, max, min, random, roundTo, sum, json, stringLength, isEmpty, stringContains, startsWith, endsWith, searchCount, trim, toUpper, toLower, toTitle, split, repeat, reverse, left, right, replace, replaceFirst, naturalSort, toNumber, toBoolean, padLeft, padRight, padBoth, slice, urlEncode, base64Encode, base64Decode, coalesceString } from '../functions/index.js';
 import {
   add,
   sub,
@@ -219,7 +219,12 @@ export class Parser {
       toBoolean: toBoolean,
       padLeft: padLeft,
       padRight: padRight,
-      padBoth: padBoth
+      padBoth: padBoth,
+      slice: slice,
+      urlEncode: urlEncode,
+      base64Encode: base64Encode,
+      base64Decode: base64Decode,
+      coalesce: coalesceString
     };
 
     this.numericConstants = {

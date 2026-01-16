@@ -191,6 +191,21 @@ The parser includes comprehensive string manipulation capabilities.
 | padRight(str, len, padChar?)    | Pads a string on the right with spaces (or optional padding character) to reach the target length. |
 | padBoth(str, len, padChar?)     | Pads a string on both sides with spaces (or optional padding character) to reach the target length. If an odd number of padding characters is needed, the extra character is added on the right. |
 
+### Slicing and Encoding
+
+| Function              | Description |
+|:--------------------- |:----------- |
+| slice(s, start, end?) | Extracts a portion of a string or array. Supports negative indices (e.g., -1 for last element). |
+| urlEncode(str)        | URL-encodes a string using `encodeURIComponent`. |
+| base64Encode(str)     | Base64-encodes a string with proper UTF-8 support. |
+| base64Decode(str)     | Base64-decodes a string with proper UTF-8 support. |
+
+### Utility Functions
+
+| Function              | Description |
+|:--------------------- |:----------- |
+| coalesce(a, b, ...)   | Returns the first non-null and non-empty string value from the arguments. Numbers and booleans (including 0 and false) are considered valid values. |
+
 ### String Function Examples
 
 ```js
@@ -238,6 +253,20 @@ parser.evaluate('padRight("5", 3)'); // "5  "
 parser.evaluate('padRight("5", 3, "0")'); // "500"
 parser.evaluate('padBoth("hi", 6)'); // "  hi  "
 parser.evaluate('padBoth("hi", 6, "-")'); // "--hi--"
+
+// Slicing
+parser.evaluate('slice("hello world", 0, 5)'); // "hello"
+parser.evaluate('slice("hello world", -5)'); // "world"
+parser.evaluate('slice([1, 2, 3, 4, 5], -2)'); // [4, 5]
+
+// Encoding
+parser.evaluate('urlEncode("foo=bar&baz")'); // "foo%3Dbar%26baz"
+parser.evaluate('base64Encode("hello")'); // "aGVsbG8="
+parser.evaluate('base64Decode("aGVsbG8=")'); // "hello"
+
+// Coalesce
+parser.evaluate('coalesce("", null, "found")'); // "found"
+parser.evaluate('coalesce(null, 0, 42)'); // 0
 
 // Complex string operations
 parser.evaluate('toUpper(trim(left("  hello world  ", 10)))'); // "HELLO WOR"
