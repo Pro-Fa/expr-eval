@@ -455,24 +455,22 @@ require(['vs/editor/editor.main'], function () {
     });
 
     // Syntax highlighting
+    let highlightDecorations = [];
+    
     function applyHighlighting() {
         const doc = makeTextDocument(expressionModel);
         const tokens = ls.getHighlighting(doc);
-        const rangesByClass = new Map();
-        for (const t of tokens) {
+        const decorations = tokens.map(t => {
             const start = expressionModel.getPositionAt(t.start);
             const end = expressionModel.getPositionAt(t.end);
-            const range = new monaco.Range(start.lineNumber, start.column, end.lineNumber, end.column);
-            const cls = 'tok-' + t.type;
-            if (!rangesByClass.has(cls)) rangesByClass.set(cls, []);
-            rangesByClass.get(cls).push({range, options: {inlineClassName: cls}});
-        }
+            return {
+                range: new monaco.Range(start.lineNumber, start.column, end.lineNumber, end.column),
+                options: { inlineClassName: 'tok-' + t.type }
+            };
+        });
 
-        window.__exprEvalDecos = window.__exprEvalDecos || {};
-        for (const [cls, decos] of rangesByClass.entries()) {
-            const prev = window.__exprEvalDecos[cls] || [];
-            window.__exprEvalDecos[cls] = expressionEditor.deltaDecorations(prev, decos);
-        }
+        // deltaDecorations replaces old decorations with new ones atomically
+        highlightDecorations = expressionEditor.deltaDecorations(highlightDecorations, decorations);
     }
 
     // Result display functions

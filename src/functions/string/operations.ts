@@ -22,14 +22,14 @@ export function stringLength(str: string | undefined): number | undefined {
 export function isEmpty(str: string | null | undefined): boolean | undefined {
   if (str === undefined) {
     return undefined;
-  }  
+  }
   if (str === null) {
     return true;
   }
   if (typeof str !== 'string') {
     throw new Error('Argument to isEmpty must be a string');
   }
-  
+
   return str.length === 0;
 }
 

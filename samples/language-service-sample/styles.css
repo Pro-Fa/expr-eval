@@ -83,6 +83,7 @@ html, body {
 .tok-function { color: #795e26 !important; }
 .tok-punctuation { color: #383a42 !important; }
 .tok-name { color: #001080 !important; }
+.tok-constant { color: #0070c1 !important; }
 
 /* Dark theme token colors */
 .dark .tok-number { color: #b5cea8 !important; }
@@ -92,6 +93,7 @@ html, body {
 .dark .tok-function { color: #dcdcaa !important; }
 .dark .tok-punctuation { color: #d4d4d4 !important; }
 .dark .tok-name { color: #9cdcfe !important; }
+.dark .tok-constant { color: #4fc1ff !important; }
 
 /* Error styling animation */
 @keyframes shake {
