@@ -25,6 +25,11 @@ describe('String Functions TypeScript Test', function () {
       assert.strictEqual(parser.evaluate('isEmpty("")'), true);
     });
 
+    it('should return true for null values', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('isEmpty(null)'), true);
+    });
+
     it('should return false for non-empty strings', function () {
       const parser = new Parser();
       assert.strictEqual(parser.evaluate('isEmpty("hello")'), false);

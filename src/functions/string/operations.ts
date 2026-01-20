@@ -17,15 +17,19 @@ export function stringLength(str: string | undefined): number | undefined {
 }
 
 /**
- * Checks if a string is empty (length === 0)
+ * Checks if a string is empty (null or length === 0)
  */
-export function isEmpty(str: string | undefined): boolean | undefined {
+export function isEmpty(str: string | null | undefined): boolean | undefined {
   if (str === undefined) {
     return undefined;
+  }  
+  if (str === null) {
+    return true;
   }
   if (typeof str !== 'string') {
     throw new Error('Argument to isEmpty must be a string');
   }
+  
   return str.length === 0;
 }
 
