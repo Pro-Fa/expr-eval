@@ -274,6 +274,44 @@ parser.evaluate('toUpper(trim(left("  hello world  ", 10)))'); // "HELLO WOR"
 
 > **Note:** All string functions return `undefined` if any of their required arguments are `undefined`, allowing for safe chaining and conditional logic.
 
+## Object Manipulation Functions
+
+The parser includes functions for working with objects.
+
+| Function              | Description |
+|:--------------------- |:----------- |
+| merge(obj1, obj2, ...)| Merges two or more objects together. Duplicate keys are overwritten by later arguments. |
+| keys(obj)             | Returns an array of strings containing the keys of the object. |
+| values(obj)           | Returns an array containing the values of the object. |
+| flatten(obj, sep?)    | Flattens a nested object's keys using an optional separator (default: `_`). For example, `{foo: {bar: 1}}` becomes `{foo_bar: 1}`. |
+
+### Object Function Examples
+
+```js
+const parser = new Parser();
+
+// Merge objects
+parser.evaluate('merge({a: 1}, {b: 2})'); // {a: 1, b: 2}
+parser.evaluate('merge({a: 1, b: 2}, {b: 3, c: 4})'); // {a: 1, b: 3, c: 4}
+parser.evaluate('merge({a: 1}, {b: 2}, {c: 3})'); // {a: 1, b: 2, c: 3}
+
+// Get keys
+parser.evaluate('keys({a: 1, b: 2, c: 3})'); // ["a", "b", "c"]
+
+// Get values
+parser.evaluate('values({a: 1, b: 2, c: 3})'); // [1, 2, 3]
+
+// Flatten nested objects
+parser.evaluate('flatten(obj)', { obj: { foo: { bar: 1 } } }); // {foo_bar: 1}
+parser.evaluate('flatten(obj)', { obj: { a: { b: { c: 1 } } } }); // {a_b_c: 1}
+parser.evaluate('flatten(obj, ".")', { obj: { foo: { bar: 1 } } }); // {"foo.bar": 1}
+
+// Mixed nested and flat keys
+parser.evaluate('flatten(obj)', { obj: { a: 1, b: { c: 2 } } }); // {a: 1, b_c: 2}
+```
+
+> **Note:** All object functions return `undefined` if any of their required arguments are `undefined`, allowing for safe chaining and conditional logic.
+
 ## Array Literals
 
 Arrays can be created by including the elements inside square `[]` brackets, separated by commas. For example:

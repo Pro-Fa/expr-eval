@@ -262,6 +262,38 @@ export const BUILTIN_FUNCTION_DOCS: Record<string, FunctionDoc> = {
     params: [
       { name: 'values', description: 'Values to check.', isVariadic: true }
     ]
+  },
+  /**
+   * Object functions
+   */
+  merge: {
+    name: 'merge',
+    description: 'Merge two or more objects together. Duplicate keys are overwritten by later arguments.',
+    params: [
+      { name: 'objects', description: 'Objects to merge.', isVariadic: true }
+    ]
+  },
+  keys: {
+    name: 'keys',
+    description: 'Return an array of strings containing the keys of the object.',
+    params: [
+      { name: 'obj', description: 'Input object.' }
+    ]
+  },
+  values: {
+    name: 'values',
+    description: 'Return an array containing the values of the object.',
+    params: [
+      { name: 'obj', description: 'Input object.' }
+    ]
+  },
+  flatten: {
+    name: 'flatten',
+    description: 'Flatten a nested object\'s keys using an optional separator (default: _). For example, {foo: {bar: 1}} becomes {foo_bar: 1}.',
+    params: [
+      { name: 'obj', description: 'Input object.' },
+      { name: 'separator', description: 'Key separator (default: _).', optional: true }
+    ]
   }
 };
 
