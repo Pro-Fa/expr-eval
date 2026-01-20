@@ -1,4 +1,8 @@
 /* Base styles */
+:root {
+    --sidebar-width: 256px;
+}
+
 html, body {
     height: 100%;
     margin: 0;
@@ -98,4 +102,109 @@ html, body {
 
 .error-shake {
     animation: shake 0.3s ease-in-out;
+}
+
+/* Examples sidebar styles */
+#examplesSidebar {
+    min-width: 200px;
+    width: var(--sidebar-width);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    background-color: #f9fafb;
+    border-right: 1px solid #e5e7eb;
+}
+
+.dark #examplesSidebar {
+    background-color: #252526;
+    border-right-color: #3c3c3c;
+}
+
+#examplesSidebar > div:first-child {
+    height: 40px;
+    background-color: #f3f4f6;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    flex-shrink: 0;
+}
+
+.dark #examplesSidebar > div:first-child {
+    background-color: #333333;
+    border-bottom-color: #3c3c3c;
+}
+
+#examplesList {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+}
+
+.example-item {
+    width: 100%;
+    text-align: left;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    background: transparent;
+    cursor: pointer;
+    margin-bottom: 4px;
+    transition: all 0.2s ease;
+}
+
+.example-item:hover {
+    background-color: #ffffff;
+    border-color: #e0e7ff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.dark .example-item:hover {
+    background-color: #2d2d2d;
+    border-color: #3c3c3c;
+}
+
+.example-item:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
+}
+
+.example-item:active {
+    transform: scale(0.98);
+}
+
+.example-item p:first-child {
+    font-size: 14px;
+    font-weight: 500;
+    color: #1f2937;
+    margin: 0;
+}
+
+.dark .example-item p:first-child {
+    color: #cccccc;
+}
+
+.example-item:hover p:first-child {
+    color: #4f46e5;
+}
+
+.dark .example-item:hover p:first-child {
+    color: #569cd6;
+}
+
+.example-item p:last-child {
+    font-size: 12px;
+    color: #6b7280;
+    margin: 4px 0 0 0;
+}
+
+.dark .example-item p:last-child {
+    color: #808080;
+}
+
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
