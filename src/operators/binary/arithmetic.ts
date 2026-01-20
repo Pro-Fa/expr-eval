@@ -45,7 +45,7 @@ export function add(a: any, b: any): any {
     return Number(a) + Number(b);
   }
 
-  // Otherwhise return an error indicating that the values of mixed types cannot be added.
+  // Otherwise return an error indicating that the values of mixed types cannot be added.
   throw new Error(`Cannot add values of different types: ${typeof a} and ${typeof b}`);
 }
 
