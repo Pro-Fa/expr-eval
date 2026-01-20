@@ -23,6 +23,12 @@ function send(res, status, body, headers = {}) {
 
 const server = http.createServer((req, res) => {
     let urlPath = decodeURIComponent(req.url || '/');
+    
+    // Strip query string
+    const queryIndex = urlPath.indexOf('?');
+    if (queryIndex !== -1) {
+        urlPath = urlPath.substring(0, queryIndex);
+    }
 
     if (urlPath === '/' || urlPath === '/index.html') {
         urlPath = 'samples/language-service-sample/index.html';

@@ -125,6 +125,19 @@ const exampleCases = [
                 }
             }
         }
+    },
+    {
+        id: 'data-transform',
+        title: 'Data Transformation',
+        description: 'Flatten nested objects and transform rows',
+        expression: "map(f(row) = {_id: row.rowId} + flatten(row.data, ''), $event)",
+        context: {
+            "$event": [
+                {"rowId": 1, "state": "saved", "data": { "InventoryId": 1256, "Description": "Bal", "Weight": { "Unit": "g", "Amount": 120 } }},
+                {"rowId": 2, "state": "new", "data": { "InventoryId": 2344, "Description": "Basket", "Weight": { "Unit": "g", "Amount": 300 } }},
+                {"rowId": 3, "state": "unchanged", "data": { "InventoryId": 9362, "Description": "Wood", "Weight": { "Unit": "kg", "Amount": 18 } }}
+            ]
+        }
     }
 ];
 
@@ -184,6 +197,25 @@ function loadExample(example) {
 
 // Initialize sidebar
 renderExamplesSidebar();
+
+// Get example ID from URL query parameter
+function getExampleFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('example');
+}
+
+// Load example from URL if present (called after Monaco initializes)
+function loadExampleFromUrl() {
+    const exampleId = getExampleFromUrl();
+    if (exampleId) {
+        const example = exampleCases.find(e => e.id === exampleId);
+        if (example) {
+            loadExample(example);
+            return true;
+        }
+    }
+    return false;
+}
 
 // Split pane resizing
 (function() {
@@ -584,6 +616,9 @@ require(['vs/editor/editor.main'], function () {
     // Initialize
     applyHighlighting();
     evaluate();
+
+    // Load example from URL query parameter if present
+    loadExampleFromUrl();
 
     // Event listeners for changes
     expressionModel.onDidChangeContent(() => {
