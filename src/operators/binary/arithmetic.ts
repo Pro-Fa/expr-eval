@@ -46,7 +46,7 @@ export function add(a: any, b: any): any {
   }
 
   // Otherwise return an error indicating that the values of mixed types cannot be added.
-  throw new Error(`Cannot add values of different types: ${typeof a} and ${typeof b}`);
+  throw new Error(`Cannot add values of incompatible types: ${typeof a} and ${typeof b}`);
 }
 
 export function sub(a: number | undefined, b: number | undefined): number | undefined {
