@@ -43,6 +43,180 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e)
 
 initTheme();
 
+// Examples data
+const exampleCases = [
+    {
+        id: 'math',
+        title: 'Mathematical Expression',
+        description: 'Basic math operations with variables',
+        expression: '(x + y) * multiplier + sqrt(16)',
+        context: {
+            x: 10,
+            y: 5,
+            multiplier: 3
+        }
+    },
+    {
+        id: 'arrays',
+        title: 'Working with Arrays',
+        description: 'Array functions like sum, min, max',
+        expression: 'sum(numbers) + max(numbers) - min(numbers)',
+        context: {
+            numbers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+            values: [15, 25, 35]
+        }
+    },
+    {
+        id: 'objects',
+        title: 'Object Manipulation',
+        description: 'Access nested object properties',
+        expression: 'user.profile.score * level.multiplier + bonus.points',
+        context: {
+            user: {
+                name: "Alice",
+                profile: {
+                    score: 85,
+                    rank: "Gold"
+                }
+            },
+            level: {
+                current: 5,
+                multiplier: 1.5
+            },
+            bonus: {
+                points: 100,
+                active: true
+            }
+        }
+    },
+    {
+        id: 'map-filter',
+        title: 'Map and Filter Functions',
+        description: 'Transform and filter data with callbacks',
+        expression: 'sum(map(filter(items, item => item > 3), x => x * 2))',
+        context: {
+            items: [1, 2, 3, 4, 5, 6, 7, 8],
+            threshold: 3
+        }
+    },
+    {
+        id: 'complex',
+        title: 'Complex Objects',
+        description: 'Work with deeply nested data structures',
+        expression: 'company.departments[0].employees.length * company.settings.bonusRate + sum(map(company.departments, d => d.budget))',
+        context: {
+            company: {
+                name: "TechCorp",
+                departments: [
+                    {
+                        name: "Engineering",
+                        budget: 500000,
+                        employees: ["John", "Jane", "Bob"]
+                    },
+                    {
+                        name: "Marketing",
+                        budget: 200000,
+                        employees: ["Alice", "Carol"]
+                    }
+                ],
+                settings: {
+                    bonusRate: 0.15,
+                    fiscalYear: 2024
+                }
+            }
+        }
+    },
+    {
+        id: 'data-transform',
+        title: 'Data Transformation',
+        description: 'Flatten nested objects and transform rows',
+        expression: "map(f(row) = {_id: row.rowId} + flatten(row.data, ''), $event)",
+        context: {
+            "$event": [
+                {"rowId": 1, "state": "saved", "data": { "InventoryId": 1256, "Description": "Bal", "Weight": { "Unit": "g", "Amount": 120 } }},
+                {"rowId": 2, "state": "new", "data": { "InventoryId": 2344, "Description": "Basket", "Weight": { "Unit": "g", "Amount": 300 } }},
+                {"rowId": 3, "state": "unchanged", "data": { "InventoryId": 9362, "Description": "Wood", "Weight": { "Unit": "kg", "Amount": 18 } }}
+            ]
+        }
+    }
+];
+
+// Render examples sidebar
+function renderExamplesSidebar() {
+    const examplesList = document.getElementById('examplesList');
+    if (!examplesList) return;
+
+    examplesList.innerHTML = exampleCases.map(example => `
+        <button 
+            class="example-item w-full text-left p-3 rounded-lg transition-all duration-200
+                   hover:bg-white dark:hover:bg-[#2d2d2d] 
+                   hover:shadow-sm hover:border-indigo-200 dark:hover:border-[#3c3c3c]
+                   border border-transparent
+                   group"
+            data-example-id="${example.id}"
+        >
+            <div class="flex items-start gap-2">
+                <div class="flex-shrink-0 w-6 h-6 rounded bg-indigo-100 dark:bg-[#3c3c3c] flex items-center justify-center mt-0.5">
+                    <svg class="w-3.5 h-3.5 text-indigo-600 dark:text-[#569cd6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-gray-800 dark:text-[#cccccc] truncate group-hover:text-indigo-600 dark:group-hover:text-[#569cd6]">
+                        ${example.title}
+                    </p>
+                    <p class="text-xs text-gray-500 dark:text-[#808080] mt-0.5 line-clamp-2">
+                        ${example.description}
+                    </p>
+                </div>
+            </div>
+        </button>
+    `).join('');
+
+    // Add click handlers
+    examplesList.querySelectorAll('.example-item').forEach(button => {
+        button.addEventListener('click', () => {
+            const exampleId = button.dataset.exampleId;
+            const example = exampleCases.find(e => e.id === exampleId);
+            if (example) {
+                loadExample(example);
+            }
+        });
+    });
+}
+
+// Load example into editors
+function loadExample(example) {
+    if (typeof expressionEditor !== 'undefined' && expressionEditor) {
+        expressionEditor.getModel().setValue(example.expression);
+    }
+    if (typeof contextEditor !== 'undefined' && contextEditor) {
+        contextEditor.getModel().setValue(JSON.stringify(example.context, null, 2));
+    }
+}
+
+// Initialize sidebar
+renderExamplesSidebar();
+
+// Get example ID from URL query parameter
+function getExampleFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('example');
+}
+
+// Load example from URL if present (called after Monaco initializes)
+function loadExampleFromUrl() {
+    const exampleId = getExampleFromUrl();
+    if (exampleId) {
+        const example = exampleCases.find(e => e.id === exampleId);
+        if (example) {
+            loadExample(example);
+            return true;
+        }
+    }
+    return false;
+}
+
 // Split pane resizing
 (function() {
     const resizer = document.getElementById('resizer');
@@ -281,24 +455,22 @@ require(['vs/editor/editor.main'], function () {
     });
 
     // Syntax highlighting
+    let highlightDecorations = [];
+    
     function applyHighlighting() {
         const doc = makeTextDocument(expressionModel);
         const tokens = ls.getHighlighting(doc);
-        const rangesByClass = new Map();
-        for (const t of tokens) {
+        const decorations = tokens.map(t => {
             const start = expressionModel.getPositionAt(t.start);
             const end = expressionModel.getPositionAt(t.end);
-            const range = new monaco.Range(start.lineNumber, start.column, end.lineNumber, end.column);
-            const cls = 'tok-' + t.type;
-            if (!rangesByClass.has(cls)) rangesByClass.set(cls, []);
-            rangesByClass.get(cls).push({range, options: {inlineClassName: cls}});
-        }
+            return {
+                range: new monaco.Range(start.lineNumber, start.column, end.lineNumber, end.column),
+                options: { inlineClassName: 'tok-' + t.type }
+            };
+        });
 
-        window.__exprEvalDecos = window.__exprEvalDecos || {};
-        for (const [cls, decos] of rangesByClass.entries()) {
-            const prev = window.__exprEvalDecos[cls] || [];
-            window.__exprEvalDecos[cls] = expressionEditor.deltaDecorations(prev, decos);
-        }
+        // deltaDecorations replaces old decorations with new ones atomically
+        highlightDecorations = expressionEditor.deltaDecorations(highlightDecorations, decorations);
     }
 
     // Result display functions
@@ -442,6 +614,9 @@ require(['vs/editor/editor.main'], function () {
     // Initialize
     applyHighlighting();
     evaluate();
+
+    // Load example from URL query parameter if present
+    loadExampleFromUrl();
 
     // Event listeners for changes
     expressionModel.onDidChangeContent(() => {
