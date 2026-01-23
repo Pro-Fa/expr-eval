@@ -337,6 +337,22 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
           let closeParenSpan = openParenSpan;
           let hasSeenArgumentToken = false;
 
+          // Helper to check if we're at the top level of the function call
+          const isAtFunctionCallTopLevel = () =>
+            parenDepth === 1 && bracketDepth === 0 && braceDepth === 0;
+
+          // Helper to mark that we've seen the first token of an argument
+          const markArgumentSeen = () => {
+            if (!hasSeenArgumentToken) {
+              hasSeenArgumentToken = true;
+              // Only set argCount to 1 if this is the first argument
+              // (if we've seen commas, argCount is already > 0)
+              if (argCount === 0) {
+                argCount = 1;
+              }
+            }
+          };
+
           for (let j = openParenIndex + 1; j < spans.length && parenDepth > 0; j++) {
             const currentToken = spans[j].token;
 
@@ -344,9 +360,8 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
               if (currentToken.value === '(') {
                 parenDepth++;
                 // Opening paren can start an argument (e.g., nested function call)
-                if (parenDepth === 2 && bracketDepth === 0 && braceDepth === 0 && !hasSeenArgumentToken) {
-                  hasSeenArgumentToken = true;
-                  argCount = 1;
+                if (parenDepth === 2 && bracketDepth === 0 && braceDepth === 0) {
+                  markArgumentSeen();
                 }
               } else if (currentToken.value === ')') {
                 parenDepth--;
@@ -359,9 +374,8 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
               if (currentToken.value === '[') {
                 bracketDepth++;
                 // Opening bracket starts an argument (array literal)
-                if (parenDepth === 1 && bracketDepth === 1 && braceDepth === 0 && !hasSeenArgumentToken) {
-                  hasSeenArgumentToken = true;
-                  argCount = 1;
+                if (parenDepth === 1 && bracketDepth === 1 && braceDepth === 0) {
+                  markArgumentSeen();
                 }
               } else if (currentToken.value === ']') {
                 bracketDepth--;
@@ -370,30 +384,20 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
               if (currentToken.value === '{') {
                 braceDepth++;
                 // Opening brace starts an argument (object literal)
-                if (parenDepth === 1 && bracketDepth === 0 && braceDepth === 1 && !hasSeenArgumentToken) {
-                  hasSeenArgumentToken = true;
-                  argCount = 1;
+                if (parenDepth === 1 && bracketDepth === 0 && braceDepth === 1) {
+                  markArgumentSeen();
                 }
               } else if (currentToken.value === '}') {
                 braceDepth--;
               }
-            } else if (currentToken.type === TCOMMA && parenDepth === 1 && bracketDepth === 0 && braceDepth === 0) {
+            } else if (currentToken.type === TCOMMA && isAtFunctionCallTopLevel()) {
               // Only count commas at the top level of the function call
               argCount++;
               hasSeenArgumentToken = false; // Reset for next argument
-            } else if (parenDepth === 1 && bracketDepth === 0 && braceDepth === 0 && !hasSeenArgumentToken) {
-              // First non-comma, non-paren, non-bracket, non-brace token at depth 1 means we have at least one argument
-              hasSeenArgumentToken = true;
-              argCount = Math.max(argCount, 1);
+            } else if (isAtFunctionCallTopLevel()) {
+              // First token at top level means we have at least one argument
+              markArgumentSeen();
             }
-          }
-
-          // If we found a closing paren and there was content, argCount is commas + 1
-          // If there were no arguments (empty parens), argCount stays 0
-          if (foundClosingParen && argCount > 0) {
-            // argCount currently holds the count from counting commas
-            // When we saw first token at depth 1, we set argCount = 1
-            // Each comma adds 1 more, so argCount is correct
           }
 
           // Get the function's expected arity
@@ -402,6 +406,7 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
             const arityInfo = funcDetails.arityInfo();
             if (arityInfo) {
               const { min, max } = arityInfo;
+              const pluralize = (count: number) => count !== 1 ? 's' : '';
 
               // Check if argument count is too few
               if (argCount < min) {
@@ -412,7 +417,7 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
                 diagnostics.push({
                   range,
                   severity: DiagnosticSeverity.Error,
-                  message: `Function '${funcName}' expects at least ${min} argument${min !== 1 ? 's' : ''}, but got ${argCount}.`,
+                  message: `Function '${funcName}' expects at least ${min} argument${pluralize(min)}, but got ${argCount}.`,
                   source: 'expr-eval'
                 });
               }
@@ -425,7 +430,7 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
                 diagnostics.push({
                   range,
                   severity: DiagnosticSeverity.Error,
-                  message: `Function '${funcName}' expects at most ${max} argument${max !== 1 ? 's' : ''}, but got ${argCount}.`,
+                  message: `Function '${funcName}' expects at most ${max} argument${pluralize(max)}, but got ${argCount}.`,
                   source: 'expr-eval'
                 });
               }
