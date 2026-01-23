@@ -12,6 +12,10 @@ The library includes a built-in language service that provides IDE-like features
   - **Variable value previews** - Hovers on variables show a truncated JSON preview of the value
   - **Nested path support** - Hovering over `user.name` resolves and shows the value at that path
 - **Syntax Highlighting** - Token-based highlighting for numbers, strings, keywords, operators, etc.
+- **Diagnostics** - Error detection for function argument count validation
+  - **Too few arguments** - Reports when a function is called with fewer arguments than required (e.g., `pow(2)` needs 2 arguments)
+  - **Too many arguments** - Reports when a function is called with more arguments than allowed (e.g., `random(1, 2, 3)` accepts at most 1)
+  - **Variadic functions** - Correctly handles functions that accept unlimited arguments (e.g., `min`, `max`, `coalesce`)
 
 ## Basic Usage
 
@@ -39,6 +43,9 @@ const hover = ls.getHover({
 
 // Get syntax highlighting tokens
 const tokens = ls.getHighlighting(doc);
+
+// Get diagnostics (function argument count errors)
+const diagnostics = ls.getDiagnostics({ textDocument: doc });
 ```
 
 ## Monaco Editor Integration Sample
@@ -56,6 +63,7 @@ Then open http://localhost:8080 in your browser. The sample demonstrates:
 - Hover documentation for functions and variables
 - Live syntax highlighting
 - Real-time expression evaluation
+- **Diagnostics** - Red squiggly underlines for function argument count errors (select the "Diagnostics Demo" example to see this in action)
 
 The sample code is located in `samples/language-service-sample/` and shows how to:
 
@@ -63,6 +71,7 @@ The sample code is located in `samples/language-service-sample/` and shows how t
 2. Connect the language service to Monaco's completion and hover providers
 3. Apply syntax highlighting using decorations
 4. Create an LSP-compatible text document wrapper for Monaco models
+5. Display diagnostics using Monaco's `setModelMarkers` API
 
 ## Advanced Features
 
@@ -318,6 +327,54 @@ tokens.forEach(token => {
 });
 ```
 
+### ls.getDiagnostics(params)
+
+Returns a list of diagnostics for the given text document. Currently validates function argument counts.
+
+**Parameters:**
+- `params`: `GetDiagnosticsParams`
+  - `textDocument`: `TextDocument` - The text document to analyze
+
+**Returns:** `Diagnostic[]` - Array of LSP-compatible diagnostic objects
+
+**Diagnostic Properties:**
+- `range`: `Range` - The range of the problematic function call
+- `severity`: `DiagnosticSeverity` - The severity level (Error)
+- `message`: `string` - Human-readable description of the issue
+- `source`: `string` - Always `'expr-eval'`
+
+**Example:**
+```js
+const diagnostics = ls.getDiagnostics({ textDocument: doc });
+diagnostics.forEach(d => {
+  console.log(`${d.message} at line ${d.range.start.line}`);
+});
+
+// For expression "pow(2) + random(1, 2, 3)":
+// "Function 'pow' expects at least 2 arguments, but got 1." at line 0
+// "Function 'random' expects at most 1 argument, but got 3." at line 0
+```
+
+**Monaco Editor Integration:**
+```js
+function applyDiagnostics() {
+    const doc = makeTextDocument(model);
+    const diagnostics = ls.getDiagnostics({ textDocument: doc });
+
+    const markers = diagnostics.map(d => ({
+        severity: monaco.MarkerSeverity.Error,
+        message: d.message,
+        startLineNumber: d.range.start.line + 1,
+        startColumn: d.range.start.character + 1,
+        endLineNumber: d.range.end.line + 1,
+        endColumn: d.range.end.character + 1,
+        source: d.source
+    }));
+
+    monaco.editor.setModelMarkers(model, 'expr-eval', markers);
+}
+```
+
 ## TypeScript Types
 
 The library exports the following TypeScript types for use in your applications:
@@ -330,17 +387,21 @@ import type {
   HoverV2,
   GetCompletionsParams,
   GetHoverParams,
+  GetDiagnosticsParams,
   HighlightToken,
-  LanguageServiceOptions
+  LanguageServiceOptions,
+  ArityInfo
 } from '@pro-fa/expr-eval';
 ```
 
-- **`LanguageServiceApi`** - The main language service interface with `getCompletions`, `getHover`, and `getHighlighting` methods
+- **`LanguageServiceApi`** - The main language service interface with `getCompletions`, `getHover`, `getHighlighting`, and `getDiagnostics` methods
 - **`HoverV2`** - Extended Hover type with guaranteed `MarkupContent` for contents (not deprecated string/array formats)
 - **`GetCompletionsParams`** - Parameters for `getCompletions`: `textDocument`, `position`, and optional `variables`
 - **`GetHoverParams`** - Parameters for `getHover`: `textDocument`, `position`, and optional `variables`
+- **`GetDiagnosticsParams`** - Parameters for `getDiagnostics`: `textDocument`
 - **`HighlightToken`** - Syntax highlighting token with `type`, `start`, `end`, and optional `value`
 - **`LanguageServiceOptions`** - Configuration options for creating a language service, including optional `operators` map
+- **`ArityInfo`** - Describes a function's expected argument count with `min` and optional `max` (undefined for variadic functions)
 
 ### LSP Types
 
@@ -354,7 +415,9 @@ import type {
   CompletionItemKind,
   MarkupContent,
   MarkupKind,
-  InsertTextFormat
+  InsertTextFormat,
+  Diagnostic,
+  DiagnosticSeverity
 } from 'vscode-languageserver-types';
 
 import type { TextDocument } from 'vscode-languageserver-textdocument';

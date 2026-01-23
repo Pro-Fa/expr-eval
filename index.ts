@@ -43,8 +43,10 @@ export type {
   HoverV2,
   GetCompletionsParams,
   GetHoverParams,
+  GetDiagnosticsParams,
   HighlightToken,
-  LanguageServiceOptions
+  LanguageServiceOptions,
+  ArityInfo
 } from './src/language-service/index.js';
 
 export { createLanguageService, Expression, Parser };

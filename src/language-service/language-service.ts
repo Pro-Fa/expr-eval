@@ -21,10 +21,11 @@ import type {
   LanguageServiceOptions,
   GetCompletionsParams,
   GetHoverParams,
+  GetDiagnosticsParams,
   LanguageServiceApi,
   HoverV2
 } from './language-service.types';
-import type { CompletionItem, Range } from 'vscode-languageserver-types';
+import type { CompletionItem, Range, Diagnostic } from 'vscode-languageserver-types';
 import { CompletionItemKind, MarkupKind, InsertTextFormat } from 'vscode-languageserver-types';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { BUILTIN_KEYWORD_DOCS, DEFAULT_CONSTANT_DOCS } from './language-service.documentation';
@@ -36,6 +37,7 @@ import {
   iterateTokens
 } from './ls-utils';
 import { pathVariableCompletions, tryVariableHoverUsingSpans } from './variable-utils';
+import { getDiagnosticsForDocument } from './diagnostics';
 
 export function createLanguageService(options: LanguageServiceOptions | undefined = undefined): LanguageServiceApi {
   // Build a parser instance to access keywords/operators/functions/consts
@@ -295,10 +297,31 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
     }));
   }
 
+  /**
+   * Analyzes the document for function calls and checks if they have the correct number of arguments.
+   * Returns diagnostics for function calls with incorrect argument counts.
+   */
+  function getDiagnostics(params: GetDiagnosticsParams): Diagnostic[] {
+    const { textDocument } = params;
+    const text = textDocument.getText();
+
+    const ts = makeTokenStream(parser, text);
+    const spans = iterateTokens(ts);
+
+    // Build a map from function name to FunctionDetails for quick lookup
+    const funcDetailsMap = new Map<string, FunctionDetails>();
+    for (const func of allFunctions()) {
+      funcDetailsMap.set(func.name, func);
+    }
+
+    return getDiagnosticsForDocument(params, spans, functionNamesSet(), funcDetailsMap);
+  }
+
   return {
     getCompletions,
     getHover,
-    getHighlighting
+    getHighlighting,
+    getDiagnostics
   };
 
 }

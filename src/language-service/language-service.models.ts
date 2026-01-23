@@ -1,5 +1,6 @@
 ﻿import { Parser } from '../parsing/parser';
 import { BUILTIN_FUNCTION_DOCS, FunctionDoc } from './language-service.documentation';
+import type { ArityInfo } from './language-service.types';
 
 export class FunctionDetails {
   private readonly builtInFunctionDoc : FunctionDoc | undefined;
@@ -15,6 +16,41 @@ export class FunctionDetails {
 
     const f: unknown = (this.parser.functions && this.parser.functions[this.name]) || (this.parser.unaryOps && this.parser.unaryOps[this.name]);
     return typeof f === 'function' ? f.length : undefined;
+  }
+
+  /**
+   * Returns the arity information for this function:
+   * - min: minimum number of required arguments
+   * - max: maximum number of arguments, or undefined if variadic
+   */
+  public arityInfo(): ArityInfo | undefined {
+    if (this.builtInFunctionDoc) {
+      const params = this.builtInFunctionDoc.params || [];
+      if (params.length === 0) {
+        return { min: 0, max: 0 };
+      }
+
+      // Check if any parameter is variadic
+      const hasVariadic = params.some(p => p.isVariadic);
+      // Count required (non-optional, non-variadic) parameters
+      const requiredParams = params.filter(p => !p.optional && !p.isVariadic);
+      const optionalParams = params.filter(p => p.optional && !p.isVariadic);
+
+      const min = requiredParams.length;
+      // If variadic, max is undefined (unlimited); otherwise, it's all non-variadic params
+      const max = hasVariadic ? undefined : (requiredParams.length + optionalParams.length);
+
+      return { min, max };
+    }
+
+    // For functions without documentation, use the JavaScript function's .length property
+    const f: unknown = (this.parser.functions && this.parser.functions[this.name]) || (this.parser.unaryOps && this.parser.unaryOps[this.name]);
+    if (typeof f === 'function') {
+      // JavaScript's .length gives number of expected arguments (doesn't account for variadic)
+      return { min: f.length, max: f.length };
+    }
+
+    return undefined;
   }
 
   public docs() {

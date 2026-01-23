@@ -93,5 +93,15 @@ const exampleCases = [
                 {"rowId": 3, "state": "unchanged", "data": { "InventoryId": 9362, "Description": "Wood", "Weight": { "Unit": "kg", "Amount": 18 } }}
             ]
         }
+    },
+    {
+        id: 'diagnostics-demo',
+        title: 'Diagnostics Demo',
+        description: 'Shows error highlighting for incorrect function arguments',
+        expression: '// Try functions with wrong argument counts:\n// pow() needs 2 args, random() needs 0-1 args\npow(2) + random(1, 2, 3)',
+        context: {
+            x: 5,
+            y: 10
+        }
     }
 ];

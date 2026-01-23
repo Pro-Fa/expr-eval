@@ -1,7 +1,7 @@
 ﻿import { describe, it, expect, beforeEach } from 'vitest';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { createLanguageService } from '../../src/language-service/language-service';
-import { CompletionItemKind, MarkupKind } from 'vscode-languageserver-types';
+import { CompletionItemKind, MarkupKind, DiagnosticSeverity } from 'vscode-languageserver-types';
 
 function getContentsValue(contents: any): string {
   if (typeof contents === 'string') {
@@ -667,6 +667,167 @@ describe('Language Service', () => {
       const tokens2 = ls.getHighlighting(doc);
 
       expect(tokens1).toEqual(tokens2);
+    });
+
+    it('should include getDiagnostics method', () => {
+      const service = createLanguageService();
+      expect(service.getDiagnostics).toBeDefined();
+    });
+  });
+
+  describe('getDiagnostics', () => {
+    it('should return empty array for valid function calls', () => {
+      const text = 'pow(2, 3)';
+      const doc = TextDocument.create('file://test', 'plaintext', 1, text);
+      const diagnostics = ls.getDiagnostics({ textDocument: doc });
+      expect(diagnostics).toEqual([]);
+    });
+
+    it('should return empty array for expressions without function calls', () => {
+      const text = '1 + 2 * 3';
+      const doc = TextDocument.create('file://test', 'plaintext', 1, text);
+      const diagnostics = ls.getDiagnostics({ textDocument: doc });
+      expect(diagnostics).toEqual([]);
+    });
+
+    it('should detect too few arguments for a function', () => {
+      const text = 'pow(2)';
+      const doc = TextDocument.create('file://test', 'plaintext', 1, text);
+      const diagnostics = ls.getDiagnostics({ textDocument: doc });
+
+      expect(diagnostics.length).toBe(1);
+      expect(diagnostics[0].message).toContain('pow');
+      expect(diagnostics[0].message).toContain('at least 2');
+      expect(diagnostics[0].message).toContain('got 1');
+    });
+
+    it('should detect too many arguments for a function', () => {
+      const text = 'pow(2, 3, 4)';
+      const doc = TextDocument.create('file://test', 'plaintext', 1, text);
+      const diagnostics = ls.getDiagnostics({ textDocument: doc });
+
+      expect(diagnostics.length).toBe(1);
+      expect(diagnostics[0].message).toContain('pow');
+      expect(diagnostics[0].message).toContain('at most 2');
+      expect(diagnostics[0].message).toContain('got 3');
+    });
+
+    it('should allow variadic functions with any number of arguments', () => {
+      // min and max are variadic functions
+      const text = 'max(1, 2, 3, 4, 5)';
+      const doc = TextDocument.create('file://test', 'plaintext', 1, text);
+      const diagnostics = ls.getDiagnostics({ textDocument: doc });
+      expect(diagnostics).toEqual([]);
+    });
+
+    it('should detect multiple errors in a single expression', () => {
+      const text = 'pow(1) + pow(2, 3, 4)';
+      const doc = TextDocument.create('file://test', 'plaintext', 1, text);
+      const diagnostics = ls.getDiagnostics({ textDocument: doc });
+
+      expect(diagnostics.length).toBe(2);
+      expect(diagnostics[0].message).toContain('at least');
+      expect(diagnostics[1].message).toContain('at most');
+    });
+
+    it('should handle nested function calls correctly', () => {
+      const text = 'pow(pow(2, 3), 2)';
+      const doc = TextDocument.create('file://test', 'plaintext', 1, text);
+      const diagnostics = ls.getDiagnostics({ textDocument: doc });
+      expect(diagnostics).toEqual([]);
+    });
+
+    it('should detect error in nested function call', () => {
+      const text = 'pow(pow(2), 2)';
+      const doc = TextDocument.create('file://test', 'plaintext', 1, text);
+      const diagnostics = ls.getDiagnostics({ textDocument: doc });
+
+      expect(diagnostics.length).toBe(1);
+      expect(diagnostics[0].message).toContain('pow');
+      expect(diagnostics[0].message).toContain('at least 2');
+    });
+
+    it('should handle functions with optional parameters', () => {
+      // random has one optional parameter
+      const textNoArg = 'random()';
+      const docNoArg = TextDocument.create('file://test', 'plaintext', 1, textNoArg);
+      const diagnosticsNoArg = ls.getDiagnostics({ textDocument: docNoArg });
+      expect(diagnosticsNoArg).toEqual([]);
+
+      const textOneArg = 'random(10)';
+      const docOneArg = TextDocument.create('file://test', 'plaintext', 1, textOneArg);
+      const diagnosticsOneArg = ls.getDiagnostics({ textDocument: docOneArg });
+      expect(diagnosticsOneArg).toEqual([]);
+    });
+
+    it('should detect too many arguments for functions with optional parameters', () => {
+      // random(n) has one optional parameter, so random(1, 2) is too many
+      const text = 'random(1, 2)';
+      const doc = TextDocument.create('file://test', 'plaintext', 1, text);
+      const diagnostics = ls.getDiagnostics({ textDocument: doc });
+
+      expect(diagnostics.length).toBe(1);
+      expect(diagnostics[0].message).toContain('random');
+      expect(diagnostics[0].message).toContain('at most 1');
+      expect(diagnostics[0].message).toContain('got 2');
+    });
+
+    it('should provide correct diagnostic range', () => {
+      const text = 'pow(2)';
+      const doc = TextDocument.create('file://test', 'plaintext', 1, text);
+      const diagnostics = ls.getDiagnostics({ textDocument: doc });
+
+      expect(diagnostics.length).toBe(1);
+      // Range should cover the entire function call including arguments
+      expect(diagnostics[0].range.start.line).toBe(0);
+      expect(diagnostics[0].range.start.character).toBe(0);
+      expect(diagnostics[0].range.end.line).toBe(0);
+      expect(diagnostics[0].range.end.character).toBe(text.length);
+    });
+
+    it('should have correct severity (Error)', () => {
+      const text = 'pow(2)';
+      const doc = TextDocument.create('file://test', 'plaintext', 1, text);
+      const diagnostics = ls.getDiagnostics({ textDocument: doc });
+
+      expect(diagnostics.length).toBe(1);
+      expect(diagnostics[0].severity).toBe(DiagnosticSeverity.Error);
+    });
+
+    it('should have correct source', () => {
+      const text = 'pow(2)';
+      const doc = TextDocument.create('file://test', 'plaintext', 1, text);
+      const diagnostics = ls.getDiagnostics({ textDocument: doc });
+
+      expect(diagnostics.length).toBe(1);
+      expect(diagnostics[0].source).toBe('expr-eval');
+    });
+
+    it('should handle empty function calls', () => {
+      // if function requires 3 arguments
+      const text = 'if()';
+      const doc = TextDocument.create('file://test', 'plaintext', 1, text);
+      const diagnostics = ls.getDiagnostics({ textDocument: doc });
+
+      expect(diagnostics.length).toBe(1);
+      expect(diagnostics[0].message).toContain('if');
+      expect(diagnostics[0].message).toContain('at least 3');
+      expect(diagnostics[0].message).toContain('got 0');
+    });
+
+    it('should handle function calls with array arguments', () => {
+      // sum takes one array argument
+      const text = 'sum([1, 2, 3])';
+      const doc = TextDocument.create('file://test', 'plaintext', 1, text);
+      const diagnostics = ls.getDiagnostics({ textDocument: doc });
+      expect(diagnostics).toEqual([]);
+    });
+
+    it('should handle function calls with object arguments', () => {
+      const text = 'keys({a: 1, b: 2})';
+      const doc = TextDocument.create('file://test', 'plaintext', 1, text);
+      const diagnostics = ls.getDiagnostics({ textDocument: doc });
+      expect(diagnostics).toEqual([]);
     });
   });
 });
