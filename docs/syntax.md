@@ -17,6 +17,7 @@ The parser accepts a pretty basic grammar. It's similar to normal JavaScript exp
 | and                      | Left          | Logical AND |
 | or                       | Left          | Logical OR |
 | x ? y : z                | Right         | Ternary conditional (if x then y else z) |
+| =>                       | Right         | Arrow function (e.g., x => x * 2) |
 | =                        | Right         | Variable assignment |
 | ;                        | Left          | Expression separator |
 
@@ -344,6 +345,59 @@ You can also define the functions inline:
 ```js
 filter(isEven(x) = x % 2 == 0, [1, 2, 3, 4, 5])
 ```
+
+### Arrow Functions
+
+Arrow functions provide a concise syntax for inline functions, similar to JavaScript arrow functions. They are particularly useful when passing functions to higher-order functions like `map`, `filter`, and `fold`.
+
+**Single parameter (no parentheses required):**
+
+```js
+map(x => x * 2, [1, 2, 3])           // [2, 4, 6]
+filter(x => x > 2, [1, 2, 3, 4])     // [3, 4]
+map(x => x.name, users)              // Extract property from objects
+```
+
+**Multiple parameters (parentheses required):**
+
+```js
+fold((acc, x) => acc + x, 0, [1, 2, 3, 4, 5])    // 15 (sum)
+fold((acc, x) => acc * x, 1, [1, 2, 3, 4, 5])    // 120 (product)
+map((val, idx) => val + idx, [10, 20, 30])       // [10, 21, 32]
+filter((x, i) => i >= 1, [10, 20, 30])           // [20, 30]
+```
+
+**Zero parameters:**
+
+```js
+(() => 42)()                         // 42
+```
+
+**Assignment to variable:**
+
+Arrow functions can be assigned to variables for reuse:
+
+```js
+fn = x => x * 2; map(fn, [1, 2, 3])  // [2, 4, 6]
+double = x => x * 2; triple = x => x * 3; map(double, map(triple, [1, 2]))  // [6, 12]
+```
+
+**Nested arrow functions:**
+
+```js
+map(row => map(x => x * 2, row), [[1, 2], [3, 4]])  // [[2, 4], [6, 8]]
+```
+
+**With member access and complex expressions:**
+
+```js
+filter(x => x.age > 25, users)                     // Filter objects by property
+map(x => x.value * 2 + 1, items)                   // Complex transformations
+filter(x => x > 0 and x < 10, numbers)             // Using logical operators
+map(x => x > 5 ? "high" : "low", [3, 7, 2, 9])     // Using ternary operator
+```
+
+> **Note:** Arrow functions share the same `fndef` operator flag as traditional function definitions. If function definitions are disabled via parser options, arrow functions will also be disabled.
 
 ## Custom JavaScript Functions
 
