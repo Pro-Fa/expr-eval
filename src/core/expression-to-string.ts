@@ -1,9 +1,9 @@
-// cSpell:words ISCALAR IVAR IVARNAME IFUNCALL IEXPR IEXPREVAL IMEMBER IENDSTATEMENT IARRAY
+// cSpell:words ISCALAR IVAR IVARNAME IFUNCALL IEXPR IEXPREVAL IMEMBER IENDSTATEMENT IARRAY IARROW
 // cSpell:words IFUNDEF IUNDEFINED ICASEMATCH ICASECOND IWHENCOND IWHENMATCH ICASEELSE IPROPERTY
 // cSpell:words IOBJECT IOBJECTEND
 // cSpell:words nstack
 
-import { ISCALAR, IOP1, IOP2, IOP3, IVAR, IVARNAME, IFUNCALL, IFUNDEF, IEXPR, IMEMBER, IENDSTATEMENT, IARRAY, IUNDEFINED, ICASEMATCH, ICASECOND, IWHENCOND, IWHENMATCH, ICASEELSE, IOBJECT, IOBJECTEND, IPROPERTY } from '../parsing/instruction.js';
+import { ISCALAR, IOP1, IOP2, IOP3, IVAR, IVARNAME, IFUNCALL, IFUNDEF, IARROW, IEXPR, IMEMBER, IENDSTATEMENT, IARRAY, IUNDEFINED, ICASEMATCH, ICASECOND, IWHENCOND, IWHENMATCH, ICASEELSE, IOBJECT, IOBJECTEND, IPROPERTY } from '../parsing/instruction.js';
 import type { Instruction } from '../parsing/instruction.js';
 
 export default function expressionToString(tokens: Instruction[], toJS?: boolean): string {
@@ -100,6 +100,22 @@ export default function expressionToString(tokens: Instruction[], toJS?: boolean
         nstack.push('(' + n1 + ' = function(' + args.join(', ') + ') { return ' + n2 + ' })');
       } else {
         nstack.push('(' + n1 + '(' + args.join(', ') + ') = ' + n2 + ')');
+      }
+    } else if (type === IARROW) {
+      n2 = nstack.pop()!;
+      argCount = item.value as number;
+      args = [];
+      while (argCount-- > 0) {
+        args.unshift(nstack.pop()!);
+      }
+      if (toJS) {
+        nstack.push('((' + args.join(', ') + ') => ' + n2 + ')');
+      } else {
+        if (args.length === 1) {
+          nstack.push('(' + args[0] + ' => ' + n2 + ')');
+        } else {
+          nstack.push('((' + args.join(', ') + ') => ' + n2 + ')');
+        }
       }
     } else if (type === IMEMBER) {
       n1 = nstack.pop()!;

@@ -327,6 +327,7 @@ export class Parser {
     '=': 'assignment',
     '[': 'array',
     '()=': 'fndef',
+    '=>': 'fndef',
     '??': 'coalesce',
     'as': 'conversion'
   } as const;

@@ -549,6 +549,30 @@ describe('Language Service', () => {
       expect(stringToken?.start).toBe(0);
       expect(stringToken?.end).toBe(text.length);
     });
+
+    it('should highlight arrow function operator', () => {
+      const text = 'map(x => x * 2, arr)';
+      const doc = TextDocument.create('file://test', 'plaintext', 1, text);
+      const tokens = ls.getHighlighting(doc);
+
+      const arrowToken = tokens.find(t => t.value === '=>');
+      expect(arrowToken).toBeDefined();
+      expect(arrowToken?.type).toBe('operator');
+    });
+
+    it('should highlight multi-parameter arrow function', () => {
+      const text = 'fold((a, b) => a + b, 0, arr)';
+      const doc = TextDocument.create('file://test', 'plaintext', 1, text);
+      const tokens = ls.getHighlighting(doc);
+
+      const arrowToken = tokens.find(t => t.value === '=>');
+      expect(arrowToken).toBeDefined();
+      expect(arrowToken?.type).toBe('operator');
+
+      // Check the parameter names are recognized
+      const nameTokens = tokens.filter(t => t.type === 'name');
+      expect(nameTokens.length).toBeGreaterThanOrEqual(3); // a, b, arr
+    });
   });
 
   describe('Edge cases', () => {

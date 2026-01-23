@@ -5,14 +5,14 @@
  * It uses a stack-based interpreter to evaluate instruction sequences produced by the parser.
  */
 
-import { ISCALAR, IOP1, IOP2, IOP3, IVAR, IVARNAME, IFUNCALL, IFUNDEF, IEXPR, IEXPREVAL, IMEMBER, IENDSTATEMENT, IARRAY, IUNDEFINED, ICASEMATCH, IWHENMATCH, ICASEELSE, ICASECOND, IWHENCOND, IOBJECT, IPROPERTY, IOBJECTEND } from '../parsing/instruction.js';
+import { ISCALAR, IOP1, IOP2, IOP3, IVAR, IVARNAME, IFUNCALL, IFUNDEF, IARROW, IEXPR, IEXPREVAL, IMEMBER, IENDSTATEMENT, IARRAY, IUNDEFINED, ICASEMATCH, IWHENMATCH, ICASEELSE, ICASECOND, IWHENCOND, IOBJECT, IPROPERTY, IOBJECTEND } from '../parsing/instruction.js';
 import type { Instruction } from '../parsing/instruction.js';
 import type { Expression } from './expression.js';
 import type { Value, Values, VariableResolveResult } from '../types/values.js';
 import { VariableError } from '../types/errors.js';
 import { ExpressionValidator } from '../validation/expression-validator.js';
 
-// cSpell:words ISCALAR IVAR IVARNAME IFUNCALL IEXPR IEXPREVAL IMEMBER IENDSTATEMENT IARRAY
+// cSpell:words ISCALAR IVAR IVARNAME IFUNCALL IEXPR IEXPREVAL IMEMBER IENDSTATEMENT IARRAY IARROW
 // cSpell:words IFUNDEF IUNDEFINED ICASEMATCH ICASECOND IWHENCOND IWHENMATCH ICASEELSE IPROPERTY
 // cSpell:words IOBJECT IOBJECTEND
 // cSpell:words nstack
@@ -260,6 +260,34 @@ function evaluateExpressionToken(expr: Expression, values: EvaluationValues, tok
       expr.functions[uniqueKey] = userDefinedFunction;
       values[functionName] = userDefinedFunction;
       return userDefinedFunction;
+    })());
+  } else if (type === IARROW) {
+    // Create anonymous arrow function closure
+    // Stack contains: param1, param2, ..., paramN, expression
+    // token.value is the parameter count
+    nstack.push((function () {
+      const expressionToEvaluate = nstack.pop();
+      const functionParams: string[] = [];
+      let parameterCount = token.value as number;
+      while (parameterCount-- > 0) {
+        functionParams.unshift(nstack.pop());
+      }
+      const arrowFunction = function (...functionArguments: any[]) {
+        const localScope = Object.assign({}, values);
+        for (let i = 0, len = functionParams.length; i < len; i++) {
+          localScope[functionParams[i]] = functionArguments[i];
+        }
+        return evaluate(expressionToEvaluate, expr, localScope);
+      };
+      // Set function name for debugging (anonymous arrow function)
+      Object.defineProperty(arrowFunction, 'name', {
+        value: '(arrow)',
+        writable: false
+      });
+      // Security: Register the arrow function as allowed using a unique counter-based key
+      const uniqueKey = `__inline_fn_${inlineFunctionCounter++}__`;
+      expr.functions[uniqueKey] = arrowFunction;
+      return arrowFunction;
     })());
   } else if (type === IEXPR) {
     nstack.push(createExpressionEvaluator(token, expr));

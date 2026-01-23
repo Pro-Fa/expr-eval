@@ -532,6 +532,22 @@ export class TokenStream {
   }
 
   /**
+   * Try to match the arrow operator (=>)
+   * Returns true if arrow operator was matched, false otherwise
+   */
+  private tryMatchArrowOperator(): boolean {
+    if (this.expression.charAt(this.pos + 1) === '>') {
+      if (!this.isOperatorEnabled('=>')) {
+        return false;
+      }
+      this.current = this.newToken(TOP, '=>');
+      this.pos++;
+      return true;
+    }
+    return false;
+  }
+
+  /**
    * Try to match pipe operators (| or ||)
    */
   private tryMatchPipeOperator(): boolean {
@@ -599,7 +615,10 @@ export class TokenStream {
       this.tryMatchComparisonOperator(c, '<=');
     }
     else if (c === '=') {
-      this.tryMatchComparisonOperator(c, '==');
+      // Try arrow operator first (=>), then comparison/assignment (== or =)
+      if (!this.tryMatchArrowOperator()) {
+        this.tryMatchComparisonOperator(c, '==');
+      }
     }
     else if (c === '!') {
       this.tryMatchComparisonOperator(c, '!=');
