@@ -39,9 +39,6 @@ import {
 import { pathVariableCompletions, tryVariableHoverUsingSpans } from './variable-utils';
 import {
   getDiagnosticsForDocument,
-  getDiagnosticsForBrackets,
-  getDiagnosticsForUnclosedStrings,
-  getDiagnosticsForUnclosedComments,
   createDiagnosticFromParseError,
   TokenSpan
 } from './diagnostics';
@@ -308,35 +305,35 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
   /**
    * Analyzes the document for function calls and checks if they have the correct number of arguments.
    * Returns diagnostics for function calls with incorrect argument counts, as well as
-   * syntax errors like unclosed strings, brackets, and comments.
+   * syntax errors detected by the parser (unclosed strings, brackets, unknown characters, etc.).
    */
   function getDiagnostics(params: GetDiagnosticsParams): Diagnostic[] {
     const { textDocument } = params;
     const text = textDocument.getText();
     const diagnostics: Diagnostic[] = [];
 
-    // Check for unclosed strings first (these prevent proper tokenization)
-    const stringDiagnostics = getDiagnosticsForUnclosedStrings(textDocument);
-    diagnostics.push(...stringDiagnostics);
+    // Try to parse the expression to catch syntax errors
+    // The parser will throw ParseError for issues like:
+    // - Unknown characters
+    // - Unclosed strings
+    // - Illegal escape sequences
+    // - Unexpected tokens
+    // - Missing expected tokens (like closing brackets)
+    try {
+      parser.parse(text);
+    } catch (error) {
+      if (error instanceof ParseError) {
+        diagnostics.push(createDiagnosticFromParseError(textDocument, error));
+      }
+    }
 
-    // Check for unclosed comments
-    const commentDiagnostics = getDiagnosticsForUnclosedComments(textDocument);
-    diagnostics.push(...commentDiagnostics);
-
-    // Check for mismatched brackets
-    const bracketDiagnostics = getDiagnosticsForBrackets(textDocument);
-    diagnostics.push(...bracketDiagnostics);
-
-    // Try to tokenize and get additional diagnostics
+    // Try to tokenize for function argument checking
     let spans: TokenSpan[] = [];
     try {
       const ts = makeTokenStream(parser, text);
       spans = iterateTokens(ts);
     } catch (error) {
-      // If tokenization fails, add a diagnostic for the parse error
-      if (error instanceof ParseError) {
-        diagnostics.push(createDiagnosticFromParseError(textDocument, error));
-      }
+      // If tokenization fails, we already have a parse error diagnostic
       // Return early since we can't do function argument checking without tokens
       return diagnostics;
     }
