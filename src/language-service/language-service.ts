@@ -34,14 +34,14 @@ import {
   valueTypeName,
   extractPathPrefix,
   makeTokenStream,
-  iterateTokens
+  iterateTokens,
+  TokenSpan
 } from './ls-utils';
 import { pathVariableCompletions, tryVariableHoverUsingSpans } from './variable-utils';
 import {
   getDiagnosticsForDocument,
   createDiagnosticFromParseError,
-  createDiagnosticFromError,
-  TokenSpan
+  createDiagnosticFromError
 } from './diagnostics';
 import { ParseError } from '../types/errors';
 
