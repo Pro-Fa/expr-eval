@@ -32,7 +32,7 @@ const server = http.createServer((req, res) => {
 
     if (urlPath === '/' || urlPath === '/index.html') {
         urlPath = 'samples/language-service-sample/index.html';
-    } else if (urlPath === '/styles.css' || urlPath === '/app.js') {
+    } else if (urlPath === '/styles.css' || urlPath === '/app.js' || urlPath === '/examples.js') {
         // Serve sample-specific files from the sample folder
         urlPath = 'samples/language-service-sample' + urlPath;
     }
