@@ -111,4 +111,41 @@ describe('Advanced Functions TypeScript Test', function () {
       assert.strictEqual(parser.evaluate('if(2 > 5, 1, undefined)'), undefined);
     });
   });
+
+  describe('clamp(value, min, max)', function () {
+    it('should return the value when within bounds', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('clamp(5, 0, 10)'), 5);
+      assert.strictEqual(parser.evaluate('clamp(0, 0, 10)'), 0);
+      assert.strictEqual(parser.evaluate('clamp(10, 0, 10)'), 10);
+    });
+    it('should return min when value is below min', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('clamp(-5, 0, 10)'), 0);
+      assert.strictEqual(parser.evaluate('clamp(-100, -10, 10)'), -10);
+    });
+    it('should return max when value is above max', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('clamp(15, 0, 10)'), 10);
+      assert.strictEqual(parser.evaluate('clamp(100, -10, 10)'), 10);
+    });
+    it('should work with negative ranges', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('clamp(-5, -10, -1)'), -5);
+      assert.strictEqual(parser.evaluate('clamp(0, -10, -1)'), -1);
+      assert.strictEqual(parser.evaluate('clamp(-15, -10, -1)'), -10);
+    });
+    it('should work with decimal values', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('clamp(5.5, 0, 10)'), 5.5);
+      assert.strictEqual(parser.evaluate('clamp(0.1, 0.2, 0.9)'), 0.2);
+      assert.strictEqual(parser.evaluate('clamp(0.95, 0.2, 0.9)'), 0.9);
+    });
+    it('should return undefined if any argument is undefined', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('clamp(undefined, 0, 10)'), undefined);
+      assert.strictEqual(parser.evaluate('clamp(5, undefined, 10)'), undefined);
+      assert.strictEqual(parser.evaluate('clamp(5, 0, undefined)'), undefined);
+    });
+  });
 });

@@ -187,3 +187,10 @@ export function roundTo(value: number | undefined, exp?: number): number | undef
   const resultStr = shiftedValue.toString().split('e');
   return +(resultStr[0] + 'e' + (resultStr[1] ? (+resultStr[1] + numExp) : numExp));
 }
+
+export function clamp(value: number | undefined, minVal: number | undefined, maxVal: number | undefined): number | undefined {
+  if (value === undefined || minVal === undefined || maxVal === undefined) {
+    return undefined;
+  }
+  return Math.min(Math.max(value, minVal), maxVal);
+}

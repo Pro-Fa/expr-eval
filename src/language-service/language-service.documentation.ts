@@ -146,6 +146,22 @@ export const BUILTIN_FUNCTION_DOCS: Record<string, FunctionDoc> = {
       { name: 'a', description: 'Array of numbers.' }
     ]
   },
+  count: {
+    name: 'count',
+    description: 'Returns the number of items in an array.',
+    params: [
+      { name: 'a', description: 'Array to count.' }
+    ]
+  },
+  clamp: {
+    name: 'clamp',
+    description: 'Clamps a value between a minimum and maximum.',
+    params: [
+      { name: 'value', description: 'The value to clamp.' },
+      { name: 'min', description: 'Minimum allowed value.' },
+      { name: 'max', description: 'Maximum allowed value.' }
+    ]
+  },
   /**
      * String functions
      */
