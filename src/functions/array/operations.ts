@@ -12,42 +12,63 @@ function getTypeName(value: unknown): string {
   return typeof value;
 }
 
-export function filter(f: Function, a: any[] | undefined): any[] | undefined {
+export function filter(arg1: Function | any[] | undefined, arg2: Function | any[] | undefined): any[] | undefined {
+  // Support both filter(array, fn) and filter(fn, array) for backwards compatibility
+  let f: Function;
+  let a: any[] | undefined;
+  
+  if (Array.isArray(arg1) && typeof arg2 === 'function') {
+    // array-first: filter(array, fn)
+    a = arg1;
+    f = arg2;
+  } else if (typeof arg1 === 'function' && (Array.isArray(arg2) || arg2 === undefined)) {
+    // function-first: filter(fn, array)
+    f = arg1;
+    a = arg2 as any[] | undefined;
+  } else if (arg1 === undefined) {
+    return undefined;
+  } else {
+    throw new Error(
+      `filter(array, predicate) expects an array and a function.\n` +
+      'Example: filter([1, -2, 3], x => x > 0)'
+    );
+  }
+
   if (a === undefined) {
     return undefined;
-  }
-  if (typeof f !== 'function') {
-    throw new Error(
-      `filter(predicate, array) expects a function as first argument, got ${getTypeName(f)}.\n` +
-      'Example: filter(x => x > 0, [1, -2, 3])'
-    );
-  }
-  if (!Array.isArray(a)) {
-    throw new Error(
-      `filter(predicate, array) expects an array as second argument, got ${getTypeName(a)}.\n` +
-      'Example: filter(x => x > 0, [1, -2, 3])'
-    );
   }
   return a.filter(function (x: any, i: number): any {
     return f(x, i);
   });
 }
 
-export function fold(f: Function, init: any, a: any[] | undefined): any {
+export function fold(arg1: Function | any[] | undefined, arg2: any, arg3: Function | any[] | undefined): any {
+  // Support both fold(array, initial, fn) and fold(fn, initial, array) for backwards compatibility
+  let f: Function;
+  let init: any;
+  let a: any[] | undefined;
+  
+  if (Array.isArray(arg1) && typeof arg3 === 'function') {
+    // array-first: fold(array, initial, fn)
+    a = arg1;
+    init = arg2;
+    f = arg3;
+  } else if (typeof arg1 === 'function' && (Array.isArray(arg3) || arg3 === undefined)) {
+    // function-first: fold(fn, initial, array)
+    f = arg1;
+    init = arg2;
+    a = arg3 as any[] | undefined;
+  } else if (arg1 === undefined || arg3 === undefined) {
+    return undefined;
+  } else {
+    throw new Error(
+      `fold(array, initial, reducer) expects an array, initial value, and a function.\n` +
+      'Example: fold([1, 2, 3], 0, (acc, x) => acc + x)'
+    );
+  }
+
   if (a === undefined) {
     return undefined;
-  }
-  if (typeof f !== 'function') {
-    throw new Error(
-      `fold(reducer, initial, array) expects a function as first argument, got ${getTypeName(f)}.\n` +
-      'Example: fold((acc, x) => acc + x, 0, [1, 2, 3])'
-    );
-  }
-  if (!Array.isArray(a)) {
-    throw new Error(
-      `fold(reducer, initial, array) expects an array as third argument, got ${getTypeName(a)}.\n` +
-      'Example: fold((acc, x) => acc + x, 0, [1, 2, 3])'
-    );
   }
   return a.reduce(function (acc: any, x: any, i: number): any {
     return f(acc, x, i);
@@ -82,21 +103,30 @@ export function join(sep: string | undefined, a: any[] | undefined): string | un
   return a.join(sep);
 }
 
-export function map(f: Function, a: any[] | undefined): any[] | undefined {
+export function map(arg1: Function | any[] | undefined, arg2: Function | any[] | undefined): any[] | undefined {
+  // Support both map(array, fn) and map(fn, array) for backwards compatibility
+  let f: Function;
+  let a: any[] | undefined;
+  
+  if (Array.isArray(arg1) && typeof arg2 === 'function') {
+    // array-first: map(array, fn)
+    a = arg1;
+    f = arg2;
+  } else if (typeof arg1 === 'function' && (Array.isArray(arg2) || arg2 === undefined)) {
+    // function-first: map(fn, array)
+    f = arg1;
+    a = arg2 as any[] | undefined;
+  } else if (arg1 === undefined) {
+    return undefined;
+  } else {
+    throw new Error(
+      `map(array, mapper) expects an array and a function.\n` +
+      'Example: map([1, 2, 3], x => x * 2)'
+    );
+  }
+
   if (a === undefined) {
     return undefined;
-  }
-  if (typeof f !== 'function') {
-    throw new Error(
-      `map(mapper, array) expects a function as first argument, got ${getTypeName(f)}.\n` +
-      'Example: map(x => x * 2, [1, 2, 3])'
-    );
-  }
-  if (!Array.isArray(a)) {
-    throw new Error(
-      `map(mapper, array) expects an array as second argument, got ${getTypeName(a)}.\n` +
-      'Example: map(x => x * 2, [1, 2, 3])'
-    );
   }
   return a.map(function (x: any, i: number): any {
     return f(x, i);
@@ -135,68 +165,95 @@ export function count(array: any[] | undefined): number | undefined {
   return array.length;
 }
 
-export function reduce(f: Function, init: any, a: any[] | undefined): any {
-  // reduce is an alias for fold
-  return fold(f, init, a);
+export function reduce(arg1: Function | any[] | undefined, arg2: any, arg3: Function | any[] | undefined): any {
+  // reduce is an alias for fold - supports both argument orders
+  return fold(arg1, arg2, arg3);
 }
 
-export function find(f: Function, a: any[] | undefined): any {
+export function find(arg1: Function | any[] | undefined, arg2: Function | any[] | undefined): any {
+  // Support both find(array, fn) and find(fn, array) for backwards compatibility
+  let f: Function;
+  let a: any[] | undefined;
+  
+  if (Array.isArray(arg1) && typeof arg2 === 'function') {
+    // array-first: find(array, fn)
+    a = arg1;
+    f = arg2;
+  } else if (typeof arg1 === 'function' && (Array.isArray(arg2) || arg2 === undefined)) {
+    // function-first: find(fn, array)
+    f = arg1;
+    a = arg2 as any[] | undefined;
+  } else if (arg1 === undefined) {
+    return undefined;
+  } else {
+    throw new Error(
+      `find(array, predicate) expects an array and a function.\n` +
+      'Example: find([1, 2, 3, 4], x => x > 2)'
+    );
+  }
+
   if (a === undefined) {
     return undefined;
-  }
-  if (typeof f !== 'function') {
-    throw new Error(
-      `find(predicate, array) expects a function as first argument, got ${getTypeName(f)}.\n` +
-      'Example: find(x => x > 2, [1, 2, 3, 4])'
-    );
-  }
-  if (!Array.isArray(a)) {
-    throw new Error(
-      `find(predicate, array) expects an array as second argument, got ${getTypeName(a)}.\n` +
-      'Example: find(x => x > 2, [1, 2, 3, 4])'
-    );
   }
   return a.find(function (x: any, i: number): any {
     return f(x, i);
   });
 }
 
-export function some(f: Function, a: any[] | undefined): boolean | undefined {
+export function some(arg1: Function | any[] | undefined, arg2: Function | any[] | undefined): boolean | undefined {
+  // Support both some(array, fn) and some(fn, array) for backwards compatibility
+  let f: Function;
+  let a: any[] | undefined;
+  
+  if (Array.isArray(arg1) && typeof arg2 === 'function') {
+    // array-first: some(array, fn)
+    a = arg1;
+    f = arg2;
+  } else if (typeof arg1 === 'function' && (Array.isArray(arg2) || arg2 === undefined)) {
+    // function-first: some(fn, array)
+    f = arg1;
+    a = arg2 as any[] | undefined;
+  } else if (arg1 === undefined) {
+    return undefined;
+  } else {
+    throw new Error(
+      `some(array, predicate) expects an array and a function.\n` +
+      'Example: some([1, 2, 3, 4], x => x > 2)'
+    );
+  }
+
   if (a === undefined) {
     return undefined;
-  }
-  if (typeof f !== 'function') {
-    throw new Error(
-      `some(predicate, array) expects a function as first argument, got ${getTypeName(f)}.\n` +
-      'Example: some(x => x > 2, [1, 2, 3, 4])'
-    );
-  }
-  if (!Array.isArray(a)) {
-    throw new Error(
-      `some(predicate, array) expects an array as second argument, got ${getTypeName(a)}.\n` +
-      'Example: some(x => x > 2, [1, 2, 3, 4])'
-    );
   }
   return a.some(function (x: any, i: number): any {
     return f(x, i);
   });
 }
 
-export function every(f: Function, a: any[] | undefined): boolean | undefined {
+export function every(arg1: Function | any[] | undefined, arg2: Function | any[] | undefined): boolean | undefined {
+  // Support both every(array, fn) and every(fn, array) for backwards compatibility
+  let f: Function;
+  let a: any[] | undefined;
+  
+  if (Array.isArray(arg1) && typeof arg2 === 'function') {
+    // array-first: every(array, fn)
+    a = arg1;
+    f = arg2;
+  } else if (typeof arg1 === 'function' && (Array.isArray(arg2) || arg2 === undefined)) {
+    // function-first: every(fn, array)
+    f = arg1;
+    a = arg2 as any[] | undefined;
+  } else if (arg1 === undefined) {
+    return undefined;
+  } else {
+    throw new Error(
+      `every(array, predicate) expects an array and a function.\n` +
+      'Example: every([1, 2, 3, 4], x => x > 0)'
+    );
+  }
+
   if (a === undefined) {
     return undefined;
-  }
-  if (typeof f !== 'function') {
-    throw new Error(
-      `every(predicate, array) expects a function as first argument, got ${getTypeName(f)}.\n` +
-      'Example: every(x => x > 0, [1, 2, 3, 4])'
-    );
-  }
-  if (!Array.isArray(a)) {
-    throw new Error(
-      `every(predicate, array) expects an array as second argument, got ${getTypeName(a)}.\n` +
-      'Example: every(x => x > 0, [1, 2, 3, 4])'
-    );
   }
   return a.every(function (x: any, i: number): any {
     return f(x, i);

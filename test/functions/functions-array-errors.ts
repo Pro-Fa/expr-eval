@@ -5,111 +5,111 @@ import { expect } from 'vitest';
 
 describe('Array Function Error Messages', function () {
   describe('filter()', function () {
-    it('should provide user-friendly error when first argument is not a function', function () {
+    it('should provide user-friendly error when arguments are invalid', function () {
       const parser = new Parser();
       expect(() => parser.evaluate('filter(42, [1, 2, 3])')).toThrow(
-        /filter\(predicate, array\) expects a function as first argument, got number/
+        /filter\(array, predicate\) expects an array and a function/
       );
       expect(() => parser.evaluate('filter(42, [1, 2, 3])')).toThrow(/Example:/);
     });
 
-    it('should provide user-friendly error when second argument is not an array', function () {
+    it('should provide user-friendly error when second argument is not a function', function () {
       const parser = new Parser();
-      expect(() => parser.evaluate('f(x) = x > 0; filter(f, "not an array")')).toThrow(
-        /filter\(predicate, array\) expects an array as second argument, got string/
+      expect(() => parser.evaluate('filter([1, 2, 3], "not a function")')).toThrow(
+        /filter\(array, predicate\) expects an array and a function/
       );
-      expect(() => parser.evaluate('f(x) = x > 0; filter(f, "not an array")')).toThrow(/Example:/);
+      expect(() => parser.evaluate('filter([1, 2, 3], "not a function")')).toThrow(/Example:/);
     });
   });
 
   describe('map()', function () {
-    it('should provide user-friendly error when first argument is not a function', function () {
+    it('should provide user-friendly error when arguments are invalid', function () {
       const parser = new Parser();
       expect(() => parser.evaluate('map("not a function", [1, 2, 3])')).toThrow(
-        /map\(mapper, array\) expects a function as first argument, got string/
+        /map\(array, mapper\) expects an array and a function/
       );
       expect(() => parser.evaluate('map("not a function", [1, 2, 3])')).toThrow(/Example:/);
     });
 
-    it('should provide user-friendly error when second argument is not an array', function () {
+    it('should provide user-friendly error when second argument is not a function', function () {
       const parser = new Parser();
-      expect(() => parser.evaluate('f(x) = x * 2; map(f, 123)')).toThrow(
-        /map\(mapper, array\) expects an array as second argument, got number/
+      expect(() => parser.evaluate('map([1, 2, 3], 123)')).toThrow(
+        /map\(array, mapper\) expects an array and a function/
       );
     });
   });
 
   describe('fold()', function () {
-    it('should provide user-friendly error when first argument is not a function', function () {
+    it('should provide user-friendly error when arguments are invalid', function () {
       const parser = new Parser();
       expect(() => parser.evaluate('fold(null, 0, [1, 2, 3])', { null: null })).toThrow(
-        /fold\(reducer, initial, array\) expects a function as first argument, got null/
+        /fold\(array, initial, reducer\) expects an array, initial value, and a function/
       );
       expect(() => parser.evaluate('fold(null, 0, [1, 2, 3])', { null: null })).toThrow(/Example:/);
     });
 
-    it('should provide user-friendly error when third argument is not an array', function () {
+    it('should provide user-friendly error when third argument is not a function', function () {
       const parser = new Parser();
-      expect(() => parser.evaluate('f(a, b) = a + b; fold(f, 0, {a: 1})')).toThrow(
-        /fold\(reducer, initial, array\) expects an array as third argument, got object/
+      expect(() => parser.evaluate('fold([1, 2, 3], 0, {a: 1})')).toThrow(
+        /fold\(array, initial, reducer\) expects an array, initial value, and a function/
       );
     });
   });
 
   describe('reduce()', function () {
-    it('should provide user-friendly error from fold when first argument is not a function', function () {
+    it('should provide user-friendly error from fold when arguments are invalid', function () {
       const parser = new Parser();
       expect(() => parser.evaluate('reduce(true, 0, [1, 2, 3])')).toThrow(
-        /fold\(reducer, initial, array\) expects a function as first argument, got boolean/
+        /fold\(array, initial, reducer\) expects an array, initial value, and a function/
       );
     });
   });
 
   describe('find()', function () {
-    it('should provide user-friendly error when first argument is not a function', function () {
+    it('should provide user-friendly error when arguments are invalid', function () {
       const parser = new Parser();
       expect(() => parser.evaluate('find([1, 2], [1, 2, 3])')).toThrow(
-        /find\(predicate, array\) expects a function as first argument, got array/
+        /find\(array, predicate\) expects an array and a function/
       );
       expect(() => parser.evaluate('find([1, 2], [1, 2, 3])')).toThrow(/Example:/);
     });
 
-    it('should provide user-friendly error when second argument is not an array', function () {
+    it('should provide user-friendly error when second argument is not a function', function () {
       const parser = new Parser();
-      expect(() => parser.evaluate('f(x) = x > 0; find(f, 99)')).toThrow(
-        /find\(predicate, array\) expects an array as second argument, got number/
+      expect(() => parser.evaluate('find([1, 2, 3], 99)')).toThrow(
+        /find\(array, predicate\) expects an array and a function/
       );
     });
   });
 
   describe('some()', function () {
-    it('should provide user-friendly error when first argument is not a function', function () {
+    it('should provide user-friendly error when arguments are invalid', function () {
       const parser = new Parser();
       expect(() => parser.evaluate('some(5, [1, 2, 3])')).toThrow(
-        /some\(predicate, array\) expects a function as first argument, got number/
+        /some\(array, predicate\) expects an array and a function/
       );
     });
 
-    it('should provide user-friendly error when second argument is not an array', function () {
+    it('should provide user-friendly error when second argument is not a function', function () {
       const parser = new Parser();
-      expect(() => parser.evaluate('f(x) = x > 0; some(f, "string")')).toThrow(
-        /some\(predicate, array\) expects an array as second argument, got string/
+      expect(() => parser.evaluate('some([1, 2, 3], "string")')).toThrow(
+        /some\(array, predicate\) expects an array and a function/
       );
     });
   });
 
   describe('every()', function () {
-    it('should provide user-friendly error when first argument is not a function', function () {
+    it('should provide user-friendly error when arguments are invalid', function () {
       const parser = new Parser();
       expect(() => parser.evaluate('every({a: 1}, [1, 2, 3])')).toThrow(
-        /every\(predicate, array\) expects a function as first argument, got object/
+        /every\(array, predicate\) expects an array and a function/
       );
     });
 
-    it('should provide user-friendly error when second argument is not an array', function () {
+    it('should provide user-friendly error when second argument is not a function', function () {
       const parser = new Parser();
-      expect(() => parser.evaluate('f(x) = x > 0; every(f, false)')).toThrow(
-        /every\(predicate, array\) expects an array as second argument, got boolean/
+      expect(() => parser.evaluate('every([1, 2, 3], false)')).toThrow(
+        /every\(array, predicate\) expects an array and a function/
       );
     });
   });

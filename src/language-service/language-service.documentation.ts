@@ -86,25 +86,25 @@ export const BUILTIN_FUNCTION_DOCS: Record<string, FunctionDoc> = {
     name: 'map',
     description: 'Apply function f to each element of array a.',
     params: [
-      { name: 'f', description: 'Mapping function (value, index).' },
-      { name: 'a', description: 'Input array.' }
+      { name: 'a', description: 'Input array.' },
+      { name: 'f', description: 'Mapping function (value, index).' }
     ]
   },
   fold: {
     name: 'fold',
     description: 'Reduce array a using function f, starting with accumulator y.',
     params: [
-      { name: 'f', description: 'Reducer function. Eg: `f(acc, x, i) = acc + x`.' },
+      { name: 'a', description: 'Input array.' },
       { name: 'y', description: 'Initial accumulator value.' },
-      { name: 'a', description: 'Input array.' }
+      { name: 'f', description: 'Reducer function. Eg: `f(acc, x, i) = acc + x`.' }
     ]
   },
   filter: {
     name: 'filter',
     description: 'Filter array a using predicate f.',
     params: [
-      { name: 'f', description: 'Filter function. Eg:`f(x) = x % 2 == 0`' },
-      { name: 'a', description: 'Input array.' }
+      { name: 'a', description: 'Input array.' },
+      { name: 'f', description: 'Filter function. Eg:`f(x) = x % 2 == 0`' }
     ]
   },
   indexOf: {
@@ -157,33 +157,33 @@ export const BUILTIN_FUNCTION_DOCS: Record<string, FunctionDoc> = {
     name: 'reduce',
     description: 'Alias for fold. Reduce array a using function f, starting with accumulator y.',
     params: [
-      { name: 'f', description: 'Reducer function. Eg: `f(acc, x, i) = acc + x`.' },
+      { name: 'a', description: 'Input array.' },
       { name: 'y', description: 'Initial accumulator value.' },
-      { name: 'a', description: 'Input array.' }
+      { name: 'f', description: 'Reducer function. Eg: `f(acc, x, i) = acc + x`.' }
     ]
   },
   find: {
     name: 'find',
     description: 'Returns the first element in array a that satisfies predicate f, or undefined if not found.',
     params: [
-      { name: 'f', description: 'Predicate function. Eg: `f(x) = x > 5`' },
-      { name: 'a', description: 'Input array.' }
+      { name: 'a', description: 'Input array.' },
+      { name: 'f', description: 'Predicate function. Eg: `f(x) = x > 5`' }
     ]
   },
   some: {
     name: 'some',
     description: 'Returns true if at least one element in array a satisfies predicate f.',
     params: [
-      { name: 'f', description: 'Predicate function. Eg: `f(x) = x > 5`' },
-      { name: 'a', description: 'Input array.' }
+      { name: 'a', description: 'Input array.' },
+      { name: 'f', description: 'Predicate function. Eg: `f(x) = x > 5`' }
     ]
   },
   every: {
     name: 'every',
     description: 'Returns true if all elements in array a satisfy predicate f. Returns true for empty arrays.',
     params: [
-      { name: 'f', description: 'Predicate function. Eg: `f(x) = x > 0`' },
-      { name: 'a', description: 'Input array.' }
+      { name: 'a', description: 'Input array.' },
+      { name: 'f', description: 'Predicate function. Eg: `f(x) = x > 0`' }
     ]
   },
   unique: {
