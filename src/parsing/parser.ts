@@ -6,7 +6,7 @@ import { Expression } from '../core/expression.js';
 import type { Value, VariableResolveResult, Values } from '../types/values.js';
 import type { Instruction } from './instruction.js';
 import type { OperatorFunction } from '../types/parser.js';
-import { atan2, condition, fac, filter, fold, gamma, hypot, indexOf, join, map, max, min, random, roundTo, sum, json, stringLength, isEmpty, stringContains, startsWith, endsWith, searchCount, trim, toUpper, toLower, toTitle, split, repeat, reverse, left, right, replace, replaceFirst, naturalSort, toNumber, toBoolean, padLeft, padRight, padBoth, slice, urlEncode, base64Encode, base64Decode, coalesceString, merge, keys, values, flatten, count, clamp } from '../functions/index.js';
+import { atan2, condition, fac, filter, fold, gamma, hypot, indexOf, join, map, max, min, random, roundTo, sum, json, stringLength, isEmpty, stringContains, startsWith, endsWith, searchCount, trim, toUpper, toLower, toTitle, split, repeat, reverse, left, right, replace, replaceFirst, naturalSort, toNumber, toBoolean, padLeft, padRight, padBoth, slice, urlEncode, base64Encode, base64Decode, coalesceString, merge, keys, values, flatten, count, clamp, reduce, find, some, every, unique, distinct, isArray, isObject, isNumber, isString, isBoolean, isNull, isUndefined, isFunctionValue } from '../functions/index.js';
 import {
   add,
   sub,
@@ -185,6 +185,12 @@ export class Parser {
       fac: fac,
       filter: filter,
       fold: fold,
+      reduce: reduce,
+      find: find,
+      some: some,
+      every: every,
+      unique: unique,
+      distinct: distinct,
       gamma: gamma,
       hypot: hypot,
       indexOf: indexOf,
@@ -231,7 +237,16 @@ export class Parser {
       merge: merge,
       keys: keys,
       values: values,
-      flatten: flatten
+      flatten: flatten,
+      // Type checking functions
+      isArray: isArray,
+      isObject: isObject,
+      isNumber: isNumber,
+      isString: isString,
+      isBoolean: isBoolean,
+      isNull: isNull,
+      isUndefined: isUndefined,
+      isFunction: isFunctionValue
     };
 
     this.numericConstants = {

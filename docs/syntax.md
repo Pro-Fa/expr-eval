@@ -134,7 +134,13 @@ Besides the "operator" functions, there are several pre-defined functions. You c
 | count(a)      | Returns the number of items in an array. |
 | map(f, a)     | Array map: Pass each element of `a` the function `f`, and return an array of the results. |
 | fold(f, y, a) | Array fold: Fold/reduce array `a` into a single value, `y` by setting `y = f(y, x, index)` for each element `x` of the array. |
+| reduce(f, y, a) | Alias for `fold`. Reduces array `a` into a single value using function `f` starting with accumulator `y`. |
 | filter(f, a)  | Array filter: Return an array containing only the values from `a` where `f(x, index)` is `true`. |
+| find(f, a)    | Returns the first element in array `a` where `f(x, index)` is `true`, or `undefined` if not found. |
+| some(f, a)    | Returns `true` if at least one element in array `a` satisfies `f(x, index)`, `false` otherwise. |
+| every(f, a)   | Returns `true` if all elements in array `a` satisfy `f(x, index)`. Returns `true` for empty arrays. |
+| unique(a)     | Returns a new array with duplicate values removed from array `a`. |
+| distinct(a)   | Alias for `unique`. Returns a new array with duplicate values removed. |
 | indexOf(x, a) | Return the first index of string or array `a` matching the value `x`, or `-1` if not found. |
 | join(sep, a)  | Concatenate the elements of `a`, separated by `sep`. |
 | naturalSort(arr) | Sorts an array of strings using natural sort order (alphanumeric-aware). For example, `["file10", "file2", "file1"]` becomes `["file1", "file2", "file10"]`. |
@@ -145,6 +151,19 @@ Besides the "operator" functions, there are several pre-defined functions. You c
 |:------------- |:----------- |
 | if(c, a, b)   | Function form of c ? a : b. Note: This always evaluates both `a` and `b`, regardless of whether `c` is `true` or not. Use `c ? a : b` instead if there are side effects, or if evaluating the branches could be expensive. |
 | coalesce(a, b, ...)   | Returns the first non-null and non-empty string value from the arguments. Numbers and booleans (including 0 and false) are considered valid values. |
+
+### Type Checking Functions
+
+| Function      | Description |
+|:------------- |:----------- |
+| isArray(v)    | Returns `true` if `v` is an array, `false` otherwise. |
+| isObject(v)   | Returns `true` if `v` is an object (excluding null and arrays), `false` otherwise. |
+| isNumber(v)   | Returns `true` if `v` is a number, `false` otherwise. |
+| isString(v)   | Returns `true` if `v` is a string, `false` otherwise. |
+| isBoolean(v)  | Returns `true` if `v` is a boolean, `false` otherwise. |
+| isNull(v)     | Returns `true` if `v` is null, `false` otherwise. |
+| isUndefined(v)| Returns `true` if `v` is undefined, `false` otherwise. |
+| isFunction(v) | Returns `true` if `v` is a function, `false` otherwise. |
 
 ## String Functions
 
@@ -402,6 +421,106 @@ map(x => x > 5 ? "high" : "low", [3, 7, 2, 9])     // Using ternary operator
 ```
 
 > **Note:** Arrow functions share the same `fndef` operator flag as traditional function definitions. If function definitions are disabled via parser options, arrow functions will also be disabled.
+
+### Examples of New Array Functions
+
+The new array utility functions provide additional ways to work with arrays:
+
+**Using reduce (alias for fold):**
+
+```js
+reduce((acc, x) => acc + x, 0, [1, 2, 3, 4])    // 10 (sum using reduce)
+reduce((acc, x) => acc * x, 1, [2, 3, 4])       // 24 (product)
+```
+
+**Using find:**
+
+```js
+find(x => x > 5, [1, 3, 7, 2, 9])               // 7 (first element > 5)
+find(x => x < 0, [1, 2, 3])                     // undefined (not found)
+find(x => x.age > 18, users)                    // First user over 18
+```
+
+**Using some and every:**
+
+```js
+some(x => x > 10, [1, 5, 15, 3])                // true (at least one > 10)
+every(x => x > 0, [1, 2, 3, 4])                 // true (all positive)
+every(x => x % 2 == 0, [2, 4, 5, 6])            // false (not all even)
+some(x => x < 0, [1, 2, 3])                     // false (none negative)
+```
+
+**Using unique/distinct:**
+
+```js
+unique([1, 2, 2, 3, 3, 3, 4])                   // [1, 2, 3, 4]
+distinct(["a", "b", "a", "c", "b"])             // ["a", "b", "c"]
+unique([])                                      // []
+```
+
+**Combining array functions:**
+
+```js
+// Filter positive numbers, remove duplicates, then double each
+unique(filter(x => x > 0, [1, -2, 3, 3, -4, 5, 1]))  // [1, 3, 5]
+map(x => x * 2, unique([1, 2, 2, 3]))           // [2, 4, 6]
+
+// Find first even number greater than 5
+find(x => x % 2 == 0, filter(x => x > 5, [3, 7, 8, 9, 10]))  // 8
+```
+
+### Examples of Type Checking Functions
+
+Type checking functions are useful for validating data types and conditional logic:
+
+**Basic type checking:**
+
+```js
+isArray([1, 2, 3])                              // true
+isNumber(42)                                    // true
+isString("hello")                               // true
+isBoolean(true)                                 // true
+isNull(null)                                    // true
+isUndefined(undefined)                          // true
+isObject({a: 1})                                // true
+isFunction(abs)                                 // true
+```
+
+**Using with conditionals:**
+
+```js
+if(isArray(x), count(x), 0)                     // Get array length or 0
+if(isNumber(x), x * 2, x)                       // Double if number
+if(isString(x), toUpper(x), x)                  // Uppercase if string
+```
+
+**Using with filter:**
+
+```js
+filter(isNumber, [1, "a", 2, "b", 3])           // [1, 2, 3]
+filter(isString, [1, "a", 2, "b", 3])           // ["a", "b"]
+```
+
+**Using with some/every:**
+
+```js
+some(isString, [1, 2, "hello", 3])              // true (has at least one string)
+every(isNumber, [1, 2, 3, 4])                   // true (all are numbers)
+every(isNumber, [1, "a", 3])                    // false (not all numbers)
+```
+
+**Practical examples:**
+
+```js
+// Count how many strings are in an array
+count(filter(isString, [1, "a", 2, "b", 3]))    // 2
+
+// Get the first number in a mixed array
+find(isNumber, ["a", "b", 3, "c", 5])           // 3
+
+// Check if any value is null or undefined
+some(x => isNull(x) or isUndefined(x), data)    // true/false
+```
 
 ## Custom JavaScript Functions
 
