@@ -14,8 +14,21 @@ export function add(a: any, b: any): any {
     return a + b;
   }
 
-  // If one of the values is a string, try to add or else concatenate.
-  if (typeof a === 'string' || typeof b === 'string') {
+  // If both values are booleans or numbers (and at least one is boolean), convert to numbers and add.
+  if (
+    (typeof a === 'boolean' || typeof a === 'number') &&
+    (typeof b === 'boolean' || typeof b === 'number') &&
+    (typeof a === 'boolean' || typeof b === 'boolean')
+  ) {
+    return Number(a) + Number(b);
+  }
+
+  // If one of the values is a string and both are either string or number, try to add or else concatenate.
+  if (
+    (typeof a === 'string' || typeof b === 'string') &&
+    (typeof a === 'string' || typeof a === 'number') &&
+    (typeof b === 'string' || typeof b === 'number')
+  ) {
     const numA = Number(a);
     const numB = Number(b);
 
