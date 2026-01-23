@@ -20,7 +20,7 @@ describe('New Array Functions TypeScript Test', function () {
     });
     it('should return undefined if undefined is passed as the array', function () {
       const parser = new Parser();
-      assert.deepStrictEqual(parser.evaluate('f(a) = a*a; reduce(f, 3, undefined)'), undefined);
+      assert.deepStrictEqual(parser.evaluate('f(a, b) = a+b; reduce(f, 3, undefined)'), undefined);
     });
   });
 
