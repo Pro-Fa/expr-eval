@@ -314,6 +314,9 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
       funcDetailsMap.set(func.name, func);
     }
 
+    // Helper for pluralization (defined once, reused for all diagnostics)
+    const pluralize = (count: number) => count !== 1 ? 's' : '';
+
     // Find function calls: TNAME followed by TPAREN '('
     for (let i = 0; i < spans.length; i++) {
       const span = spans[i];
@@ -333,40 +336,26 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
           let parenDepth = 1;
           let bracketDepth = 0;
           let braceDepth = 0;
-          let foundClosingParen = false;
           let closeParenSpan = openParenSpan;
           let hasSeenArgumentToken = false;
 
-          // Helper to check if we're at the top level of the function call
-          const isAtFunctionCallTopLevel = () =>
-            parenDepth === 1 && bracketDepth === 0 && braceDepth === 0;
-
-          // Helper to mark that we've seen the first token of an argument
-          const markArgumentSeen = () => {
-            if (!hasSeenArgumentToken) {
-              hasSeenArgumentToken = true;
-              // Only set argCount to 1 if this is the first argument
-              // (if we've seen commas, argCount is already > 0)
-              if (argCount === 0) {
-                argCount = 1;
-              }
-            }
-          };
-
           for (let j = openParenIndex + 1; j < spans.length && parenDepth > 0; j++) {
             const currentToken = spans[j].token;
+
+            // Helper to check if we're at the top level of the function call
+            const isAtTopLevel = parenDepth === 1 && bracketDepth === 0 && braceDepth === 0;
 
             if (currentToken.type === TPAREN) {
               if (currentToken.value === '(') {
                 parenDepth++;
                 // Opening paren can start an argument (e.g., nested function call)
-                if (parenDepth === 2 && bracketDepth === 0 && braceDepth === 0) {
-                  markArgumentSeen();
+                if (parenDepth === 2 && bracketDepth === 0 && braceDepth === 0 && !hasSeenArgumentToken) {
+                  hasSeenArgumentToken = true;
+                  if (argCount === 0) argCount = 1;
                 }
               } else if (currentToken.value === ')') {
                 parenDepth--;
                 if (parenDepth === 0) {
-                  foundClosingParen = true;
                   closeParenSpan = spans[j];
                 }
               }
@@ -374,8 +363,9 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
               if (currentToken.value === '[') {
                 bracketDepth++;
                 // Opening bracket starts an argument (array literal)
-                if (parenDepth === 1 && bracketDepth === 1 && braceDepth === 0) {
-                  markArgumentSeen();
+                if (parenDepth === 1 && bracketDepth === 1 && braceDepth === 0 && !hasSeenArgumentToken) {
+                  hasSeenArgumentToken = true;
+                  if (argCount === 0) argCount = 1;
                 }
               } else if (currentToken.value === ']') {
                 bracketDepth--;
@@ -384,19 +374,21 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
               if (currentToken.value === '{') {
                 braceDepth++;
                 // Opening brace starts an argument (object literal)
-                if (parenDepth === 1 && bracketDepth === 0 && braceDepth === 1) {
-                  markArgumentSeen();
+                if (parenDepth === 1 && bracketDepth === 0 && braceDepth === 1 && !hasSeenArgumentToken) {
+                  hasSeenArgumentToken = true;
+                  if (argCount === 0) argCount = 1;
                 }
               } else if (currentToken.value === '}') {
                 braceDepth--;
               }
-            } else if (currentToken.type === TCOMMA && isAtFunctionCallTopLevel()) {
+            } else if (currentToken.type === TCOMMA && isAtTopLevel) {
               // Only count commas at the top level of the function call
               argCount++;
               hasSeenArgumentToken = false; // Reset for next argument
-            } else if (isAtFunctionCallTopLevel()) {
+            } else if (isAtTopLevel && !hasSeenArgumentToken) {
               // First token at top level means we have at least one argument
-              markArgumentSeen();
+              hasSeenArgumentToken = true;
+              if (argCount === 0) argCount = 1;
             }
           }
 
@@ -406,7 +398,6 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
             const arityInfo = funcDetails.arityInfo();
             if (arityInfo) {
               const { min, max } = arityInfo;
-              const pluralize = (count: number) => count !== 1 ? 's' : '';
 
               // Check if argument count is too few
               if (argCount < min) {
