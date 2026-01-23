@@ -118,7 +118,34 @@ Access to these properties is now blocked:
 - `prototype`
 - `constructor`
 
-See [BREAKING_CHANGES.md](BREAKING_CHANGES.md) for complete details.
+### Version 4.0.0
+
+**Concatenation operator changed from `||` to `|`:**
+
+The `||` operator was repurposed for logical OR (JavaScript-style), and a new `|` operator was introduced for concatenation.
+
+```js
+// BEFORE (original expr-eval)
+"hello" || " world"     // "hello world" (concatenation)
+[1, 2] || [3, 4]        // [1, 2, 3, 4] (concatenation)
+true || false           // Not supported or different behavior
+
+// AFTER (v4.0.0+)
+"hello" | " world"      // "hello world" (concatenation with |)
+[1, 2] | [3, 4]         // [1, 2, 3, 4] (concatenation with |)
+true || false           // true (logical OR)
+true && false           // false (logical AND)
+```
+
+**Migration steps:**
+
+1. Search your expressions for `||` used for string or array concatenation
+2. Replace `||` with `|` for concatenation operations
+3. `||` now works as logical OR, and `&&` was added as logical AND
+
+**Package renamed:**
+
+The package was renamed from `expr-eval` to `@pro-fa/expr-eval` and ported to TypeScript.
 
 ## Package Name Change
 
