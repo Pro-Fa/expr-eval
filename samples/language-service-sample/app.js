@@ -43,103 +43,23 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e)
 
 initTheme();
 
-// Examples data
-const exampleCases = [
-    {
-        id: 'math',
-        title: 'Mathematical Expression',
-        description: 'Basic math operations with variables',
-        expression: '(x + y) * multiplier + sqrt(16)',
-        context: {
-            x: 10,
-            y: 5,
-            multiplier: 3
-        }
-    },
-    {
-        id: 'arrays',
-        title: 'Working with Arrays',
-        description: 'Array functions like sum, min, max',
-        expression: 'sum(numbers) + max(numbers) - min(numbers)',
-        context: {
-            numbers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-            values: [15, 25, 35]
-        }
-    },
-    {
-        id: 'objects',
-        title: 'Object Manipulation',
-        description: 'Access nested object properties',
-        expression: 'user.profile.score * level.multiplier + bonus.points',
-        context: {
-            user: {
-                name: "Alice",
-                profile: {
-                    score: 85,
-                    rank: "Gold"
-                }
-            },
-            level: {
-                current: 5,
-                multiplier: 1.5
-            },
-            bonus: {
-                points: 100,
-                active: true
-            }
-        }
-    },
-    {
-        id: 'map-filter',
-        title: 'Map and Filter Functions',
-        description: 'Transform and filter data with callbacks',
-        expression: 'sum(map(filter(items, item => item > 3), x => x * 2))',
-        context: {
-            items: [1, 2, 3, 4, 5, 6, 7, 8],
-            threshold: 3
-        }
-    },
-    {
-        id: 'complex',
-        title: 'Complex Objects',
-        description: 'Work with deeply nested data structures',
-        expression: 'company.departments[0].employees.length * company.settings.bonusRate + sum(map(company.departments, d => d.budget))',
-        context: {
-            company: {
-                name: "TechCorp",
-                departments: [
-                    {
-                        name: "Engineering",
-                        budget: 500000,
-                        employees: ["John", "Jane", "Bob"]
-                    },
-                    {
-                        name: "Marketing",
-                        budget: 200000,
-                        employees: ["Alice", "Carol"]
-                    }
-                ],
-                settings: {
-                    bonusRate: 0.15,
-                    fiscalYear: 2024
-                }
-            }
-        }
-    },
-    {
-        id: 'data-transform',
-        title: 'Data Transformation',
-        description: 'Flatten nested objects and transform rows',
-        expression: "map(f(row) = {_id: row.rowId} + flatten(row.data, ''), $event)",
-        context: {
-            "$event": [
-                {"rowId": 1, "state": "saved", "data": { "InventoryId": 1256, "Description": "Bal", "Weight": { "Unit": "g", "Amount": 120 } }},
-                {"rowId": 2, "state": "new", "data": { "InventoryId": 2344, "Description": "Basket", "Weight": { "Unit": "g", "Amount": 300 } }},
-                {"rowId": 3, "state": "unchanged", "data": { "InventoryId": 9362, "Description": "Wood", "Weight": { "Unit": "kg", "Amount": 18 } }}
-            ]
-        }
-    }
-];
+// Copy example link to clipboard
+function copyExampleLink(exampleId, button) {
+    const url = new URL(window.location.href);
+    url.search = '';
+    url.searchParams.set('example', exampleId);
+    navigator.clipboard.writeText(url.toString()).then(() => {
+        // Show checkmark briefly
+        const icon = button.querySelector('svg');
+        const originalPath = icon.innerHTML;
+        icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />';
+        button.classList.add('text-green-500', 'dark:text-green-400');
+        setTimeout(() => {
+            icon.innerHTML = originalPath;
+            button.classList.remove('text-green-500', 'dark:text-green-400');
+        }, 1500);
+    });
+}
 
 // Render examples sidebar
 function renderExamplesSidebar() {
@@ -147,33 +67,48 @@ function renderExamplesSidebar() {
     if (!examplesList) return;
 
     examplesList.innerHTML = exampleCases.map(example => `
-        <button 
-            class="example-item w-full text-left p-3 rounded-lg transition-all duration-200
-                   hover:bg-white dark:hover:bg-[#2d2d2d] 
-                   hover:shadow-sm hover:border-indigo-200 dark:hover:border-[#3c3c3c]
-                   border border-transparent
-                   group"
-            data-example-id="${example.id}"
-        >
-            <div class="flex items-start gap-2">
-                <div class="flex-shrink-0 w-6 h-6 rounded bg-indigo-100 dark:bg-[#3c3c3c] flex items-center justify-center mt-0.5">
-                    <svg class="w-3.5 h-3.5 text-indigo-600 dark:text-[#569cd6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
+        <div class="example-container relative group/container">
+            <button 
+                class="example-item w-full text-left p-3 rounded-lg transition-all duration-200
+                       hover:bg-white dark:hover:bg-[#2d2d2d] 
+                       hover:shadow-sm hover:border-indigo-200 dark:hover:border-[#3c3c3c]
+                       border border-transparent
+                       group"
+                data-example-id="${example.id}"
+            >
+                <div class="flex items-start gap-2">
+                    <div class="flex-shrink-0 w-6 h-6 rounded bg-indigo-100 dark:bg-[#3c3c3c] flex items-center justify-center mt-0.5">
+                        <svg class="w-3.5 h-3.5 text-indigo-600 dark:text-[#569cd6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-gray-800 dark:text-[#cccccc] truncate group-hover:text-indigo-600 dark:group-hover:text-[#569cd6]">
+                            ${example.title}
+                        </p>
+                        <p class="text-xs text-gray-500 dark:text-[#808080] mt-0.5 line-clamp-2">
+                            ${example.description}
+                        </p>
+                    </div>
                 </div>
-                <div class="flex-1 min-w-0">
-                    <p class="text-sm font-medium text-gray-800 dark:text-[#cccccc] truncate group-hover:text-indigo-600 dark:group-hover:text-[#569cd6]">
-                        ${example.title}
-                    </p>
-                    <p class="text-xs text-gray-500 dark:text-[#808080] mt-0.5 line-clamp-2">
-                        ${example.description}
-                    </p>
-                </div>
-            </div>
-        </button>
+            </button>
+            <button 
+                class="copy-link-btn absolute top-2 right-2 p-1.5 rounded-md 
+                       opacity-0 group-hover/container:opacity-100
+                       bg-gray-100 dark:bg-[#3c3c3c] hover:bg-gray-200 dark:hover:bg-[#4c4c4c]
+                       text-gray-500 dark:text-[#808080] hover:text-indigo-600 dark:hover:text-[#569cd6]
+                       transition-all duration-200"
+                data-example-id="${example.id}"
+                title="Copy link to example"
+            >
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                </svg>
+            </button>
+        </div>
     `).join('');
 
-    // Add click handlers
+    // Add click handlers for loading examples
     examplesList.querySelectorAll('.example-item').forEach(button => {
         button.addEventListener('click', () => {
             const exampleId = button.dataset.exampleId;
@@ -181,6 +116,15 @@ function renderExamplesSidebar() {
             if (example) {
                 loadExample(example);
             }
+        });
+    });
+
+    // Add click handlers for copy link buttons
+    examplesList.querySelectorAll('.copy-link-btn').forEach(button => {
+        button.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const exampleId = button.dataset.exampleId;
+            copyExampleLink(exampleId, button);
         });
     });
 }
