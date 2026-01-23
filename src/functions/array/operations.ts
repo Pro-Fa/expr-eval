@@ -14,6 +14,11 @@ function getTypeName(value: unknown): string {
 
 export function filter(arg1: Function | any[] | undefined, arg2: Function | any[] | undefined): any[] | undefined {
   // Support both filter(array, fn) and filter(fn, array) for backwards compatibility
+  // Early return for undefined first argument
+  if (arg1 === undefined) {
+    return undefined;
+  }
+  
   let f: Function;
   let a: any[] | undefined;
   
@@ -25,8 +30,6 @@ export function filter(arg1: Function | any[] | undefined, arg2: Function | any[
     // function-first: filter(fn, array)
     f = arg1;
     a = arg2 as any[] | undefined;
-  } else if (arg1 === undefined) {
-    return undefined;
   } else {
     throw new Error(
       `filter(array, predicate) expects an array and a function.\n` +
@@ -44,6 +47,11 @@ export function filter(arg1: Function | any[] | undefined, arg2: Function | any[
 
 export function fold(arg1: Function | any[] | undefined, arg2: any, arg3: Function | any[] | undefined): any {
   // Support both fold(array, initial, fn) and fold(fn, initial, array) for backwards compatibility
+  // Early return for undefined arguments
+  if (arg1 === undefined) {
+    return undefined;
+  }
+  
   let f: Function;
   let init: any;
   let a: any[] | undefined;
@@ -58,7 +66,7 @@ export function fold(arg1: Function | any[] | undefined, arg2: any, arg3: Functi
     f = arg1;
     init = arg2;
     a = arg3 as any[] | undefined;
-  } else if (arg1 === undefined || arg3 === undefined) {
+  } else if (arg3 === undefined) {
     return undefined;
   } else {
     throw new Error(
@@ -105,6 +113,11 @@ export function join(sep: string | undefined, a: any[] | undefined): string | un
 
 export function map(arg1: Function | any[] | undefined, arg2: Function | any[] | undefined): any[] | undefined {
   // Support both map(array, fn) and map(fn, array) for backwards compatibility
+  // Early return for undefined first argument
+  if (arg1 === undefined) {
+    return undefined;
+  }
+  
   let f: Function;
   let a: any[] | undefined;
   
@@ -116,8 +129,6 @@ export function map(arg1: Function | any[] | undefined, arg2: Function | any[] |
     // function-first: map(fn, array)
     f = arg1;
     a = arg2 as any[] | undefined;
-  } else if (arg1 === undefined) {
-    return undefined;
   } else {
     throw new Error(
       `map(array, mapper) expects an array and a function.\n` +
@@ -172,6 +183,11 @@ export function reduce(arg1: Function | any[] | undefined, arg2: any, arg3: Func
 
 export function find(arg1: Function | any[] | undefined, arg2: Function | any[] | undefined): any {
   // Support both find(array, fn) and find(fn, array) for backwards compatibility
+  // Early return for undefined first argument
+  if (arg1 === undefined) {
+    return undefined;
+  }
+  
   let f: Function;
   let a: any[] | undefined;
   
@@ -183,8 +199,6 @@ export function find(arg1: Function | any[] | undefined, arg2: Function | any[] 
     // function-first: find(fn, array)
     f = arg1;
     a = arg2 as any[] | undefined;
-  } else if (arg1 === undefined) {
-    return undefined;
   } else {
     throw new Error(
       `find(array, predicate) expects an array and a function.\n` +
@@ -202,6 +216,11 @@ export function find(arg1: Function | any[] | undefined, arg2: Function | any[] 
 
 export function some(arg1: Function | any[] | undefined, arg2: Function | any[] | undefined): boolean | undefined {
   // Support both some(array, fn) and some(fn, array) for backwards compatibility
+  // Early return for undefined first argument
+  if (arg1 === undefined) {
+    return undefined;
+  }
+  
   let f: Function;
   let a: any[] | undefined;
   
@@ -213,8 +232,6 @@ export function some(arg1: Function | any[] | undefined, arg2: Function | any[] 
     // function-first: some(fn, array)
     f = arg1;
     a = arg2 as any[] | undefined;
-  } else if (arg1 === undefined) {
-    return undefined;
   } else {
     throw new Error(
       `some(array, predicate) expects an array and a function.\n` +
@@ -232,6 +249,11 @@ export function some(arg1: Function | any[] | undefined, arg2: Function | any[] 
 
 export function every(arg1: Function | any[] | undefined, arg2: Function | any[] | undefined): boolean | undefined {
   // Support both every(array, fn) and every(fn, array) for backwards compatibility
+  // Early return for undefined first argument
+  if (arg1 === undefined) {
+    return undefined;
+  }
+  
   let f: Function;
   let a: any[] | undefined;
   
@@ -243,8 +265,6 @@ export function every(arg1: Function | any[] | undefined, arg2: Function | any[]
     // function-first: every(fn, array)
     f = arg1;
     a = arg2 as any[] | undefined;
-  } else if (arg1 === undefined) {
-    return undefined;
   } else {
     throw new Error(
       `every(array, predicate) expects an array and a function.\n` +

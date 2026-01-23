@@ -225,8 +225,9 @@ describe('Array-First Argument Order', function () {
     it('should work with find and object filtering', function () {
       const parser = new Parser();
       const users = [{ name: 'Alice', age: 25 }, { name: 'Bob', age: 30 }];
-      const result = parser.evaluate('find(users, x => x.age > 26)', { users }) as { name: string };
-      assert.strictEqual(result.name, 'Bob');
+      const result = parser.evaluate('find(users, x => x.age > 26)', { users });
+      assert.ok(result !== undefined);
+      assert.strictEqual((result as { name: string }).name, 'Bob');
     });
   });
 });
