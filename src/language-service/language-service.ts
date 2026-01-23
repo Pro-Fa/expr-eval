@@ -26,7 +26,7 @@ import type {
   HoverV2
 } from './language-service.types';
 import type { CompletionItem, Range, Diagnostic } from 'vscode-languageserver-types';
-import { CompletionItemKind, MarkupKind, InsertTextFormat, DiagnosticSeverity } from 'vscode-languageserver-types';
+import { CompletionItemKind, MarkupKind, InsertTextFormat } from 'vscode-languageserver-types';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { BUILTIN_KEYWORD_DOCS, DEFAULT_CONSTANT_DOCS } from './language-service.documentation';
 import { FunctionDetails } from './language-service.models';
@@ -37,6 +37,7 @@ import {
   iterateTokens
 } from './ls-utils';
 import { pathVariableCompletions, tryVariableHoverUsingSpans } from './variable-utils';
+import { getDiagnosticsForDocument } from './diagnostics';
 
 export function createLanguageService(options: LanguageServiceOptions | undefined = undefined): LanguageServiceApi {
   // Build a parser instance to access keywords/operators/functions/consts
@@ -303,7 +304,6 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
   function getDiagnostics(params: GetDiagnosticsParams): Diagnostic[] {
     const { textDocument } = params;
     const text = textDocument.getText();
-    const diagnostics: Diagnostic[] = [];
 
     const ts = makeTokenStream(parser, text);
     const spans = iterateTokens(ts);
@@ -314,124 +314,7 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
       funcDetailsMap.set(func.name, func);
     }
 
-    // Helper for pluralization (defined once, reused for all diagnostics)
-    const pluralize = (count: number) => count !== 1 ? 's' : '';
-
-    // Find function calls: TNAME followed by TPAREN '('
-    for (let i = 0; i < spans.length; i++) {
-      const span = spans[i];
-      const token = span.token;
-
-      // Check if this is a function name followed by '('
-      if (token.type === TNAME && functionNamesSet().has(String(token.value))) {
-        const funcName = String(token.value);
-
-        // Look for the next token being '('
-        if (i + 1 < spans.length && spans[i + 1].token.type === TPAREN && spans[i + 1].token.value === '(') {
-          const openParenIndex = i + 1;
-          const openParenSpan = spans[openParenIndex];
-
-          // Count arguments by tracking parentheses/brackets depth and commas
-          let argCount = 0;
-          let parenDepth = 1;
-          let bracketDepth = 0;
-          let braceDepth = 0;
-          let closeParenSpan = openParenSpan;
-          let hasSeenArgumentToken = false;
-
-          for (let j = openParenIndex + 1; j < spans.length && parenDepth > 0; j++) {
-            const currentToken = spans[j].token;
-
-            // Helper to check if we're at the top level of the function call
-            const isAtTopLevel = parenDepth === 1 && bracketDepth === 0 && braceDepth === 0;
-
-            if (currentToken.type === TPAREN) {
-              if (currentToken.value === '(') {
-                parenDepth++;
-                // Opening paren can start an argument (e.g., nested function call)
-                if (parenDepth === 2 && bracketDepth === 0 && braceDepth === 0 && !hasSeenArgumentToken) {
-                  hasSeenArgumentToken = true;
-                  if (argCount === 0) argCount = 1;
-                }
-              } else if (currentToken.value === ')') {
-                parenDepth--;
-                if (parenDepth === 0) {
-                  closeParenSpan = spans[j];
-                }
-              }
-            } else if (currentToken.type === TBRACKET) {
-              if (currentToken.value === '[') {
-                bracketDepth++;
-                // Opening bracket starts an argument (array literal)
-                if (parenDepth === 1 && bracketDepth === 1 && braceDepth === 0 && !hasSeenArgumentToken) {
-                  hasSeenArgumentToken = true;
-                  if (argCount === 0) argCount = 1;
-                }
-              } else if (currentToken.value === ']') {
-                bracketDepth--;
-              }
-            } else if (currentToken.type === TBRACE) {
-              if (currentToken.value === '{') {
-                braceDepth++;
-                // Opening brace starts an argument (object literal)
-                if (parenDepth === 1 && bracketDepth === 0 && braceDepth === 1 && !hasSeenArgumentToken) {
-                  hasSeenArgumentToken = true;
-                  if (argCount === 0) argCount = 1;
-                }
-              } else if (currentToken.value === '}') {
-                braceDepth--;
-              }
-            } else if (currentToken.type === TCOMMA && isAtTopLevel) {
-              // Only count commas at the top level of the function call
-              argCount++;
-              hasSeenArgumentToken = false; // Reset for next argument
-            } else if (isAtTopLevel && !hasSeenArgumentToken) {
-              // First token at top level means we have at least one argument
-              hasSeenArgumentToken = true;
-              if (argCount === 0) argCount = 1;
-            }
-          }
-
-          // Get the function's expected arity
-          const funcDetails = funcDetailsMap.get(funcName);
-          if (funcDetails) {
-            const arityInfo = funcDetails.arityInfo();
-            if (arityInfo) {
-              const { min, max } = arityInfo;
-
-              // Check if argument count is too few
-              if (argCount < min) {
-                const range: Range = {
-                  start: textDocument.positionAt(span.start),
-                  end: textDocument.positionAt(closeParenSpan.end)
-                };
-                diagnostics.push({
-                  range,
-                  severity: DiagnosticSeverity.Error,
-                  message: `Function '${funcName}' expects at least ${min} argument${pluralize(min)}, but got ${argCount}.`,
-                  source: 'expr-eval'
-                });
-              }
-              // Check if argument count is too many (only if max is defined, i.e., not variadic)
-              else if (max !== undefined && argCount > max) {
-                const range: Range = {
-                  start: textDocument.positionAt(span.start),
-                  end: textDocument.positionAt(closeParenSpan.end)
-                };
-                diagnostics.push({
-                  range,
-                  severity: DiagnosticSeverity.Error,
-                  message: `Function '${funcName}' expects at most ${max} argument${pluralize(max)}, but got ${argCount}.`,
-                  source: 'expr-eval'
-                });
-              }
-            }
-          }
-        }
-      }
-    }
-
-    return diagnostics;
+    return getDiagnosticsForDocument(params, spans, functionNamesSet(), funcDetailsMap);
   }
 
   return {
