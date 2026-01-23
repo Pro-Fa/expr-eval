@@ -3,15 +3,30 @@
  * Handles array manipulation and processing operations
  */
 
+/**
+ * Get a user-friendly type name for a value
+ */
+function getTypeName(value: unknown): string {
+  if (value === null) return 'null';
+  if (Array.isArray(value)) return 'array';
+  return typeof value;
+}
+
 export function filter(f: Function, a: any[] | undefined): any[] | undefined {
   if (a === undefined) {
     return undefined;
   }
   if (typeof f !== 'function') {
-    throw new Error('First argument to filter is not a function');
+    throw new Error(
+      `filter(predicate, array) expects a function as first argument, got ${getTypeName(f)}.\n` +
+      'Example: filter(x => x > 0, [1, -2, 3])'
+    );
   }
   if (!Array.isArray(a)) {
-    throw new Error('Second argument to filter is not an array');
+    throw new Error(
+      `filter(predicate, array) expects an array as second argument, got ${getTypeName(a)}.\n` +
+      'Example: filter(x => x > 0, [1, -2, 3])'
+    );
   }
   return a.filter(function (x: any, i: number): any {
     return f(x, i);
@@ -23,10 +38,16 @@ export function fold(f: Function, init: any, a: any[] | undefined): any {
     return undefined;
   }
   if (typeof f !== 'function') {
-    throw new Error('First argument to fold is not a function');
+    throw new Error(
+      `fold(reducer, initial, array) expects a function as first argument, got ${getTypeName(f)}.\n` +
+      'Example: fold((acc, x) => acc + x, 0, [1, 2, 3])'
+    );
   }
   if (!Array.isArray(a)) {
-    throw new Error('Second argument to fold is not an array');
+    throw new Error(
+      `fold(reducer, initial, array) expects an array as third argument, got ${getTypeName(a)}.\n` +
+      'Example: fold((acc, x) => acc + x, 0, [1, 2, 3])'
+    );
   }
   return a.reduce(function (acc: any, x: any, i: number): any {
     return f(acc, x, i);
@@ -38,7 +59,10 @@ export function indexOf(target: any, s: string | any[] | undefined): number | un
     return undefined;
   }
   if (!(Array.isArray(s) || typeof s === 'string')) {
-    throw new Error('Second argument to indexOf is not a string or array');
+    throw new Error(
+      `indexOf(target, arrayOrString) expects a string or array as second argument, got ${getTypeName(s)}.\n` +
+      'Example: indexOf("b", ["a", "b", "c"]) or indexOf("o", "hello")'
+    );
   }
 
   return s.indexOf(target);
@@ -49,7 +73,10 @@ export function join(sep: string | undefined, a: any[] | undefined): string | un
     return undefined;
   }
   if (!Array.isArray(a)) {
-    throw new Error('Second argument to join is not an array');
+    throw new Error(
+      `join(separator, array) expects an array as second argument, got ${getTypeName(a)}.\n` +
+      'Example: join(", ", ["a", "b", "c"])'
+    );
   }
 
   return a.join(sep);
@@ -60,10 +87,16 @@ export function map(f: Function, a: any[] | undefined): any[] | undefined {
     return undefined;
   }
   if (typeof f !== 'function') {
-    throw new Error('First argument to map is not a function');
+    throw new Error(
+      `map(mapper, array) expects a function as first argument, got ${getTypeName(f)}.\n` +
+      'Example: map(x => x * 2, [1, 2, 3])'
+    );
   }
   if (!Array.isArray(a)) {
-    throw new Error('Second argument to map is not an array');
+    throw new Error(
+      `map(mapper, array) expects an array as second argument, got ${getTypeName(a)}.\n` +
+      'Example: map(x => x * 2, [1, 2, 3])'
+    );
   }
   return a.map(function (x: any, i: number): any {
     return f(x, i);
@@ -75,7 +108,10 @@ export function sum(array: (number | undefined)[] | undefined): number | undefin
     return undefined;
   }
   if (!Array.isArray(array)) {
-    throw new Error('Sum argument is not an array');
+    throw new Error(
+      `sum(array) expects an array as argument, got ${getTypeName(array)}.\n` +
+      'Example: sum([1, 2, 3, 4])'
+    );
   }
   if (array.includes(undefined)) {
     return undefined;
@@ -91,7 +127,10 @@ export function count(array: any[] | undefined): number | undefined {
     return undefined;
   }
   if (!Array.isArray(array)) {
-    throw new Error('Count argument is not an array');
+    throw new Error(
+      `count(array) expects an array as argument, got ${getTypeName(array)}.\n` +
+      'Example: count([1, 2, 3, 4])'
+    );
   }
   return array.length;
 }
@@ -106,10 +145,16 @@ export function find(f: Function, a: any[] | undefined): any {
     return undefined;
   }
   if (typeof f !== 'function') {
-    throw new Error('First argument to find is not a function');
+    throw new Error(
+      `find(predicate, array) expects a function as first argument, got ${getTypeName(f)}.\n` +
+      'Example: find(x => x > 2, [1, 2, 3, 4])'
+    );
   }
   if (!Array.isArray(a)) {
-    throw new Error('Second argument to find is not an array');
+    throw new Error(
+      `find(predicate, array) expects an array as second argument, got ${getTypeName(a)}.\n` +
+      'Example: find(x => x > 2, [1, 2, 3, 4])'
+    );
   }
   return a.find(function (x: any, i: number): any {
     return f(x, i);
@@ -121,10 +166,16 @@ export function some(f: Function, a: any[] | undefined): boolean | undefined {
     return undefined;
   }
   if (typeof f !== 'function') {
-    throw new Error('First argument to some is not a function');
+    throw new Error(
+      `some(predicate, array) expects a function as first argument, got ${getTypeName(f)}.\n` +
+      'Example: some(x => x > 2, [1, 2, 3, 4])'
+    );
   }
   if (!Array.isArray(a)) {
-    throw new Error('Second argument to some is not an array');
+    throw new Error(
+      `some(predicate, array) expects an array as second argument, got ${getTypeName(a)}.\n` +
+      'Example: some(x => x > 2, [1, 2, 3, 4])'
+    );
   }
   return a.some(function (x: any, i: number): any {
     return f(x, i);
@@ -136,10 +187,16 @@ export function every(f: Function, a: any[] | undefined): boolean | undefined {
     return undefined;
   }
   if (typeof f !== 'function') {
-    throw new Error('First argument to every is not a function');
+    throw new Error(
+      `every(predicate, array) expects a function as first argument, got ${getTypeName(f)}.\n` +
+      'Example: every(x => x > 0, [1, 2, 3, 4])'
+    );
   }
   if (!Array.isArray(a)) {
-    throw new Error('Second argument to every is not an array');
+    throw new Error(
+      `every(predicate, array) expects an array as second argument, got ${getTypeName(a)}.\n` +
+      'Example: every(x => x > 0, [1, 2, 3, 4])'
+    );
   }
   return a.every(function (x: any, i: number): any {
     return f(x, i);
@@ -151,7 +208,10 @@ export function unique(a: any[] | undefined): any[] | undefined {
     return undefined;
   }
   if (!Array.isArray(a)) {
-    throw new Error('Argument to unique is not an array');
+    throw new Error(
+      `unique(array) expects an array as argument, got ${getTypeName(a)}.\n` +
+      'Example: unique([1, 2, 2, 3, 3, 3])'
+    );
   }
   // Use Set to remove duplicates, then convert back to array
   return Array.from(new Set(a));
