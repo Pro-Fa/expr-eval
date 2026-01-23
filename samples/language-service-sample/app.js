@@ -417,6 +417,30 @@ require(['vs/editor/editor.main'], function () {
         highlightDecorations = expressionEditor.deltaDecorations(highlightDecorations, decorations);
     }
 
+    // Diagnostics - show function argument count errors
+    function applyDiagnostics() {
+        const doc = makeTextDocument(expressionModel);
+        const diagnostics = ls.getDiagnostics({ textDocument: doc });
+
+        // Convert LSP diagnostics to Monaco markers
+        const markers = diagnostics.map(d => {
+            const startPos = fromLspPosition(d.range.start);
+            const endPos = fromLspPosition(d.range.end);
+            return {
+                severity: monaco.MarkerSeverity.Error,
+                message: d.message,
+                startLineNumber: startPos.lineNumber,
+                startColumn: startPos.column,
+                endLineNumber: endPos.lineNumber,
+                endColumn: endPos.column,
+                source: d.source || 'expr-eval'
+            };
+        });
+
+        // Set markers on the model
+        monaco.editor.setModelMarkers(expressionModel, 'expr-eval', markers);
+    }
+
     // Syntax highlight JSON
     function syntaxHighlightJson(json) {
         if (typeof json !== 'string') {
@@ -598,6 +622,7 @@ require(['vs/editor/editor.main'], function () {
 
     // Initialize
     applyHighlighting();
+    applyDiagnostics();
     evaluate();
 
     // Load example from URL query parameter if present
@@ -606,6 +631,7 @@ require(['vs/editor/editor.main'], function () {
     // Event listeners for changes
     expressionModel.onDidChangeContent(() => {
         applyHighlighting();
+        applyDiagnostics();
         evaluate();
     });
 
