@@ -35,6 +35,17 @@ jobs:
       - name: Build UMD bundle
         run: npm run build:umd
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install mkdocs
+        run: pip install mkdocs-material==9.7.1
+
+      - name: Build documentation
+        run: mkdocs build
+
       - name: Prepare playground files
         run: |
           mkdir -p _site/dist
@@ -43,6 +54,7 @@ jobs:
           cp samples/language-service-sample/examples.js _site/
           cp samples/language-service-sample/styles.css _site/
           cp dist/bundle.js _site/dist/
+          cp -r site _site/docs
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
