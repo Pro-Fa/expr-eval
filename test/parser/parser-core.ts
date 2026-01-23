@@ -224,13 +224,13 @@ describe('Parser Core Functionality TypeScript Test', () => {
 
           // Special case for 'not' operator
           expect(parser.parse('not 0').evaluate()).toBe(true);
-          expect(parser.parse('1 + not 0').evaluate()).toBe(2);
-          expect(parser.parse('not 0 + 1').evaluate()).toBe(2);
-          expect(parser.parse('1 + not 0 + 1').evaluate()).toBe(3);
+          expect(() => parser.parse('1 + not 0').evaluate()).toThrow(/Cannot add values of incompatible types/);
+          expect(() => parser.parse('not 0 + 1').evaluate()).toThrow(/Cannot add values of incompatible types/);
+          expect(() => parser.parse('1 + not 0 + 1').evaluate()).toThrow(/Cannot add values of incompatible types/);
           expect(parser.parse('not(0)').evaluate()).toBe(true);
-          expect(parser.parse('1 + not(0)').evaluate()).toBe(2);
-          expect(parser.parse('not(0) + 1').evaluate()).toBe(2);
-          expect(parser.parse('1 + not(0) + 1').evaluate()).toBe(3);
+          expect(() => parser.parse('1 + not(0)').evaluate()).toThrow(/Cannot add values of incompatible types/);
+          expect(() => parser.parse('not(0) + 1').evaluate()).toThrow(/Cannot add values of incompatible types/);
+          expect(() => parser.parse('1 + not(0) + 1').evaluate()).toThrow(/Cannot add values of incompatible types/);
         });
 
         it('unary + and - should not be parsed as function calls', () => {

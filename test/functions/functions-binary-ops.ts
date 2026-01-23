@@ -49,11 +49,11 @@ describe('Binary Operators TypeScript Test', function () {
       const parser = new Parser();
       assert.deepStrictEqual(parser.evaluate('null + null'), {});
     });
-    it('should convert numeric values to numbers before adding', function () {
+    it('should throw error for boolean operands', function () {
       const parser = new Parser();
-      assert.strictEqual(parser.evaluate('true + 1'), 2);
-      assert.strictEqual(parser.evaluate('false + 5'), 5);
-      assert.strictEqual(parser.evaluate('1 + true'), 2);
+      assert.throws(() => parser.evaluate('true + 1'), /Cannot add values of incompatible types/);
+      assert.throws(() => parser.evaluate('false + 5'), /Cannot add values of incompatible types/);
+      assert.throws(() => parser.evaluate('1 + true'), /Cannot add values of incompatible types/);
     });
     it('should throw error for incompatible types', function () {
       const parser = new Parser();

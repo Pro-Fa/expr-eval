@@ -14,8 +14,12 @@ export function add(a: any, b: any): any {
     return a + b;
   }
 
-  // If one of the values is a string, try to add or else concatenate.
-  if (typeof a === 'string' || typeof b === 'string') {
+  // If one of the values is a string and both are either string or number, try to add or else concatenate.
+  if (
+    (typeof a === 'string' || typeof b === 'string') &&
+    (typeof a === 'string' || typeof a === 'number') &&
+    (typeof b === 'string' || typeof b === 'number')
+  ) {
     const numA = Number(a);
     const numB = Number(b);
 
