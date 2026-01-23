@@ -95,3 +95,69 @@ export function count(array: any[] | undefined): number | undefined {
   }
   return array.length;
 }
+
+export function reduce(f: Function, init: any, a: any[] | undefined): any {
+  // reduce is an alias for fold
+  return fold(f, init, a);
+}
+
+export function find(f: Function, a: any[] | undefined): any {
+  if (a === undefined) {
+    return undefined;
+  }
+  if (typeof f !== 'function') {
+    throw new Error('First argument to find is not a function');
+  }
+  if (!Array.isArray(a)) {
+    throw new Error('Second argument to find is not an array');
+  }
+  return a.find(function (x: any, i: number): any {
+    return f(x, i);
+  });
+}
+
+export function some(f: Function, a: any[] | undefined): boolean | undefined {
+  if (a === undefined) {
+    return undefined;
+  }
+  if (typeof f !== 'function') {
+    throw new Error('First argument to some is not a function');
+  }
+  if (!Array.isArray(a)) {
+    throw new Error('Second argument to some is not an array');
+  }
+  return a.some(function (x: any, i: number): any {
+    return f(x, i);
+  });
+}
+
+export function every(f: Function, a: any[] | undefined): boolean | undefined {
+  if (a === undefined) {
+    return undefined;
+  }
+  if (typeof f !== 'function') {
+    throw new Error('First argument to every is not a function');
+  }
+  if (!Array.isArray(a)) {
+    throw new Error('Second argument to every is not an array');
+  }
+  return a.every(function (x: any, i: number): any {
+    return f(x, i);
+  });
+}
+
+export function unique(a: any[] | undefined): any[] | undefined {
+  if (a === undefined) {
+    return undefined;
+  }
+  if (!Array.isArray(a)) {
+    throw new Error('Argument to unique is not an array');
+  }
+  // Use Set to remove duplicates, then convert back to array
+  return Array.from(new Set(a));
+}
+
+export function distinct(a: any[] | undefined): any[] | undefined {
+  // distinct is an alias for unique
+  return unique(a);
+}

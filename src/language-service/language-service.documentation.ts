@@ -153,6 +153,53 @@ export const BUILTIN_FUNCTION_DOCS: Record<string, FunctionDoc> = {
       { name: 'a', description: 'Array to count.' }
     ]
   },
+  reduce: {
+    name: 'reduce',
+    description: 'Alias for fold. Reduce array a using function f, starting with accumulator y.',
+    params: [
+      { name: 'f', description: 'Reducer function. Eg: `f(acc, x, i) = acc + x`.' },
+      { name: 'y', description: 'Initial accumulator value.' },
+      { name: 'a', description: 'Input array.' }
+    ]
+  },
+  find: {
+    name: 'find',
+    description: 'Returns the first element in array a that satisfies predicate f, or undefined if not found.',
+    params: [
+      { name: 'f', description: 'Predicate function. Eg: `f(x) = x > 5`' },
+      { name: 'a', description: 'Input array.' }
+    ]
+  },
+  some: {
+    name: 'some',
+    description: 'Returns true if at least one element in array a satisfies predicate f.',
+    params: [
+      { name: 'f', description: 'Predicate function. Eg: `f(x) = x > 5`' },
+      { name: 'a', description: 'Input array.' }
+    ]
+  },
+  every: {
+    name: 'every',
+    description: 'Returns true if all elements in array a satisfy predicate f. Returns true for empty arrays.',
+    params: [
+      { name: 'f', description: 'Predicate function. Eg: `f(x) = x > 0`' },
+      { name: 'a', description: 'Input array.' }
+    ]
+  },
+  unique: {
+    name: 'unique',
+    description: 'Returns a new array with duplicate values removed from array a.',
+    params: [
+      { name: 'a', description: 'Input array.' }
+    ]
+  },
+  distinct: {
+    name: 'distinct',
+    description: 'Alias for unique. Returns a new array with duplicate values removed from array a.',
+    params: [
+      { name: 'a', description: 'Input array.' }
+    ]
+  },
   clamp: {
     name: 'clamp',
     description: 'Clamps a value between a minimum and maximum.',
@@ -309,6 +356,65 @@ export const BUILTIN_FUNCTION_DOCS: Record<string, FunctionDoc> = {
     params: [
       { name: 'obj', description: 'Input object.' },
       { name: 'separator', description: 'Key separator (default: _).', optional: true }
+    ]
+  },
+  /**
+   * Type checking functions
+   */
+  isArray: {
+    name: 'isArray',
+    description: 'Returns true if the value is an array.',
+    params: [
+      { name: 'value', description: 'Value to check.' }
+    ]
+  },
+  isObject: {
+    name: 'isObject',
+    description: 'Returns true if the value is an object (excluding null and arrays).',
+    params: [
+      { name: 'value', description: 'Value to check.' }
+    ]
+  },
+  isNumber: {
+    name: 'isNumber',
+    description: 'Returns true if the value is a number.',
+    params: [
+      { name: 'value', description: 'Value to check.' }
+    ]
+  },
+  isString: {
+    name: 'isString',
+    description: 'Returns true if the value is a string.',
+    params: [
+      { name: 'value', description: 'Value to check.' }
+    ]
+  },
+  isBoolean: {
+    name: 'isBoolean',
+    description: 'Returns true if the value is a boolean.',
+    params: [
+      { name: 'value', description: 'Value to check.' }
+    ]
+  },
+  isNull: {
+    name: 'isNull',
+    description: 'Returns true if the value is null.',
+    params: [
+      { name: 'value', description: 'Value to check.' }
+    ]
+  },
+  isUndefined: {
+    name: 'isUndefined',
+    description: 'Returns true if the value is undefined.',
+    params: [
+      { name: 'value', description: 'Value to check.' }
+    ]
+  },
+  isFunction: {
+    name: 'isFunction',
+    description: 'Returns true if the value is a function.',
+    params: [
+      { name: 'value', description: 'Value to check.' }
     ]
   }
 };

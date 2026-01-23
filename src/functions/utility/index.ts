@@ -9,3 +9,4 @@
 
 export * from './conditional.js';
 export * from './string-object.js';
+export * from './type-checking.js';
