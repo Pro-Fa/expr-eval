@@ -40,6 +40,7 @@ import { pathVariableCompletions, tryVariableHoverUsingSpans } from './variable-
 import {
   getDiagnosticsForDocument,
   createDiagnosticFromParseError,
+  createDiagnosticFromError,
   TokenSpan
 } from './diagnostics';
 import { ParseError } from '../types/errors';
@@ -324,6 +325,9 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
     } catch (error) {
       if (error instanceof ParseError) {
         diagnostics.push(createDiagnosticFromParseError(textDocument, error));
+      } else if (error instanceof Error) {
+        // Handle generic errors thrown by the parser (e.g., invalid object definition)
+        diagnostics.push(createDiagnosticFromError(textDocument, error));
       }
     }
 

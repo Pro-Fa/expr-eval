@@ -378,3 +378,26 @@ export function createDiagnosticFromParseError(
     source: 'expr-eval'
   };
 }
+
+/**
+ * Creates a diagnostic from a generic Error.
+ * This function handles errors thrown by the parser that are not ParseError instances.
+ * Since these errors don't have position information, the diagnostic highlights the whole text.
+ */
+export function createDiagnosticFromError(
+  textDocument: TextDocument,
+  error: Error
+): Diagnostic {
+  const text = textDocument.getText();
+  const range: Range = {
+    start: textDocument.positionAt(0),
+    end: textDocument.positionAt(text.length)
+  };
+
+  return {
+    range,
+    severity: DiagnosticSeverity.Error,
+    message: error.message,
+    source: 'expr-eval'
+  };
+}
