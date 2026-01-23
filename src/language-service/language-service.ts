@@ -336,7 +336,7 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
     try {
       const ts = makeTokenStream(parser, text);
       spans = iterateTokens(ts);
-    } catch (error) {
+    } catch {
       // If tokenization fails, we already have a parse error diagnostic
       // Return early since we can't do function argument checking without tokens
       return diagnostics;

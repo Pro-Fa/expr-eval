@@ -1,8 +1,13 @@
 # Expression Syntax
 
-The parser accepts a pretty basic grammar. It's similar to normal JavaScript expressions, but is more math-oriented. For example, the `^` operator is exponentiation, not xor.
+> **Audience:** Users writing expressions in applications powered by expr-eval.  
+> **For developers:** See [Parser Configuration](parser.md) to learn how to enable/disable operators.
+
+The expression language is similar to JavaScript but more math-oriented. For example, the `^` operator is exponentiation, not xor.
 
 ## Operator Precedence
+
+Operators are listed from highest to lowest precedence:
 
 | Operator                 | Associativity | Description |
 |:------------------------ |:------------- |:----------- |
@@ -21,15 +26,7 @@ The parser accepts a pretty basic grammar. It's similar to normal JavaScript exp
 | =                        | Right         | Variable assignment |
 | ;                        | Left          | Expression separator |
 
-```js
-const parser = new Parser({
-  operators: {
-    'in': true,
-    'assignment': true
-  }
-});
-// Now parser supports 'x in array' and 'y = 2*x' expressions
-```
+> **Note:** Some operators like `in`, `=`, and `;` may be disabled by your application.
 
 ## Concatenation Operator
 
@@ -46,23 +43,19 @@ The `|` (pipe) operator concatenates arrays or strings:
 
 When both operands are arrays, the `|` operator returns a new array containing all elements from both arrays:
 
-```js
-const parser = new Parser();
-
-parser.evaluate('[1, 2] | [3, 4]');           // [1, 2, 3, 4]
-parser.evaluate('[1] | [2] | [3]');           // [1, 2, 3]
-parser.evaluate('["a", "b"] | ["c", "d"]');   // ["a", "b", "c", "d"]
+```
+[1, 2] | [3, 4]           → [1, 2, 3, 4]
+[1] | [2] | [3]           → [1, 2, 3]
+["a", "b"] | ["c", "d"]   → ["a", "b", "c", "d"]
 ```
 
 ### String Concatenation
 
 When both operands are strings, the `|` operator returns a new string combining both:
 
-```js
-const parser = new Parser();
-
-parser.evaluate('"hello" | " " | "world"');   // "hello world"
-parser.evaluate('"a" | "b" | "c"');           // "abc"
+```
+"hello" | " " | "world"   → "hello world"
+"a" | "b" | "c"           → "abc"
 ```
 
 > **Note:** Mixing types (e.g., an array with a string) will return `undefined`.
@@ -76,7 +69,7 @@ The unary `+` and `-` operators are an exception, and always have their normal p
 | Operator | Description |
 |:-------- |:----------- |
 | -x       | Negation |
-| +x       | Unary plus. This converts it's operand to a number, but has no other effect. |
+| +x       | Unary plus. This converts its operand to a number, but has no other effect. |
 | x!       | Factorial (x * (x-1) * (x-2) * … * 2 * 1). gamma(x + 1) for non-integers. |
 | abs x    | Absolute value (magnitude) of x |
 | acos x   | Arc cosine of x (in radians) |
@@ -151,6 +144,7 @@ Besides the "operator" functions, there are several pre-defined functions. You c
 |:------------- |:----------- |
 | if(c, a, b)   | Function form of c ? a : b. Note: This always evaluates both `a` and `b`, regardless of whether `c` is `true` or not. Use `c ? a : b` instead if there are side effects, or if evaluating the branches could be expensive. |
 | coalesce(a, b, ...)   | Returns the first non-null and non-empty string value from the arguments. Numbers and booleans (including 0 and false) are considered valid values. |
+| json(value)   | Converts a value to a JSON string representation. |
 
 ### Type Checking Functions
 
@@ -232,68 +226,62 @@ The parser includes comprehensive string manipulation capabilities.
 
 ### String Function Examples
 
-```js
-const parser = new Parser();
-
+```
 // String inspection
-parser.evaluate('length("hello")'); // 5
-parser.evaluate('isEmpty("")'); // true
-parser.evaluate('contains("hello world", "world")'); // true
-parser.evaluate('startsWith("hello", "he")'); // true
-parser.evaluate('endsWith("hello", "lo")'); // true
-parser.evaluate('searchCount("hello hello", "hello")'); // 2
+length("hello")                          → 5
+isEmpty("")                               → true
+contains("hello world", "world")         → true
+startsWith("hello", "he")                → true
+endsWith("hello", "lo")                  → true
+searchCount("hello hello", "hello")      → 2
 
 // String transformation
-parser.evaluate('trim("  hello  ")'); // "hello"
-parser.evaluate('trim("**hello**", "*")'); // "hello"
-parser.evaluate('toUpper("hello")'); // "HELLO"
-parser.evaluate('toLower("HELLO")'); // "hello"
-parser.evaluate('toTitle("hello world")'); // "Hello World"
-parser.evaluate('repeat("ha", 3)'); // "hahaha"
-parser.evaluate('reverse("hello")'); // "olleh"
+trim("  hello  ")                         → "hello"
+trim("**hello**", "*")                   → "hello"
+toUpper("hello")                          → "HELLO"
+toLower("HELLO")                          → "hello"
+toTitle("hello world")                    → "Hello World"
+repeat("ha", 3)                           → "hahaha"
+reverse("hello")                          → "olleh"
 
 // String extraction
-parser.evaluate('left("hello", 3)'); // "hel"
-parser.evaluate('right("hello", 3)'); // "llo"
-parser.evaluate('split("a,b,c", ",")'); // ["a", "b", "c"]
+left("hello", 3)                          → "hel"
+right("hello", 3)                         → "llo"
+split("a,b,c", ",")                       → ["a", "b", "c"]
 
-// String manipulation
-parser.evaluate('replace("hello hello", "hello", "hi")'); // "hi hi"
-parser.evaluate('replaceFirst("hello hello", "hello", "hi")'); // "hi hello"
+// String replacement
+replace("hello hello", "hello", "hi")    → "hi hi"
+replaceFirst("hello hello", "hello", "hi") → "hi hello"
 
 // Natural sorting
-parser.evaluate('naturalSort(["file10", "file2", "file1"])'); // ["file1", "file2", "file10"]
+naturalSort(["file10", "file2", "file1"]) → ["file1", "file2", "file10"]
 
 // Type conversion
-parser.evaluate('toNumber("123")'); // 123
-parser.evaluate('toBoolean("true")'); // true
-parser.evaluate('toBoolean("yes")'); // true
-parser.evaluate('toBoolean("0")'); // false
+toNumber("123")                           → 123
+toBoolean("true")                         → true
+toBoolean("yes")                          → true
+toBoolean("0")                            → false
 
 // Padding
-parser.evaluate('padLeft("5", 3)'); // "  5"
-parser.evaluate('padLeft("5", 3, "0")'); // "005"
-parser.evaluate('padRight("5", 3)'); // "5  "
-parser.evaluate('padRight("5", 3, "0")'); // "500"
-parser.evaluate('padBoth("hi", 6)'); // "  hi  "
-parser.evaluate('padBoth("hi", 6, "-")'); // "--hi--"
+padLeft("5", 3)                           → "  5"
+padLeft("5", 3, "0")                      → "005"
+padRight("5", 3)                          → "5  "
+padBoth("hi", 6)                          → "  hi  "
+padBoth("hi", 6, "-")                     → "--hi--"
 
 // Slicing
-parser.evaluate('slice("hello world", 0, 5)'); // "hello"
-parser.evaluate('slice("hello world", -5)'); // "world"
-parser.evaluate('slice([1, 2, 3, 4, 5], -2)'); // [4, 5]
+slice("hello world", 0, 5)                → "hello"
+slice("hello world", -5)                  → "world"
+slice([1, 2, 3, 4, 5], -2)                → [4, 5]
 
 // Encoding
-parser.evaluate('urlEncode("foo=bar&baz")'); // "foo%3Dbar%26baz"
-parser.evaluate('base64Encode("hello")'); // "aGVsbG8="
-parser.evaluate('base64Decode("aGVsbG8=")'); // "hello"
+urlEncode("foo=bar&baz")                  → "foo%3Dbar%26baz"
+base64Encode("hello")                     → "aGVsbG8="
+base64Decode("aGVsbG8=")                  → "hello"
 
 // Coalesce
-parser.evaluate('coalesce("", null, "found")'); // "found"
-parser.evaluate('coalesce(null, 0, 42)'); // 0
-
-// Complex string operations
-parser.evaluate('toUpper(trim(left("  hello world  ", 10)))'); // "HELLO WOR"
+coalesce("", null, "found")               → "found"
+coalesce(null, 0, 42)                     → 0
 ```
 
 > **Note:** All string functions return `undefined` if any of their required arguments are `undefined`, allowing for safe chaining and conditional logic.
@@ -311,27 +299,20 @@ The parser includes functions for working with objects.
 
 ### Object Function Examples
 
-```js
-const parser = new Parser();
-
+```
 // Merge objects
-parser.evaluate('merge({a: 1}, {b: 2})'); // {a: 1, b: 2}
-parser.evaluate('merge({a: 1, b: 2}, {b: 3, c: 4})'); // {a: 1, b: 3, c: 4}
-parser.evaluate('merge({a: 1}, {b: 2}, {c: 3})'); // {a: 1, b: 2, c: 3}
+merge({a: 1}, {b: 2})                     → {a: 1, b: 2}
+merge({a: 1, b: 2}, {b: 3, c: 4})         → {a: 1, b: 3, c: 4}
 
 // Get keys
-parser.evaluate('keys({a: 1, b: 2, c: 3})'); // ["a", "b", "c"]
+keys({a: 1, b: 2, c: 3})                  → ["a", "b", "c"]
 
 // Get values
-parser.evaluate('values({a: 1, b: 2, c: 3})'); // [1, 2, 3]
+values({a: 1, b: 2, c: 3})                → [1, 2, 3]
 
-// Flatten nested objects
-parser.evaluate('flatten(obj)', { obj: { foo: { bar: 1 } } }); // {foo_bar: 1}
-parser.evaluate('flatten(obj)', { obj: { a: { b: { c: 1 } } } }); // {a_b_c: 1}
-parser.evaluate('flatten(obj, ".")', { obj: { foo: { bar: 1 } } }); // {"foo.bar": 1}
-
-// Mixed nested and flat keys
-parser.evaluate('flatten(obj)', { obj: { a: 1, b: { c: 2 } } }); // {a: 1, b_c: 2}
+// Flatten nested objects (using a variable `obj`)
+flatten(obj)    // where obj = {foo: {bar: 1}} → {foo_bar: 1}
+flatten(obj, ".")  // custom separator      → {"foo.bar": 1}
 ```
 
 > **Note:** All object functions return `undefined` if any of their required arguments are `undefined`, allowing for safe chaining and conditional logic.
@@ -350,22 +331,22 @@ You can define functions using the syntax `name(params) = expression`. When it's
 
 Examples:
 
-```js
+```
 square(x) = x*x
 add(a, b) = a + b
 factorial(x) = x < 2 ? 1 : x * factorial(x - 1)
 ```
 
-These functions can than be used in other functions that require a function argument, such as `map`, `filter` or `fold`:
+These functions can then be used in other functions that require a function argument, such as `map`, `filter` or `fold`:
 
-```js
+```
 name(u) = u.name; map(users, name)
 add(a, b) = a+b; fold([1, 2, 3], 0, add)
 ```
 
 You can also define the functions inline:
 
-```js
+```
 filter([1, 2, 3, 4, 5], isEven(x) = x % 2 == 0)
 ```
 
@@ -375,49 +356,49 @@ Arrow functions provide a concise syntax for inline functions, similar to JavaSc
 
 **Single parameter (no parentheses required):**
 
-```js
-map([1, 2, 3], x => x * 2)           // [2, 4, 6]
-filter([1, 2, 3, 4], x => x > 2)     // [3, 4]
-map(users, x => x.name)              // Extract property from objects
+```
+map([1, 2, 3], x => x * 2)           → [2, 4, 6]
+filter([1, 2, 3, 4], x => x > 2)     → [3, 4]
+map(users, x => x.name)              → Extract property from objects
 ```
 
 **Multiple parameters (parentheses required):**
 
-```js
-fold([1, 2, 3, 4, 5], 0, (acc, x) => acc + x)    // 15 (sum)
-fold([1, 2, 3, 4, 5], 1, (acc, x) => acc * x)    // 120 (product)
-map([10, 20, 30], (val, idx) => val + idx)       // [10, 21, 32]
-filter([10, 20, 30], (x, i) => i >= 1)           // [20, 30]
+```
+fold([1, 2, 3, 4, 5], 0, (acc, x) => acc + x)    → 15 (sum)
+fold([1, 2, 3, 4, 5], 1, (acc, x) => acc * x)    → 120 (product)
+map([10, 20, 30], (val, idx) => val + idx)       → [10, 21, 32]
+filter([10, 20, 30], (x, i) => i >= 1)           → [20, 30]
 ```
 
 **Zero parameters:**
 
-```js
-(() => 42)()                         // 42
+```
+(() => 42)()                         → 42
 ```
 
 **Assignment to variable:**
 
 Arrow functions can be assigned to variables for reuse:
 
-```js
-fn = x => x * 2; map([1, 2, 3], fn)  // [2, 4, 6]
-double = x => x * 2; triple = x => x * 3; map(map([1, 2], triple), double)  // [6, 12]
+```
+fn = x => x * 2; map([1, 2, 3], fn)  → [2, 4, 6]
+double = x => x * 2; triple = x => x * 3; map(map([1, 2], triple), double)  → [6, 12]
 ```
 
 **Nested arrow functions:**
 
-```js
-map([[1, 2], [3, 4]], row => map(row, x => x * 2))  // [[2, 4], [6, 8]]
+```
+map([[1, 2], [3, 4]], row => map(row, x => x * 2))  → [[2, 4], [6, 8]]
 ```
 
 **With member access and complex expressions:**
 
-```js
-filter(users, x => x.age > 25)                     // Filter objects by property
-map(items, x => x.value * 2 + 1)                   // Complex transformations
-filter(numbers, x => x > 0 and x < 10)             // Using logical operators
-map([3, 7, 2, 9], x => x > 5 ? "high" : "low")     // Using ternary operator
+```
+filter(users, x => x.age > 25)                     → Filter objects by property
+map(items, x => x.value * 2 + 1)                   → Complex transformations
+filter(numbers, x => x > 0 and x < 10)             → Using logical operators
+map([3, 7, 2, 9], x => x > 5 ? "high" : "low")     → ["low", "high", "low", "high"]
 ```
 
 > **Note:** Arrow functions share the same `fndef` operator flag as traditional function definitions. If function definitions are disabled via parser options, arrow functions will also be disabled.
@@ -428,45 +409,45 @@ The new array utility functions provide additional ways to work with arrays:
 
 **Using reduce (alias for fold):**
 
-```js
-reduce([1, 2, 3, 4], 0, (acc, x) => acc + x)    // 10 (sum using reduce)
-reduce([2, 3, 4], 1, (acc, x) => acc * x)       // 24 (product)
+```
+reduce([1, 2, 3, 4], 0, (acc, x) => acc + x)    → 10 (sum using reduce)
+reduce([2, 3, 4], 1, (acc, x) => acc * x)       → 24 (product)
 ```
 
 **Using find:**
 
-```js
-find([1, 3, 7, 2, 9], x => x > 5)               // 7 (first element > 5)
-find([1, 2, 3], x => x < 0)                     // undefined (not found)
-find(users, x => x.age > 18)                    // First user over 18
+```
+find([1, 3, 7, 2, 9], x => x > 5)               → 7 (first element > 5)
+find([1, 2, 3], x => x < 0)                     → undefined (not found)
+find(users, x => x.age > 18)                    → First user over 18
 ```
 
 **Using some and every:**
 
-```js
-some([1, 5, 15, 3], x => x > 10)                // true (at least one > 10)
-every([1, 2, 3, 4], x => x > 0)                 // true (all positive)
-every([2, 4, 5, 6], x => x % 2 == 0)            // false (not all even)
-some([1, 2, 3], x => x < 0)                     // false (none negative)
+```
+some([1, 5, 15, 3], x => x > 10)                → true (at least one > 10)
+every([1, 2, 3, 4], x => x > 0)                 → true (all positive)
+every([2, 4, 5, 6], x => x % 2 == 0)            → false (not all even)
+some([1, 2, 3], x => x < 0)                     → false (none negative)
 ```
 
 **Using unique/distinct:**
 
-```js
-unique([1, 2, 2, 3, 3, 3, 4])                   // [1, 2, 3, 4]
-distinct(["a", "b", "a", "c", "b"])             // ["a", "b", "c"]
-unique([])                                      // []
+```
+unique([1, 2, 2, 3, 3, 3, 4])                   → [1, 2, 3, 4]
+distinct(["a", "b", "a", "c", "b"])             → ["a", "b", "c"]
+unique([])                                      → []
 ```
 
 **Combining array functions:**
 
-```js
-// Filter positive numbers, remove duplicates, then double each
-unique(filter([1, -2, 3, 3, -4, 5, 1], x => x > 0))  // [1, 3, 5]
-map(unique([1, 2, 2, 3]), x => x * 2)           // [2, 4, 6]
+```
+// Filter positive numbers, remove duplicates
+unique(filter([1, -2, 3, 3, -4, 5, 1], x => x > 0))  → [1, 3, 5]
+map(unique([1, 2, 2, 3]), x => x * 2)               → [2, 4, 6]
 
 // Find first even number greater than 5
-find(filter([3, 7, 8, 9, 10], x => x > 5), x => x % 2 == 0)  // 8
+find(filter([3, 7, 8, 9, 10], x => x > 5), x => x % 2 == 0)  → 8
 ```
 
 ### Examples of Type Checking Functions
@@ -475,95 +456,182 @@ Type checking functions are useful for validating data types and conditional log
 
 **Basic type checking:**
 
-```js
-isArray([1, 2, 3])                              // true
-isNumber(42)                                    // true
-isString("hello")                               // true
-isBoolean(true)                                 // true
-isNull(null)                                    // true
-isUndefined(undefined)                          // true
-isObject({a: 1})                                // true
-isFunction(abs)                                 // true
+```
+isArray([1, 2, 3])                              → true
+isNumber(42)                                    → true
+isString("hello")                               → true
+isBoolean(true)                                 → true
+isNull(null)                                    → true
+isUndefined(undefined)                          → true
+isObject({a: 1})                                → true
+isFunction(abs)                                 → true
 ```
 
 **Using with conditionals:**
 
-```js
-if(isArray(x), count(x), 0)                     // Get array length or 0
-if(isNumber(x), x * 2, x)                       // Double if number
-if(isString(x), toUpper(x), x)                  // Uppercase if string
+```
+if(isArray(x), count(x), 0)                     → Get array length or 0
+if(isNumber(x), x * 2, x)                       → Double if number
+if(isString(x), toUpper(x), x)                  → Uppercase if string
 ```
 
 **Using with filter:**
 
-```js
-filter([1, "a", 2, "b", 3], isNumber)           // [1, 2, 3]
-filter([1, "a", 2, "b", 3], isString)           // ["a", "b"]
+```
+filter([1, "a", 2, "b", 3], isNumber)           → [1, 2, 3]
+filter([1, "a", 2, "b", 3], isString)           → ["a", "b"]
 ```
 
 **Using with some/every:**
 
-```js
-some([1, 2, "hello", 3], isString)              // true (has at least one string)
-every([1, 2, 3, 4], isNumber)                   // true (all are numbers)
-every([1, "a", 3], isNumber)                    // false (not all numbers)
+```
+some([1, 2, "hello", 3], isString)              → true (has at least one string)
+every([1, 2, 3, 4], isNumber)                   → true (all are numbers)
+every([1, "a", 3], isNumber)                    → false (not all numbers)
 ```
 
 **Practical examples:**
 
-```js
-// Count how many strings are in an array
-count(filter([1, "a", 2, "b", 3], isString))    // 2
-
-// Get the first number in a mixed array
-find(["a", "b", 3, "c", 5], isNumber)           // 3
-
-// Check if any value is null or undefined
-some(data, x => isNull(x) or isUndefined(x))    // true/false
+```
+count(filter([1, "a", 2, "b", 3], isString))    → 2 (count strings)
+find(["a", "b", 3, "c", 5], isNumber)           → 3 (first number)
+some(data, x => isNull(x) or isUndefined(x))    → Check for null/undefined
 ```
 
-## Custom JavaScript Functions
+## Custom Functions
 
-If you need additional functions that aren't supported out of the box, you can easily add them in your own code. Instances of the `Parser` class have a property called `functions` that's simply an object with all the functions that are in scope. You can add, replace, or delete any of the properties to customize what's available in the expressions. For example:
+Your application may provide additional custom functions beyond the built-in ones. Check your application's documentation to see what custom functions are available.
 
-```js
-const parser = new Parser();
-
-// Add a new function
-parser.functions.customAddFunction = function (arg1, arg2) {
-  return arg1 + arg2;
-};
-
-// Remove the factorial function
-delete parser.functions.fac;
-
-parser.evaluate('customAddFunction(2, 4) == 6'); // true
-//parser.evaluate('fac(3)'); // This will fail
-```
+> **For developers:** You can add custom functions via `parser.functions`. See [Parser Configuration](parser.md#parserfunctions) for details.
 
 ## Constants
 
-The parser also includes a number of pre-defined constants that can be used in expressions. These are shown in the table below:
+The following constants are available in expressions:
 
-| Constant     | Description |
-|:------------ |:----------- |
-| E            | The value of `Math.E` from your JavaScript runtime |
-| PI           | The value of `Math.PI` from your JavaScript runtime |
-| true         | Logical `true` value |
-| false        | Logical `false` value |
+| Constant | Value | Description |
+|:-------- |:----- |:----------- |
+| E        | 2.718... | Euler's number (base of natural logarithms) |
+| PI       | 3.141... | The ratio of a circle's circumference to its diameter |
+| true     | true  | Logical true value |
+| false    | false | Logical false value |
+| undefined | undefined | Represents a missing or undefined value |
 
-Pre-defined constants are stored in `parser.consts`. You can make changes to this property to customise the constants available to your expressions. For example:
+**Examples:**
 
-```js
-const parser = new Parser();
-parser.consts.R = 1.234;
-
-console.log(parser.parse('A+B/R').toString());  // ((A + B) / 1.234)
+```
+2 * PI              → 6.283185307179586
+E ^ 2               → 7.3890560989306495
+true and false      → false
+x == undefined      → true (if x is not defined)
 ```
 
-To disable the pre-defined constants, you can replace or delete `parser.consts`:
+> **For developers:** Constants can be customized via `parser.consts`. See [Parser Configuration](parser.md#parserconsts) for details.
 
-```js
-const parser = new Parser();
-parser.consts = {};
+## Coalesce Operator
+
+The `??` operator returns the right operand when the left operand is null, undefined, Infinity, or NaN:
+
+```
+x ?? 0                    → 0 (if x is undefined or null)
+y ?? "default"            → y (if y has a value)
+10 / 0 ?? -1              → -1 (division by zero gives Infinity)
+sqrt(-1) ?? 0             → 0 (sqrt of negative gives NaN)
+```
+
+This is useful for providing default values:
+
+```
+user.nickname ?? user.name ?? "Anonymous"
+settings.timeout ?? 5000
+```
+
+## Optional Property Access
+
+Property access automatically handles missing properties without errors. If any part of a property chain doesn't exist, the result is `undefined` instead of an error:
+
+```
+user.profile.name         → "Ada" (if exists)
+user.profile.email        → undefined (if missing, no error)
+user.settings.theme       → undefined (if settings is missing)
+items[99].value           → undefined (if index doesn't exist)
+```
+
+Combined with the coalesce operator:
+
+```
+user.settings.theme ?? "dark"     → "dark" (fallback if missing)
+items[0].price ?? 0               → 0 (fallback if missing)
+```
+
+## CASE Expressions
+
+SQL-style CASE expressions provide multi-way conditionals.
+
+### Switch-style CASE
+
+Compare a value against multiple options:
+
+```
+case status
+    when "active" then "✓ Active"
+    when "pending" then "⏳ Pending"
+    when "inactive" then "✗ Inactive"
+    else "Unknown"
+end
+```
+
+### Condition-style CASE
+
+Evaluate multiple conditions (like if/else if/else):
+
+```
+case
+    when score >= 90 then "A"
+    when score >= 80 then "B"
+    when score >= 70 then "C"
+    when score >= 60 then "D"
+    else "F"
+end
+```
+
+**Examples:**
+
+```
+// Categorize a number
+case
+    when x < 0 then "negative"
+    when x == 0 then "zero"
+    else "positive"
+end
+
+// Map status codes
+case code
+    when 200 then "OK"
+    when 404 then "Not Found"
+    when 500 then "Server Error"
+    else "Unknown: " + code
+end
+```
+
+## In and Not In Operators
+
+Check if a value exists in an array:
+
+```
+"apple" in ["apple", "banana", "cherry"]       → true
+"grape" in ["apple", "banana", "cherry"]       → false
+"grape" not in ["apple", "banana", "cherry"]   → true
+5 in [1, 2, 3, 4, 5]                           → true
+```
+
+> **Note:** The `in` operator may be disabled by your application.
+
+## JSON Function
+
+Convert values to JSON strings:
+
+```
+json([1, 2, 3])           → "[1,2,3]"
+json({a: 1, b: 2})        → '{"a":1,"b":2}'
+json("hello")             → '"hello"'
 ```

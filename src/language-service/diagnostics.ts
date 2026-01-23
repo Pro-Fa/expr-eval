@@ -1,7 +1,7 @@
 /**
  * Diagnostics module for the language service.
  * Provides function argument count validation and syntax error detection.
- * 
+ *
  * This module leverages the existing parser infrastructure for error detection,
  * avoiding duplication of tokenization and parsing logic.
  */

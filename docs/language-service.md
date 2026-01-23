@@ -1,5 +1,7 @@
 # Language Service
 
+> **Audience:** Developers building IDE integrations or code editors with expr-eval support.
+
 The library includes a built-in language service that provides IDE-like features for expr-eval expressions. This is useful for integrating expr-eval into code editors like Monaco Editor (used by VS Code).
 
 ## Features

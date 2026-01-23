@@ -20,26 +20,46 @@ npm install @pro-fa/expr-eval
 ## Quick Start
 
 ```js
-const Parser = require('@pro-fa/expr-eval').Parser;
+import { Parser } from '@pro-fa/expr-eval';
 
 const parser = new Parser();
-let expr = parser.parse('2 * x + 1');
+const expr = parser.parse('2 * x + 1');
 console.log(expr.evaluate({ x: 3 })); // 7
 
-// or
-Parser.evaluate('6 * x', { x: 7 }) // 42
+// or evaluate directly
+Parser.evaluate('6 * x', { x: 7 }); // 42
 ```
 
 ## Documentation
 
+### For Expression Writers
+
+If you're writing expressions in an application powered by expr-eval:
+
 | Document | Description |
 |:---------|:------------|
-| [Parser](docs/parser.md) | Parser class API, constructor options, and methods |
-| [Expression](docs/expression.md) | Expression object methods: evaluate, substitute, simplify, variables, symbols, toString, toJSFunction |
-| [Expression Syntax](docs/syntax.md) | Operator precedence, unary operators, pre-defined functions, string manipulation, array literals, function definitions, constants |
-| [TypeScript Port Enhancements](docs/enhancements.md) | New features: undefined support, coalesce operator, optional chaining, SQL case blocks, object construction, promises, and more |
-| [Language Service](docs/language-service.md) | IDE integration: code completions, hover information, syntax highlighting, Monaco Editor integration |
-| [Performance Testing](docs/performance.md) | Benchmarks, performance grades, and optimization guidance |
+| [Quick Reference](docs/quick-reference.md) | Cheat sheet of operators, functions, and syntax |
+| [Expression Syntax](docs/syntax.md) | Complete syntax reference with examples |
+
+### For Developers
+
+If you're integrating expr-eval into your project:
+
+| Document | Description |
+|:---------|:------------|
+| [Parser](docs/parser.md) | Parser configuration, methods, and customization |
+| [Expression](docs/expression.md) | Expression object methods: evaluate, simplify, variables, toJSFunction |
+| [Advanced Features](docs/advanced-features.md) | Promises, custom resolution, type conversion, operator customization |
+| [Language Service](docs/language-service.md) | IDE integration: completions, hover info, diagnostics, Monaco Editor |
+| [Migration Guide](docs/migration.md) | Upgrading from original expr-eval or previous versions |
+
+### For Contributors
+
+| Document | Description |
+|:---------|:------------|
+| [Contributing](CONTRIBUTING.md) | Development setup, code style, and PR guidelines |
+| [Performance Testing](docs/performance.md) | Benchmarks, profiling, and optimization guidance |
+| [Breaking Changes](BREAKING_CHANGES.md) | Version-by-version breaking change documentation |
 
 ## Key Features
 
