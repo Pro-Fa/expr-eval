@@ -112,6 +112,8 @@ The unary `+` and `-` operators are an exception, and always have their normal p
 
 Besides the "operator" functions, there are several pre-defined functions. You can provide your own, by binding variables to normal JavaScript functions. These are not evaluated by simplify.
 
+### Numeric Functions
+
 | Function      | Description |
 |:------------- |:----------- |
 | random(n)     | Get a random number in the range [0, n). If n is zero, or not provided, it defaults to 1. |
@@ -124,15 +126,27 @@ Besides the "operator" functions, there are several pre-defined functions. You c
 | pow(x, y)     | Equivalent to x^y. For consistency with JavaScript's Math object. |
 | atan2(y, x)   | Arc tangent of x/y. i.e. the angle between (0, 0) and (x, y) in radians. |
 | roundTo(x, n) | Rounds x to n places after the decimal point. |
+
+### Array Functions
+
+| Function      | Description |
+|:------------- |:----------- |
 | count(a)      | Returns the number of items in an array. |
 | map(f, a)     | Array map: Pass each element of `a` the function `f`, and return an array of the results. |
 | fold(f, y, a) | Array fold: Fold/reduce array `a` into a single value, `y` by setting `y = f(y, x, index)` for each element `x` of the array. |
 | filter(f, a)  | Array filter: Return an array containing only the values from `a` where `f(x, index)` is `true`. |
 | indexOf(x, a) | Return the first index of string or array `a` matching the value `x`, or `-1` if not found. |
 | join(sep, a)  | Concatenate the elements of `a`, separated by `sep`. |
-| if(c, a, b)   | Function form of c ? a : b. Note: This always evaluates both `a` and `b`, regardless of whether `c` is `true` or not. Use `c ? a : b` instead if there are side effects, or if evaluating the branches could be expensive. |
+| naturalSort(arr) | Sorts an array of strings using natural sort order (alphanumeric-aware). For example, `["file10", "file2", "file1"]` becomes `["file1", "file2", "file10"]`. |
 
-## String Manipulation Functions
+### Utility Functions
+
+| Function      | Description |
+|:------------- |:----------- |
+| if(c, a, b)   | Function form of c ? a : b. Note: This always evaluates both `a` and `b`, regardless of whether `c` is `true` or not. Use `c ? a : b` instead if there are side effects, or if evaluating the branches could be expensive. |
+| coalesce(a, b, ...)   | Returns the first non-null and non-empty string value from the arguments. Numbers and booleans (including 0 and false) are considered valid values. |
+
+## String Functions
 
 The parser includes comprehensive string manipulation capabilities.
 
@@ -166,18 +180,12 @@ The parser includes comprehensive string manipulation capabilities.
 | right(str, n)    | Returns the rightmost `n` characters from a string. |
 | split(str, delim)| Splits a string by delimiter and returns an array. |
 
-### String Manipulation
+### String Replacement
 
 | Function                    | Description |
 |:--------------------------- |:----------- |
 | replace(str, old, new)      | Replaces all occurrences of `old` with `new` in `str`. |
 | replaceFirst(str, old, new) | Replaces only the first occurrence of `old` with `new` in `str`. |
-
-### String/Array Sorting
-
-| Function         | Description |
-|:---------------- |:----------- |
-| naturalSort(arr) | Sorts an array of strings using natural sort order (alphanumeric-aware). For example, `["file10", "file2", "file1"]` becomes `["file1", "file2", "file10"]`. |
 
 ### Type Conversion
 
@@ -202,12 +210,6 @@ The parser includes comprehensive string manipulation capabilities.
 | urlEncode(str)        | URL-encodes a string using `encodeURIComponent`. |
 | base64Encode(str)     | Base64-encodes a string with proper UTF-8 support. |
 | base64Decode(str)     | Base64-decodes a string with proper UTF-8 support. |
-
-### Utility Functions
-
-| Function              | Description |
-|:--------------------- |:----------- |
-| coalesce(a, b, ...)   | Returns the first non-null and non-empty string value from the arguments. Numbers and booleans (including 0 and false) are considered valid values. |
 
 ### String Function Examples
 
@@ -277,7 +279,7 @@ parser.evaluate('toUpper(trim(left("  hello world  ", 10)))'); // "HELLO WOR"
 
 > **Note:** All string functions return `undefined` if any of their required arguments are `undefined`, allowing for safe chaining and conditional logic.
 
-## Object Manipulation Functions
+## Object Functions
 
 The parser includes functions for working with objects.
 
