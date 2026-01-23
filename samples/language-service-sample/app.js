@@ -596,13 +596,6 @@ require(['vs/editor/editor.main'], function () {
         }, 2000);
     });
 
-    // Initialize
-    applyHighlighting();
-    evaluate();
-
-    // Load example from URL query parameter if present
-    loadExampleFromUrl();
-
     // Event listeners for changes
     expressionModel.onDidChangeContent(() => {
         applyHighlighting();
@@ -612,4 +605,11 @@ require(['vs/editor/editor.main'], function () {
     contextModel.onDidChangeContent(() => {
         evaluate();
     });
+
+    // Initialize - apply highlighting and evaluate for initial content
+    applyHighlighting();
+    evaluate();
+
+    // Load example from URL query parameter if present (after event handlers are set up)
+    loadExampleFromUrl();
 });
