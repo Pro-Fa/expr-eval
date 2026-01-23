@@ -37,7 +37,13 @@ import {
   iterateTokens
 } from './ls-utils';
 import { pathVariableCompletions, tryVariableHoverUsingSpans } from './variable-utils';
-import { getDiagnosticsForDocument } from './diagnostics';
+import {
+  getDiagnosticsForDocument,
+  createDiagnosticFromParseError,
+  createDiagnosticFromError,
+  TokenSpan
+} from './diagnostics';
+import { ParseError } from '../types/errors';
 
 export function createLanguageService(options: LanguageServiceOptions | undefined = undefined): LanguageServiceApi {
   // Build a parser instance to access keywords/operators/functions/consts
@@ -299,14 +305,42 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
 
   /**
    * Analyzes the document for function calls and checks if they have the correct number of arguments.
-   * Returns diagnostics for function calls with incorrect argument counts.
+   * Returns diagnostics for function calls with incorrect argument counts, as well as
+   * syntax errors detected by the parser (unclosed strings, brackets, unknown characters, etc.).
    */
   function getDiagnostics(params: GetDiagnosticsParams): Diagnostic[] {
     const { textDocument } = params;
     const text = textDocument.getText();
+    const diagnostics: Diagnostic[] = [];
 
-    const ts = makeTokenStream(parser, text);
-    const spans = iterateTokens(ts);
+    // Try to parse the expression to catch syntax errors
+    // The parser will throw ParseError for issues like:
+    // - Unknown characters
+    // - Unclosed strings
+    // - Illegal escape sequences
+    // - Unexpected tokens
+    // - Missing expected tokens (like closing brackets)
+    try {
+      parser.parse(text);
+    } catch (error) {
+      if (error instanceof ParseError) {
+        diagnostics.push(createDiagnosticFromParseError(textDocument, error));
+      } else if (error instanceof Error) {
+        // Handle generic errors thrown by the parser (e.g., invalid object definition)
+        diagnostics.push(createDiagnosticFromError(textDocument, error));
+      }
+    }
+
+    // Try to tokenize for function argument checking
+    let spans: TokenSpan[] = [];
+    try {
+      const ts = makeTokenStream(parser, text);
+      spans = iterateTokens(ts);
+    } catch (error) {
+      // If tokenization fails, we already have a parse error diagnostic
+      // Return early since we can't do function argument checking without tokens
+      return diagnostics;
+    }
 
     // Build a map from function name to FunctionDetails for quick lookup
     const funcDetailsMap = new Map<string, FunctionDetails>();
@@ -314,7 +348,11 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
       funcDetailsMap.set(func.name, func);
     }
 
-    return getDiagnosticsForDocument(params, spans, functionNamesSet(), funcDetailsMap);
+    // Get function argument count diagnostics
+    const functionDiagnostics = getDiagnosticsForDocument(params, spans, functionNamesSet(), funcDetailsMap);
+    diagnostics.push(...functionDiagnostics);
+
+    return diagnostics;
   }
 
   return {

@@ -1,6 +1,9 @@
 /**
  * Diagnostics module for the language service.
- * Provides function argument count validation.
+ * Provides function argument count validation and syntax error detection.
+ * 
+ * This module leverages the existing parser infrastructure for error detection,
+ * avoiding duplication of tokenization and parsing logic.
  */
 
 import {
@@ -16,6 +19,13 @@ import { DiagnosticSeverity } from 'vscode-languageserver-types';
 import type { TextDocument } from 'vscode-languageserver-textdocument';
 import type { GetDiagnosticsParams, ArityInfo } from './language-service.types';
 import { FunctionDetails } from './language-service.models';
+import { ParseError } from '../types/errors';
+
+/**
+ * Length of the error highlight range when position is known but token length is not.
+ * Used to visually indicate the location of an error in the source text.
+ */
+const ERROR_HIGHLIGHT_LENGTH = 10;
 
 /**
  * Represents a token with its position in the source text.
@@ -331,4 +341,63 @@ export function getDiagnosticsForDocument(
   }
 
   return diagnostics;
+}
+
+/**
+ * Creates a diagnostic from a ParseError.
+ * This function converts errors thrown by the parser/tokenizer into diagnostics
+ * that can be displayed to the user.
+ */
+export function createDiagnosticFromParseError(
+  textDocument: TextDocument,
+  error: ParseError
+): Diagnostic {
+  const position = error.context.position;
+  let startOffset = 0;
+  let endOffset = textDocument.getText().length;
+
+  if (position) {
+    // Convert line/column to offset
+    startOffset = textDocument.offsetAt({
+      line: position.line - 1,  // ParseError uses 1-based line numbers
+      character: position.column - 1 // ParseError uses 1-based column numbers
+    });
+    // Highlight a fixed-length region from the error position
+    endOffset = Math.min(startOffset + ERROR_HIGHLIGHT_LENGTH, textDocument.getText().length);
+  }
+
+  const range: Range = {
+    start: textDocument.positionAt(startOffset),
+    end: textDocument.positionAt(endOffset)
+  };
+
+  return {
+    range,
+    severity: DiagnosticSeverity.Error,
+    message: error.message,
+    source: 'expr-eval'
+  };
+}
+
+/**
+ * Creates a diagnostic from a generic Error.
+ * This function handles errors thrown by the parser that are not ParseError instances.
+ * Since these errors don't have position information, the diagnostic highlights the whole text.
+ */
+export function createDiagnosticFromError(
+  textDocument: TextDocument,
+  error: Error
+): Diagnostic {
+  const text = textDocument.getText();
+  const range: Range = {
+    start: textDocument.positionAt(0),
+    end: textDocument.positionAt(text.length)
+  };
+
+  return {
+    range,
+    severity: DiagnosticSeverity.Error,
+    message: error.message,
+    source: 'expr-eval'
+  };
 }

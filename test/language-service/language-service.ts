@@ -829,5 +829,164 @@ describe('Language Service', () => {
       const diagnostics = ls.getDiagnostics({ textDocument: doc });
       expect(diagnostics).toEqual([]);
     });
+
+    // Extended diagnostics tests for syntax errors
+    // These tests verify that parser errors are properly converted to diagnostics
+    describe('syntax error diagnostics', () => {
+      it('should detect unclosed string literal with double quotes', () => {
+        const text = '"hello world';
+        const doc = TextDocument.create('file://test', 'plaintext', 1, text);
+        const diagnostics = ls.getDiagnostics({ textDocument: doc });
+
+        expect(diagnostics.length).toBeGreaterThanOrEqual(1);
+        // Parser reports this as 'Unknown character' since unclosed string is not tokenized
+        const stringDiag = diagnostics.find(d => d.message.includes('Unknown character'));
+        expect(stringDiag).toBeDefined();
+        expect(stringDiag?.severity).toBe(DiagnosticSeverity.Error);
+      });
+
+      it('should detect unclosed string literal with single quotes', () => {
+        const text = "'hello world";
+        const doc = TextDocument.create('file://test', 'plaintext', 1, text);
+        const diagnostics = ls.getDiagnostics({ textDocument: doc });
+
+        expect(diagnostics.length).toBeGreaterThanOrEqual(1);
+        // Parser reports this as 'Unknown character' since unclosed string is not tokenized
+        const stringDiag = diagnostics.find(d => d.message.includes('Unknown character'));
+        expect(stringDiag).toBeDefined();
+      });
+
+      it('should detect unclosed parenthesis', () => {
+        const text = '(1 + 2';
+        const doc = TextDocument.create('file://test', 'plaintext', 1, text);
+        const diagnostics = ls.getDiagnostics({ textDocument: doc });
+
+        expect(diagnostics.length).toBeGreaterThanOrEqual(1);
+        // Parser expects closing parenthesis
+        const parenDiag = diagnostics.find(d => d.message.includes('Expected )'));
+        expect(parenDiag).toBeDefined();
+      });
+
+      it('should detect unclosed bracket', () => {
+        const text = '[1, 2, 3';
+        const doc = TextDocument.create('file://test', 'plaintext', 1, text);
+        const diagnostics = ls.getDiagnostics({ textDocument: doc });
+
+        expect(diagnostics.length).toBeGreaterThanOrEqual(1);
+        // Parser reports unexpected end of input
+        const bracketDiag = diagnostics.find(d => d.message.includes('Unexpected token'));
+        expect(bracketDiag).toBeDefined();
+      });
+
+      it('should detect unclosed brace', () => {
+        const text = '{a: 1, b: 2';
+        const doc = TextDocument.create('file://test', 'plaintext', 1, text);
+        const diagnostics = ls.getDiagnostics({ textDocument: doc });
+
+        expect(diagnostics.length).toBeGreaterThanOrEqual(1);
+        // Parser reports invalid object definition
+        const braceDiag = diagnostics.find(d => d.message.includes('invalid object definition'));
+        expect(braceDiag).toBeDefined();
+      });
+
+      it('should detect unexpected closing parenthesis', () => {
+        const text = '1 + 2)';
+        const doc = TextDocument.create('file://test', 'plaintext', 1, text);
+        const diagnostics = ls.getDiagnostics({ textDocument: doc });
+
+        expect(diagnostics.length).toBeGreaterThanOrEqual(1);
+        // Parser expects EOF but found )
+        const parenDiag = diagnostics.find(d => d.message.includes('Expected EOF'));
+        expect(parenDiag).toBeDefined();
+      });
+
+      it('should detect unexpected closing bracket', () => {
+        const text = '1 + 2]';
+        const doc = TextDocument.create('file://test', 'plaintext', 1, text);
+        const diagnostics = ls.getDiagnostics({ textDocument: doc });
+
+        expect(diagnostics.length).toBeGreaterThanOrEqual(1);
+        // Parser expects EOF but found ]
+        const bracketDiag = diagnostics.find(d => d.message.includes('Expected EOF'));
+        expect(bracketDiag).toBeDefined();
+      });
+
+      it('should detect unexpected closing brace', () => {
+        const text = '1 + 2}';
+        const doc = TextDocument.create('file://test', 'plaintext', 1, text);
+        const diagnostics = ls.getDiagnostics({ textDocument: doc });
+
+        expect(diagnostics.length).toBeGreaterThanOrEqual(1);
+        // Parser expects EOF but found }
+        const braceDiag = diagnostics.find(d => d.message.includes('Expected EOF'));
+        expect(braceDiag).toBeDefined();
+      });
+
+      it('should detect unclosed comment', () => {
+        const text = '1 + /* this is a comment 2';
+        const doc = TextDocument.create('file://test', 'plaintext', 1, text);
+        const diagnostics = ls.getDiagnostics({ textDocument: doc });
+
+        expect(diagnostics.length).toBeGreaterThanOrEqual(1);
+        // Parser reports unexpected end of input
+        const commentDiag = diagnostics.find(d => d.message.includes('Unexpected token'));
+        expect(commentDiag).toBeDefined();
+      });
+
+      it('should detect unknown character', () => {
+        const text = '1 @ 2';
+        const doc = TextDocument.create('file://test', 'plaintext', 1, text);
+        const diagnostics = ls.getDiagnostics({ textDocument: doc });
+
+        expect(diagnostics.length).toBeGreaterThanOrEqual(1);
+        const unknownCharDiag = diagnostics.find(d => d.message.includes('Unknown character'));
+        expect(unknownCharDiag).toBeDefined();
+      });
+
+      it('should not report errors for valid closed strings', () => {
+        const text = '"hello" + "world"';
+        const doc = TextDocument.create('file://test', 'plaintext', 1, text);
+        const diagnostics = ls.getDiagnostics({ textDocument: doc });
+        expect(diagnostics).toEqual([]);
+      });
+
+      it('should not report errors for valid closed brackets', () => {
+        const text = '(1 + 2) * [3, 4][0]';
+        const doc = TextDocument.create('file://test', 'plaintext', 1, text);
+        const diagnostics = ls.getDiagnostics({ textDocument: doc });
+        expect(diagnostics).toEqual([]);
+      });
+
+      it('should not report errors for valid closed comments', () => {
+        const text = '1 + /* comment */ 2';
+        const doc = TextDocument.create('file://test', 'plaintext', 1, text);
+        const diagnostics = ls.getDiagnostics({ textDocument: doc });
+        expect(diagnostics).toEqual([]);
+      });
+
+      it('should handle nested brackets correctly', () => {
+        const text = '((1 + 2) * (3 + 4))';
+        const doc = TextDocument.create('file://test', 'plaintext', 1, text);
+        const diagnostics = ls.getDiagnostics({ textDocument: doc });
+        expect(diagnostics).toEqual([]);
+      });
+
+      it('should handle escaped quotes in strings', () => {
+        const text = '"hello \\"world\\""';
+        const doc = TextDocument.create('file://test', 'plaintext', 1, text);
+        const diagnostics = ls.getDiagnostics({ textDocument: doc });
+        expect(diagnostics).toEqual([]);
+      });
+
+      it('should detect syntax errors in complex expressions', () => {
+        const text = '(1 + "unclosed';
+        const doc = TextDocument.create('file://test', 'plaintext', 1, text);
+        const diagnostics = ls.getDiagnostics({ textDocument: doc });
+
+        // Parser will report the first error it encounters (unknown character for unclosed string)
+        expect(diagnostics.length).toBeGreaterThanOrEqual(1);
+        expect(diagnostics[0].severity).toBe(DiagnosticSeverity.Error);
+      });
+    });
   });
 });
