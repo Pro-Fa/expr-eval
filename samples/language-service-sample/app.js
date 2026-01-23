@@ -161,12 +161,12 @@ function loadExampleFromUrl() {
     return false;
 }
 
-// Split pane resizing
+// Vertical resizing for bottom split (context/results)
 (function() {
-    const resizer = document.getElementById('resizer');
-    const leftPane = document.getElementById('leftPane');
-    const rightPane = document.getElementById('rightPane');
-    const mainContent = document.getElementById('mainContent');
+    const resizer = document.getElementById('verticalResizer');
+    const contextPane = document.getElementById('contextPane');
+    const resultsPane = document.getElementById('resultsPane');
+    const bottomArea = document.getElementById('bottomArea');
     let isResizing = false;
 
     resizer.addEventListener('mousedown', (e) => {
@@ -180,15 +180,15 @@ function loadExampleFromUrl() {
         if (!isResizing) return;
         e.preventDefault();
         
-        const containerRect = mainContent.getBoundingClientRect();
+        const containerRect = bottomArea.getBoundingClientRect();
         const containerWidth = containerRect.width;
         const resizerWidth = 6;
         
         let newLeftWidth = e.clientX - containerRect.left;
-        newLeftWidth = Math.max(containerWidth * 0.15, Math.min(containerWidth * 0.85, newLeftWidth));
+        newLeftWidth = Math.max(containerWidth * 0.2, Math.min(containerWidth * 0.8, newLeftWidth));
         
-        leftPane.style.width = newLeftWidth + 'px';
-        rightPane.style.width = (containerWidth - newLeftWidth - resizerWidth) + 'px';
+        const percentage = (newLeftWidth / containerWidth) * 100;
+        contextPane.style.width = percentage + '%';
     });
 
     document.addEventListener('mouseup', () => {
@@ -456,15 +456,17 @@ require(['vs/editor/editor.main'], function () {
         const resultEmpty = document.getElementById('resultEmpty');
         const errorMessage = document.getElementById('errorMessage');
         const errorDetails = document.getElementById('errorDetails');
-        const footer = document.getElementById('footer');
+        const resultsPane = document.getElementById('resultsPane');
 
         resultSuccess.classList.add('hidden');
         resultError.classList.remove('hidden');
         resultEmpty.classList.add('hidden');
 
         // Shake animation
-        footer.classList.add('error-shake');
-        setTimeout(() => footer.classList.remove('error-shake'), 300);
+        if (resultsPane) {
+            resultsPane.classList.add('error-shake');
+            setTimeout(() => resultsPane.classList.remove('error-shake'), 300);
+        }
 
         errorMessage.textContent = error.message;
 
