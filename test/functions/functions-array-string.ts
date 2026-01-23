@@ -28,6 +28,30 @@ describe('Array and String Functions TypeScript Test', function () {
     });
   });
 
+  describe('count(array)', function () {
+    it('should return zero with an empty array', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('count([])'), 0);
+    });
+    it('should work on a single-element array', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('count([5])'), 1);
+    });
+    it('should work on a multi-element array', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('count([1, 2, 3, 4])'), 4);
+      assert.strictEqual(parser.evaluate('count(["a", "b", "c"])'), 3);
+    });
+    it('should return undefined if the argument is undefined', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('count(undefined)'), undefined);
+    });
+    it('should count arrays containing undefined elements', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('count([1, undefined, 3])'), 3);
+    });
+  });
+
   describe('join(sep, array)', function () {
     it('should return an empty string on an empty array', function () {
       const parser = new Parser();

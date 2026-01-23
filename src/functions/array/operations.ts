@@ -85,3 +85,13 @@ export function sum(array: (number | undefined)[] | undefined): number | undefin
     return total + (value === undefined ? 0 : Number(value));
   }, 0);
 }
+
+export function count(array: any[] | undefined): number | undefined {
+  if (array === undefined) {
+    return undefined;
+  }
+  if (!Array.isArray(array)) {
+    throw new Error('Count argument is not an array');
+  }
+  return array.length;
+}

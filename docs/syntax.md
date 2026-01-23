@@ -118,11 +118,13 @@ Besides the "operator" functions, there are several pre-defined functions. You c
 | fac(n)        | n! (factorial of n: "n * (n-1) * (n-2) * … * 2 * 1") Deprecated. Use the ! operator instead. |
 | min(a,b,…)    | Get the smallest (minimum) number in the list. |
 | max(a,b,…)    | Get the largest (maximum) number in the list. |
+| clamp(x, min, max) | Clamps x to be within the range [min, max]. Returns min if x < min, max if x > max, otherwise x. |
 | hypot(a,b)    | Hypotenuse, i.e. the square root of the sum of squares of its arguments. |
 | pyt(a, b)     | Alias for hypot. |
 | pow(x, y)     | Equivalent to x^y. For consistency with JavaScript's Math object. |
 | atan2(y, x)   | Arc tangent of x/y. i.e. the angle between (0, 0) and (x, y) in radians. |
 | roundTo(x, n) | Rounds x to n places after the decimal point. |
+| count(a)      | Returns the number of items in an array. |
 | map(f, a)     | Array map: Pass each element of `a` the function `f`, and return an array of the results. |
 | fold(f, y, a) | Array fold: Fold/reduce array `a` into a single value, `y` by setting `y = f(y, x, index)` for each element `x` of the array. |
 | filter(f, a)  | Array filter: Return an array containing only the values from `a` where `f(x, index)` is `true`. |
