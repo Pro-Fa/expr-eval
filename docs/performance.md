@@ -1,5 +1,7 @@
 # Performance Testing Guide
 
+> **Audience:** Contributors working on expr-eval internals and performance optimization.
+
 This document explains how to run and interpret performance tests for the expr-eval library.
 
 ## Overview

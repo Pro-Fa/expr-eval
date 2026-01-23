@@ -89,3 +89,58 @@ Attempting to access these properties in variable names or member expressions wi
 parser.evaluate('x.__proto__', { x: {} });
 parser.evaluate('__proto__', { __proto__: {} });
 ```
+
+## Version 4.0.0
+
+### Concatenation Operator Changed from `||` to `|`
+
+**What Changed**: The `||` operator was repurposed for logical OR (JavaScript-style). A new `|` (pipe) operator was introduced for array and string concatenation. Additionally, the `&&` operator was added for logical AND.
+
+**Before (original expr-eval 2.x)**:
+```typescript
+// || was used for concatenation
+parser.evaluate('"hello" || " world"');  // "hello world"
+parser.evaluate('[1, 2] || [3, 4]');     // [1, 2, 3, 4]
+```
+
+**After (v4.0.0+)**:
+```typescript
+// | is now used for concatenation
+parser.evaluate('"hello" | " world"');   // "hello world"
+parser.evaluate('[1, 2] | [3, 4]');      // [1, 2, 3, 4]
+
+// || is now logical OR
+parser.evaluate('true || false');        // true
+parser.evaluate('false || true');        // true
+
+// && is logical AND (new)
+parser.evaluate('true && false');        // false
+parser.evaluate('true && true');         // true
+```
+
+**Migration Guide**:
+
+1. **Find concatenation usage**: Search your expressions for `||` used with strings or arrays
+2. **Replace with pipe**: Change `||` to `|` for concatenation operations
+3. **Review logical operations**: If you were using `or` keyword, you can now also use `||`
+
+### Package Renamed
+
+The package was renamed from `expr-eval` to `@pro-fa/expr-eval` and ported to TypeScript.
+
+```bash
+# Remove old package
+npm uninstall expr-eval
+
+# Install new package
+npm install @pro-fa/expr-eval
+```
+
+Update imports:
+```typescript
+// Before
+const { Parser } = require('expr-eval');
+
+// After
+import { Parser } from '@pro-fa/expr-eval';
+```

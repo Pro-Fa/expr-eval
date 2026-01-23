@@ -34,14 +34,14 @@ import {
   valueTypeName,
   extractPathPrefix,
   makeTokenStream,
-  iterateTokens
+  iterateTokens,
+  TokenSpan
 } from './ls-utils';
 import { pathVariableCompletions, tryVariableHoverUsingSpans } from './variable-utils';
 import {
   getDiagnosticsForDocument,
   createDiagnosticFromParseError,
-  createDiagnosticFromError,
-  TokenSpan
+  createDiagnosticFromError
 } from './diagnostics';
 import { ParseError } from '../types/errors';
 
@@ -336,7 +336,7 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
     try {
       const ts = makeTokenStream(parser, text);
       spans = iterateTokens(ts);
-    } catch (error) {
+    } catch {
       // If tokenization fails, we already have a parse error diagnostic
       // Return early since we can't do function argument checking without tokens
       return diagnostics;

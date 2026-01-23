@@ -1,7 +1,7 @@
 /**
  * Diagnostics module for the language service.
  * Provides function argument count validation and syntax error detection.
- * 
+ *
  * This module leverages the existing parser infrastructure for error detection,
  * avoiding duplication of tokenization and parsing logic.
  */
@@ -20,21 +20,13 @@ import type { TextDocument } from 'vscode-languageserver-textdocument';
 import type { GetDiagnosticsParams, ArityInfo } from './language-service.types';
 import { FunctionDetails } from './language-service.models';
 import { ParseError } from '../types/errors';
+import type { TokenSpan } from './ls-utils';
 
 /**
  * Length of the error highlight range when position is known but token length is not.
  * Used to visually indicate the location of an error in the source text.
  */
 const ERROR_HIGHLIGHT_LENGTH = 10;
-
-/**
- * Represents a token with its position in the source text.
- */
-export interface TokenSpan {
-  token: Token;
-  start: number;
-  end: number;
-}
 
 /**
  * State used while counting function arguments.
