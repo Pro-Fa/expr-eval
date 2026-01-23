@@ -14,15 +14,17 @@ export function add(a: any, b: any): any {
     return a + b;
   }
 
-  // If both values are strings and at least one of them is a non-number
-  // then we want to concatenate the strings.
-  if (typeof a === 'string' && typeof b === 'string') {
+  // If one of the values is a string, try to add or else concatenate.
+  if (typeof a === 'string' || typeof b === 'string') {
     const numA = Number(a);
     const numB = Number(b);
 
     if (isNaN(numA) || isNaN(numB)) {
       return `${a}${b}`;
     }
+
+    // If both values can be converted to numbers then we want to add the numbers.
+    return numA + numB;
   }
 
   // If both values are arrays then we want to concatenate the arrays.
@@ -38,11 +40,6 @@ export function add(a: any, b: any): any {
     !Array.isArray(b)
   ) {
     return { ...a, ...b };
-  }
-
-  // If both values can be converted to numbers then we want to add the numbers.
-  if (!isNaN(Number(a)) && !isNaN(Number(b))) {
-    return Number(a) + Number(b);
   }
 
   // Otherwise return an error indicating that the values of mixed types cannot be added.
