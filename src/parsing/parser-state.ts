@@ -1,5 +1,5 @@
 // cSpell:words TEOF TNUMBER TSTRING TCONST TPAREN TBRACKET TCOMMA TNAME TSEMICOLON TUNDEFINED TKEYWORD TBRACE
-// cSpell:words ISCALAR IVAR IFUNCALL IEXPREVAL IMEMBER IARRAY
+// cSpell:words ISCALAR IVAR IFUNCALL IEXPREVAL IMEMBER IARRAY IARROW
 // cSpell:words IUNDEFINED ICASEMATCH ICASECOND IWHENCOND IWHENMATCH ICASEELSE IPROPERTY
 // cSpell:words IOBJECT IOBJECTEND
 
@@ -7,7 +7,7 @@ import {
   TOP, TNUMBER, TSTRING, TPAREN, TBRACKET, TCOMMA, TNAME, TSEMICOLON, TEOF, TKEYWORD, TBRACE, Token, TokenType,
   TCONST
 } from './token.js';
-import { Instruction, ISCALAR, IVAR, IFUNCALL, IMEMBER, IARRAY, IUNDEFINED, binaryInstruction, unaryInstruction, IWHENMATCH, ICASEMATCH, ICASEELSE, ICASECOND, IWHENCOND, IPROPERTY, IOBJECT, IOBJECTEND, InstructionType } from './instruction.js';
+import { Instruction, ISCALAR, IVAR, IFUNCALL, IMEMBER, IARRAY, IUNDEFINED, binaryInstruction, unaryInstruction, IWHENMATCH, ICASEMATCH, ICASEELSE, ICASECOND, IWHENCOND, IPROPERTY, IOBJECT, IOBJECTEND, InstructionType, IVARNAME, IEXPR, IARROW } from './instruction.js';
 import contains from '../core/contains.js';
 import { TokenStream } from './token-stream.js';
 import { ParseError, AccessError } from '../types/errors.js';
@@ -119,11 +119,21 @@ export class ParserState {
         // undefined is a reserved work that evaluates to JavaScript undefined.
         instr.push(new Instruction(IUNDEFINED));
       } else {
-        instr.push(new Instruction(IVAR, this.current!.value));
+        // Check if this is a single-parameter arrow function: x => expr
+        if (this.nextToken!.type === TOP && this.nextToken!.value === '=>') {
+          this.parseArrowFunctionFromParameter(instr, this.current!.value as string);
+        } else {
+          instr.push(new Instruction(IVAR, this.current!.value));
+        }
       }
     } else if (this.accept(TNUMBER) || this.accept(TSTRING) || this.accept(TCONST)) {
       instr.push(new Instruction(ISCALAR, this.current!.value));
     } else if (this.accept(TPAREN, '(')) {
+      // Check if this is a multi-parameter arrow function: (x, y) => expr
+      if (this.tryParseArrowFunction(instr)) {
+        // Arrow function was parsed successfully
+        return;
+      }
       this.parseExpression(instr);
       this.expect(TPAREN, ')');
     } else if (this.accept(TBRACE, '{')) {
@@ -148,6 +158,136 @@ export class ParserState {
         }
       );
     }
+  }
+
+  /**
+   * Parses an arrow function when we already have a single parameter name.
+   * Called when we detect: `paramName =>` pattern
+   */
+  private parseArrowFunctionFromParameter(instr: Instruction[], paramName: string): void {
+    // Validate that arrow functions are enabled
+    if (!this.parser.isOperatorEnabled('=>')) {
+      const coords = this.tokens.getCoordinates();
+      throw new ParseError(
+        'Arrow function syntax is not permitted',
+        {
+          position: { line: coords.line, column: coords.column },
+          expression: this.tokens.expression
+        }
+      );
+    }
+
+    // Consume the '=>' operator
+    this.expect(TOP, '=>');
+
+    // Parse the function body expression. We use parseConditionalExpression instead of
+    // parseExpression because arrow function bodies should be single expressions and
+    // should NOT consume semicolons. The semicolon terminates the arrow function
+    // definition, allowing patterns like: `fn = x => x * 2; map(fn, arr)`
+    // If we used parseExpression, the semicolon and subsequent statements would be
+    // incorrectly included in the arrow function body.
+    const bodyInstr: Instruction[] = [];
+    this.parseConditionalExpression(bodyInstr);
+
+    // Build the arrow function: push param name, body expression, and IARROW instruction
+    instr.push(new Instruction(IVARNAME, paramName));
+    instr.push(new Instruction(IEXPR, bodyInstr));
+    instr.push(new Instruction(IARROW, 1));
+  }
+
+  /**
+   * Attempts to parse an arrow function after seeing '('.
+   * Returns true if it successfully parsed an arrow function, false otherwise.
+   * Uses lookahead to detect arrow function syntax without consuming tokens on failure.
+   */
+  private tryParseArrowFunction(instr: Instruction[]): boolean {
+    // Save current position for backtracking
+    this.save();
+
+    // Try to parse parameter list
+    const params: string[] = [];
+
+    // Check for empty parameter list: () => expr
+    if (this.accept(TPAREN, ')')) {
+      // Check if followed by =>
+      if (this.accept(TOP, '=>')) {
+        // Validate that arrow functions are enabled
+        if (!this.parser.isOperatorEnabled('=>')) {
+          this.restore();
+          return false;
+        }
+        // Parse the function body
+        const bodyInstr: Instruction[] = [];
+        this.parseExpression(bodyInstr);
+
+        // Build the arrow function with no parameters
+        instr.push(new Instruction(IEXPR, bodyInstr));
+        instr.push(new Instruction(IARROW, 0));
+        return true;
+      }
+      // Not an arrow function, restore and return false
+      this.restore();
+      return false;
+    }
+
+    // Try to parse comma-separated parameter names
+    if (!this.accept(TNAME)) {
+      // Not a parameter list, restore and return false
+      this.restore();
+      return false;
+    }
+    params.push(this.current!.value as string);
+
+    // Parse additional parameters separated by commas
+    while (this.accept(TCOMMA)) {
+      if (!this.accept(TNAME)) {
+        // Invalid parameter, restore and return false
+        this.restore();
+        return false;
+      }
+      params.push(this.current!.value as string);
+    }
+
+    // Expect closing parenthesis
+    if (!this.accept(TPAREN, ')')) {
+      // Not a parameter list, restore and return false
+      this.restore();
+      return false;
+    }
+
+    // Check for arrow operator
+    if (!this.accept(TOP, '=>')) {
+      // Not an arrow function, restore and return false
+      this.restore();
+      return false;
+    }
+
+    // Validate that arrow functions are enabled
+    if (!this.parser.isOperatorEnabled('=>')) {
+      const coords = this.tokens.getCoordinates();
+      throw new ParseError(
+        'Arrow function syntax is not permitted',
+        {
+          position: { line: coords.line, column: coords.column },
+          expression: this.tokens.expression
+        }
+      );
+    }
+
+    // Parse the function body expression. We use parseConditionalExpression instead of
+    // parseExpression because arrow function bodies should be single expressions and
+    // should NOT consume semicolons. This allows patterns like: `fn = (a, b) => a + b; map(fn, arr)`
+    const bodyInstr: Instruction[] = [];
+    this.parseConditionalExpression(bodyInstr);
+
+    // Build the arrow function: push param names, body expression, and IARROW instruction
+    for (const param of params) {
+      instr.push(new Instruction(IVARNAME, param));
+    }
+    instr.push(new Instruction(IEXPR, bodyInstr));
+    instr.push(new Instruction(IARROW, params.length));
+
+    return true;
   }
 
   parseExpression(instr: Instruction[]): void {

@@ -33,6 +33,8 @@ export const IVARNAME = 'IVARNAME' as const;
 export const IFUNCALL = 'IFUNCALL' as const;
 /** Function definition instruction */
 export const IFUNDEF = 'IFUNDEF' as const;
+/** Arrow function instruction (anonymous inline function) */
+export const IARROW = 'IARROW' as const;
 /** Expression instruction (for lazy evaluation) */
 export const IEXPR = 'IEXPR' as const;
 /** Expression evaluator instruction (compiled expression) */
@@ -74,6 +76,7 @@ export type InstructionType =
   | typeof IVARNAME
   | typeof IFUNCALL
   | typeof IFUNDEF
+  | typeof IARROW
   | typeof IEXPR
   | typeof IEXPREVAL
   | typeof IMEMBER
@@ -129,6 +132,11 @@ export interface FunctionCallInstruction {
 
 export interface FunctionDefInstruction {
   type: typeof IFUNDEF;
+  value: number; // parameter count
+}
+
+export interface ArrowFunctionInstruction {
+  type: typeof IARROW;
   value: number; // parameter count
 }
 
@@ -212,6 +220,7 @@ export type TypedInstruction =
   | VarNameInstruction
   | FunctionCallInstruction
   | FunctionDefInstruction
+  | ArrowFunctionInstruction
   | ExpressionInstruction
   | ExpressionEvalInstruction
   | MemberInstruction
@@ -268,6 +277,8 @@ export class Instruction {
         return 'CALL ' + this.value;
       case IFUNDEF:
         return 'DEF ' + this.value;
+      case IARROW:
+        return 'ARROW ' + this.value;
       case IARRAY:
         return 'ARRAY ' + this.value;
       case IMEMBER:
