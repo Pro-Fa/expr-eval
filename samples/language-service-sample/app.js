@@ -161,12 +161,12 @@ function loadExampleFromUrl() {
     return false;
 }
 
-// Split pane resizing
+// Vertical resizing for bottom split (context/results)
 (function() {
-    const resizer = document.getElementById('resizer');
-    const leftPane = document.getElementById('leftPane');
-    const rightPane = document.getElementById('rightPane');
-    const mainContent = document.getElementById('mainContent');
+    const resizer = document.getElementById('verticalResizer');
+    const contextPane = document.getElementById('contextPane');
+    const resultsPane = document.getElementById('resultsPane');
+    const bottomArea = document.getElementById('bottomArea');
     let isResizing = false;
 
     resizer.addEventListener('mousedown', (e) => {
@@ -180,15 +180,15 @@ function loadExampleFromUrl() {
         if (!isResizing) return;
         e.preventDefault();
         
-        const containerRect = mainContent.getBoundingClientRect();
+        const containerRect = bottomArea.getBoundingClientRect();
         const containerWidth = containerRect.width;
         const resizerWidth = 6;
         
         let newLeftWidth = e.clientX - containerRect.left;
-        newLeftWidth = Math.max(containerWidth * 0.15, Math.min(containerWidth * 0.85, newLeftWidth));
+        newLeftWidth = Math.max(containerWidth * 0.2, Math.min(containerWidth * 0.8, newLeftWidth));
         
-        leftPane.style.width = newLeftWidth + 'px';
-        rightPane.style.width = (containerWidth - newLeftWidth - resizerWidth) + 'px';
+        const percentage = (newLeftWidth / containerWidth) * 100;
+        contextPane.style.width = percentage + '%';
     });
 
     document.addEventListener('mouseup', () => {
@@ -417,6 +417,24 @@ require(['vs/editor/editor.main'], function () {
         highlightDecorations = expressionEditor.deltaDecorations(highlightDecorations, decorations);
     }
 
+    // Syntax highlight JSON
+    function syntaxHighlightJson(json) {
+        if (typeof json !== 'string') {
+            json = JSON.stringify(json, null, 2);
+        }
+        json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        return json.replace(/("+[^"]*"+)(:)?/g, function(match, p1, p2) {
+            let cls = 'json-key';
+            if (!p2) {
+                cls = 'json-string';
+            }
+            return '<span class="' + cls + '">' + p1 + '</span>' + (p2 || '');
+        })
+        .replace(/: (true|false)/g, ': <span class="json-boolean">$1</span>')
+        .replace(/: (null)/g, ': <span class="json-null">$1</span>')
+        .replace(/: (-?\d+\.?\d*)/g, ': <span class="json-number">$1</span>');
+    }
+
     // Result display functions
     function showResult(result) {
         const resultSuccess = document.getElementById('resultSuccess');
@@ -432,21 +450,42 @@ require(['vs/editor/editor.main'], function () {
         // Format the result
         let displayValue;
         let typeInfo;
+        let isJson = false;
+        
         if (result === null) {
-            displayValue = 'null';
+            displayValue = '<span class="json-null">null</span>';
             typeInfo = 'Type: null';
+            isJson = true;
         } else if (result === undefined) {
-            displayValue = 'undefined';
+            displayValue = '<span class="json-null">undefined</span>';
             typeInfo = 'Type: undefined';
+            isJson = true;
         } else if (typeof result === 'object') {
-            displayValue = JSON.stringify(result, null, 2);
+            displayValue = syntaxHighlightJson(result);
             typeInfo = Array.isArray(result) ? `Type: array (${result.length} items)` : 'Type: object';
+            isJson = true;
+        } else if (typeof result === 'boolean') {
+            displayValue = `<span class="json-boolean">${result}</span>`;
+            typeInfo = 'Type: boolean';
+            isJson = true;
+        } else if (typeof result === 'number') {
+            displayValue = `<span class="json-number">${result}</span>`;
+            typeInfo = 'Type: number';
+            isJson = true;
+        } else if (typeof result === 'string') {
+            displayValue = `<span class="json-string">"${result}"</span>`;
+            typeInfo = 'Type: string';
+            isJson = true;
         } else {
             displayValue = String(result);
             typeInfo = `Type: ${typeof result}`;
         }
 
-        resultValue.textContent = displayValue;
+        if (isJson) {
+            resultValue.innerHTML = displayValue;
+        } else {
+            resultValue.textContent = displayValue;
+        }
         resultType.textContent = typeInfo;
     }
 
@@ -456,15 +495,17 @@ require(['vs/editor/editor.main'], function () {
         const resultEmpty = document.getElementById('resultEmpty');
         const errorMessage = document.getElementById('errorMessage');
         const errorDetails = document.getElementById('errorDetails');
-        const footer = document.getElementById('footer');
+        const resultsPane = document.getElementById('resultsPane');
 
         resultSuccess.classList.add('hidden');
         resultError.classList.remove('hidden');
         resultEmpty.classList.add('hidden');
 
         // Shake animation
-        footer.classList.add('error-shake');
-        setTimeout(() => footer.classList.remove('error-shake'), 300);
+        if (resultsPane) {
+            resultsPane.classList.add('error-shake');
+            setTimeout(() => resultsPane.classList.remove('error-shake'), 300);
+        }
 
         errorMessage.textContent = error.message;
 
