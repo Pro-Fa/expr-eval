@@ -105,6 +105,36 @@ npm run bench:memory      # Memory usage
 
 See [docs/performance.md](docs/performance.md) for detailed performance documentation.
 
+## Serving Documentation Locally
+
+The documentation can be served locally using [MkDocs](https://www.mkdocs.org/) with the [Material theme](https://squidfunk.github.io/mkdocs-material/).
+
+### Prerequisites
+
+Install MkDocs Material (requires Python):
+
+```bash
+pip install mkdocs-material
+```
+
+### Serve Documentation
+
+```bash
+# Start local documentation server
+mkdocs serve
+```
+
+This will start a local server at `http://127.0.0.1:8000` with live reload.
+
+### Build Static Site
+
+```bash
+# Build static HTML files
+mkdocs build
+```
+
+The static site will be generated in the `site/` directory.
+
 ## License
 
 See [LICENSE.txt](LICENSE.txt) for license information.

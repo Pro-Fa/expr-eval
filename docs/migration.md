@@ -189,6 +189,6 @@ import { Parser, Expression, Value, Values } from '@pro-fa/expr-eval';
 
 If you encounter issues during migration:
 
-1. Check the [BREAKING_CHANGES.md](BREAKING_CHANGES.md) for detailed breaking change information
-2. Review the [documentation](docs/) for the feature you're using
+1. Check the [Breaking Changes](breaking-changes.md) for detailed breaking change information
+2. Review the documentation for the feature you're using
 3. Open an issue on GitHub with a minimal reproduction case
