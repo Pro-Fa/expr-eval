@@ -180,8 +180,12 @@ export class ParserState {
     // Consume the '=>' operator
     this.expect(TOP, '=>');
 
-    // Parse the function body expression (use parseConditionalExpression to avoid
-    // consuming semicolons - arrow function bodies should be single expressions)
+    // Parse the function body expression. We use parseConditionalExpression instead of
+    // parseExpression because arrow function bodies should be single expressions and
+    // should NOT consume semicolons. The semicolon terminates the arrow function
+    // definition, allowing patterns like: `fn = x => x * 2; map(fn, arr)`
+    // If we used parseExpression, the semicolon and subsequent statements would be
+    // incorrectly included in the arrow function body.
     const bodyInstr: Instruction[] = [];
     this.parseConditionalExpression(bodyInstr);
 
@@ -270,8 +274,9 @@ export class ParserState {
       );
     }
 
-    // Parse the function body (use parseConditionalExpression to avoid
-    // consuming semicolons - arrow function bodies should be single expressions)
+    // Parse the function body expression. We use parseConditionalExpression instead of
+    // parseExpression because arrow function bodies should be single expressions and
+    // should NOT consume semicolons. This allows patterns like: `fn = (a, b) => a + b; map(fn, arr)`
     const bodyInstr: Instruction[] = [];
     this.parseConditionalExpression(bodyInstr);
 

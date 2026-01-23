@@ -536,6 +536,10 @@ export class TokenStream {
    * Returns true if arrow operator was matched, false otherwise
    */
   private tryMatchArrowOperator(): boolean {
+    // Check bounds before accessing the next character
+    if (this.pos + 1 >= this.expression.length) {
+      return false;
+    }
     if (this.expression.charAt(this.pos + 1) === '>') {
       if (!this.isOperatorEnabled('=>')) {
         return false;
