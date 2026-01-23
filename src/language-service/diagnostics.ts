@@ -1,6 +1,6 @@
 /**
  * Diagnostics module for the language service.
- * Provides function argument count validation.
+ * Provides function argument count validation and syntax error detection.
  */
 
 import {
@@ -16,6 +16,7 @@ import { DiagnosticSeverity } from 'vscode-languageserver-types';
 import type { TextDocument } from 'vscode-languageserver-textdocument';
 import type { GetDiagnosticsParams, ArityInfo } from './language-service.types';
 import { FunctionDetails } from './language-service.models';
+import { ParseError } from '../types/errors';
 
 /**
  * Represents a token with its position in the source text.
@@ -328,6 +329,324 @@ export function getDiagnosticsForDocument(
     if (diagnostic) {
       diagnostics.push(diagnostic);
     }
+  }
+
+  return diagnostics;
+}
+
+/**
+ * Creates a diagnostic from a ParseError.
+ */
+export function createDiagnosticFromParseError(
+  textDocument: TextDocument,
+  error: ParseError
+): Diagnostic {
+  const position = error.context.position;
+  let startOffset = 0;
+  let endOffset = textDocument.getText().length;
+
+  if (position) {
+    // Convert line/column to offset
+    startOffset = textDocument.offsetAt({
+      line: position.line - 1,  // ParseError uses 1-based line numbers
+      character: position.column - 1 // ParseError uses 1-based column numbers
+    });
+    // End at the end of the line or a few characters ahead
+    endOffset = Math.min(startOffset + 10, textDocument.getText().length);
+  }
+
+  const range: Range = {
+    start: textDocument.positionAt(startOffset),
+    end: textDocument.positionAt(endOffset)
+  };
+
+  return {
+    range,
+    severity: DiagnosticSeverity.Error,
+    message: error.message,
+    source: 'expr-eval'
+  };
+}
+
+/**
+ * Result of checking brackets in an expression.
+ */
+interface BracketCheckResult {
+  unclosedOpening: Array<{ char: string; offset: number }>;
+  unmatchedClosing: Array<{ char: string; offset: number }>;
+}
+
+/**
+ * Checks for unclosed or mismatched brackets, parentheses, and braces.
+ */
+function checkBrackets(text: string): BracketCheckResult {
+  const stack: Array<{ char: string; offset: number }> = [];
+  const unclosedOpening: Array<{ char: string; offset: number }> = [];
+  const unmatchedClosing: Array<{ char: string; offset: number }> = [];
+  const matchingBrackets: Record<string, string> = { ')': '(', ']': '[', '}': '{' };
+  const openBrackets = new Set(['(', '[', '{']);
+  const closeBrackets = new Set([')', ']', '}']);
+
+  let inString = false;
+  let stringChar = '';
+  let i = 0;
+
+  while (i < text.length) {
+    const char = text[i];
+
+    // Handle string literals
+    if (!inString && (char === '"' || char === "'")) {
+      inString = true;
+      stringChar = char;
+      i++;
+      continue;
+    }
+    if (inString) {
+      if (char === '\\' && i + 1 < text.length) {
+        i += 2; // Skip escaped character
+        continue;
+      }
+      if (char === stringChar) {
+        inString = false;
+      }
+      i++;
+      continue;
+    }
+
+    // Handle comments
+    if (char === '/' && i + 1 < text.length && text[i + 1] === '*') {
+      const endComment = text.indexOf('*/', i + 2);
+      if (endComment >= 0) {
+        i = endComment + 2;
+      } else {
+        i = text.length;
+      }
+      continue;
+    }
+
+    if (openBrackets.has(char)) {
+      stack.push({ char, offset: i });
+    } else if (closeBrackets.has(char)) {
+      const expected = matchingBrackets[char];
+      if (stack.length > 0 && stack[stack.length - 1].char === expected) {
+        stack.pop();
+      } else {
+        unmatchedClosing.push({ char, offset: i });
+      }
+    }
+    i++;
+  }
+
+  // Any remaining items in the stack are unclosed
+  unclosedOpening.push(...stack);
+
+  return { unclosedOpening, unmatchedClosing };
+}
+
+/**
+ * Creates diagnostics for bracket matching issues.
+ */
+export function getDiagnosticsForBrackets(
+  textDocument: TextDocument
+): Diagnostic[] {
+  const text = textDocument.getText();
+  const { unclosedOpening, unmatchedClosing } = checkBrackets(text);
+  const diagnostics: Diagnostic[] = [];
+
+  const bracketNames: Record<string, string> = {
+    '(': 'parenthesis',
+    ')': 'parenthesis',
+    '[': 'bracket',
+    ']': 'bracket',
+    '{': 'brace',
+    '}': 'brace'
+  };
+
+  for (const { char, offset } of unclosedOpening) {
+    const range: Range = {
+      start: textDocument.positionAt(offset),
+      end: textDocument.positionAt(offset + 1)
+    };
+    diagnostics.push({
+      range,
+      severity: DiagnosticSeverity.Error,
+      message: `Unclosed ${bracketNames[char]} '${char}'.`,
+      source: 'expr-eval'
+    });
+  }
+
+  for (const { char, offset } of unmatchedClosing) {
+    const range: Range = {
+      start: textDocument.positionAt(offset),
+      end: textDocument.positionAt(offset + 1)
+    };
+    diagnostics.push({
+      range,
+      severity: DiagnosticSeverity.Error,
+      message: `Unexpected closing ${bracketNames[char]} '${char}'.`,
+      source: 'expr-eval'
+    });
+  }
+
+  return diagnostics;
+}
+
+/**
+ * Result of checking for unclosed strings.
+ */
+interface UnclosedStringResult {
+  unclosedStrings: Array<{ quote: string; offset: number }>;
+}
+
+/**
+ * Checks for unclosed string literals.
+ */
+function checkUnclosedStrings(text: string): UnclosedStringResult {
+  const unclosedStrings: Array<{ quote: string; offset: number }> = [];
+  let i = 0;
+
+  while (i < text.length) {
+    const char = text[i];
+
+    // Handle comments (skip them)
+    if (char === '/' && i + 1 < text.length && text[i + 1] === '*') {
+      const endComment = text.indexOf('*/', i + 2);
+      if (endComment >= 0) {
+        i = endComment + 2;
+      } else {
+        i = text.length;
+      }
+      continue;
+    }
+
+    // Check for string start
+    if (char === '"' || char === "'") {
+      const quote = char;
+      const startOffset = i;
+      i++; // Move past the opening quote
+
+      let closed = false;
+      while (i < text.length) {
+        if (text[i] === '\\' && i + 1 < text.length) {
+          i += 2; // Skip escaped character
+          continue;
+        }
+        if (text[i] === quote) {
+          closed = true;
+          i++; // Move past the closing quote
+          break;
+        }
+        i++;
+      }
+
+      if (!closed) {
+        unclosedStrings.push({ quote, offset: startOffset });
+      }
+      continue;
+    }
+
+    i++;
+  }
+
+  return { unclosedStrings };
+}
+
+/**
+ * Creates diagnostics for unclosed string literals.
+ */
+export function getDiagnosticsForUnclosedStrings(
+  textDocument: TextDocument
+): Diagnostic[] {
+  const text = textDocument.getText();
+  const { unclosedStrings } = checkUnclosedStrings(text);
+  const diagnostics: Diagnostic[] = [];
+
+  for (const { quote, offset } of unclosedStrings) {
+    const range: Range = {
+      start: textDocument.positionAt(offset),
+      end: textDocument.positionAt(text.length)
+    };
+    diagnostics.push({
+      range,
+      severity: DiagnosticSeverity.Error,
+      message: `Unclosed string literal. Missing closing ${quote === '"' ? 'double quote' : 'single quote'}.`,
+      source: 'expr-eval'
+    });
+  }
+
+  return diagnostics;
+}
+
+/**
+ * Checks for unclosed comments.
+ */
+function checkUnclosedComments(text: string): Array<{ offset: number }> {
+  const unclosedComments: Array<{ offset: number }> = [];
+  let i = 0;
+  let inString = false;
+  let stringChar = '';
+
+  while (i < text.length) {
+    const char = text[i];
+
+    // Handle string literals (skip them to avoid false positives)
+    if (!inString && (char === '"' || char === "'")) {
+      inString = true;
+      stringChar = char;
+      i++;
+      continue;
+    }
+    if (inString) {
+      if (char === '\\' && i + 1 < text.length) {
+        i += 2;
+        continue;
+      }
+      if (char === stringChar) {
+        inString = false;
+      }
+      i++;
+      continue;
+    }
+
+    // Check for comment start
+    if (char === '/' && i + 1 < text.length && text[i + 1] === '*') {
+      const commentStart = i;
+      const endComment = text.indexOf('*/', i + 2);
+      if (endComment < 0) {
+        unclosedComments.push({ offset: commentStart });
+        break;
+      }
+      i = endComment + 2;
+      continue;
+    }
+
+    i++;
+  }
+
+  return unclosedComments;
+}
+
+/**
+ * Creates diagnostics for unclosed comments.
+ */
+export function getDiagnosticsForUnclosedComments(
+  textDocument: TextDocument
+): Diagnostic[] {
+  const text = textDocument.getText();
+  const unclosedComments = checkUnclosedComments(text);
+  const diagnostics: Diagnostic[] = [];
+
+  for (const { offset } of unclosedComments) {
+    const range: Range = {
+      start: textDocument.positionAt(offset),
+      end: textDocument.positionAt(text.length)
+    };
+    diagnostics.push({
+      range,
+      severity: DiagnosticSeverity.Error,
+      message: `Unclosed comment. Missing closing '*/' for block comment.`,
+      source: 'expr-eval'
+    });
   }
 
   return diagnostics;
