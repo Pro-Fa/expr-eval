@@ -13,7 +13,7 @@ Thank you for your interest in contributing to expr-eval! This document provides
 
 ```bash
 # Clone the repository
-git clone https://github.com/user/expr-eval.git
+git clone https://github.com/pro-fa/expr-eval.git
 cd expr-eval
 
 # Install dependencies
