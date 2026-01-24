@@ -5,9 +5,7 @@ Expression Evaluator
 
 ## Description
 
-**This is a modern TypeScript port of the expr-eval library, completely rewritten with contemporary build tools and development practices.** Originally based on [expr-eval 2.0.2](http://silentmatt.com/javascript-expression-evaluator/), this version has been restructured with a modular architecture, TypeScript support, and comprehensive testing using Vitest.
-
-Parses and evaluates mathematical expressions. It's a safer and more math-oriented alternative to using JavaScript's `eval` function for mathematical expressions.
+A versatile expression evaluation library that goes beyond mathematical expressions. It parses and evaluates expressions that can manipulate strings, objects, and arrays, providing a safer alternative to JavaScript's `eval` function.
 
 It has built-in support for common math operators and functions. Additionally, you can add your own JavaScript functions. Expressions can be evaluated directly, or compiled into native JavaScript functions.
 
@@ -29,6 +27,14 @@ console.log(expr.evaluate({ x: 3 })); // 7
 // or evaluate directly
 Parser.evaluate('6 * x', { x: 7 }); // 42
 ```
+
+## Playground Example
+
+Try out the expression evaluator and its language server capabilities directly in your browser at the [Playground](https://pro-fa.github.io/expr-eval/). The playground provides an interactive environment with:
+- Live expression evaluation
+- Code completions and IntelliSense
+- Syntax highlighting
+- Hover information for functions and variables
 
 ## Documentation
 
@@ -74,14 +80,6 @@ If you're integrating expr-eval into your project:
 - **SQL Case Blocks** - SQL-style CASE/WHEN/THEN/ELSE expressions
 - **Object Construction** - Create objects and arrays in expressions
 - **Language Service** - IDE integration with completions, hover info, and highlighting
-
-## Playground Example
-
-Try out the expression evaluator and its language server capabilities directly in your browser at the [Playground](https://pro-fa.github.io/expr-eval/). The playground provides an interactive environment with:
-- Live expression evaluation
-- Code completions and IntelliSense
-- Syntax highlighting
-- Hover information for functions and variables
 
 ## Running Tests
 
@@ -134,6 +132,12 @@ mkdocs build
 ```
 
 The static site will be generated in the `site/` directory.
+
+## Origins
+
+This library was originally based on [expr-eval 2.0.2](http://silentmatt.com/javascript-expression-evaluator/), but has been restructured with a modular architecture, TypeScript support, and comprehensive testing using Vitest.
+
+While the original expr-eval was focused on mathematical expressions, this library aims to be a tool for evaluating expressions that can manipulate strings, objects, and arrays.
 
 ## License
 
