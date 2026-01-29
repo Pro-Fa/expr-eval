@@ -1,6 +1,6 @@
 {
   "name": "@pro-fa/expr-eval",
-  "version": "6.2.0",
+  "version": "6.3.1",
   "description": "Mathematical expression evaluator",
   "keywords": [
     "expression",
