@@ -85,12 +85,20 @@ const expr = parser.parse('x * 2 + y');
 
 Returns an [Expression](expression.md) object with methods like `evaluate()`, `simplify()`, `variables()`, etc.
 
-### evaluate(expression: string, variables?: object)
+### evaluate(expression: string, variables?: object, resolver?: VariableResolver)
 
 Parse and immediately evaluate an expression.
 
 ```js
 parser.evaluate('x + y', { x: 2, y: 3 }); // 5
+```
+
+The optional `resolver` callback is a per-call [custom variable resolver](advanced-features.md#custom-variable-name-resolution). It is tried before `parser.resolve` when a variable is not found in `variables`.
+
+```js
+parser.evaluate('$a + $b', {}, (name) =>
+  name.startsWith('$') ? { value: lookup(name.substring(1)) } : undefined
+); // per-call resolver; parser.resolve is not mutated
 ```
 
 ## Static Methods
@@ -103,9 +111,9 @@ Static equivalent of `new Parser().parse(expression)`.
 const expr = Parser.parse('x + 1');
 ```
 
-### Parser.evaluate(expression: string, variables?: object)
+### Parser.evaluate(expression: string, variables?: object, resolver?: VariableResolver)
 
-Parse and immediately evaluate an expression. Equivalent to `Parser.parse(expr).evaluate(vars)`.
+Parse and immediately evaluate an expression. Equivalent to `Parser.parse(expr).evaluate(vars, resolver)`.
 
 ```js
 Parser.evaluate('6 * x', { x: 7 }); // 42
@@ -201,6 +209,8 @@ The `resolve` callback should return:
 - `{ alias: string }` - to redirect to another variable name
 - `{ value: any }` - to return a value directly
 - `undefined` - to use default behavior (throws error for unknown variables)
+
+For cases where different evaluations of the same parsed expression need different resolution logic, prefer passing a resolver directly to `Expression.evaluate(values, resolver)` or `parser.evaluate(expr, values, resolver)` instead of mutating `parser.resolve`. See [Per-Expression Variable Resolver](advanced-features.md#per-expression-variable-resolver).
 
 ## Advanced Configuration
 

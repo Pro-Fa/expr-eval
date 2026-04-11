@@ -73,6 +73,48 @@ parser.evaluate('$a + $b', {}); // 15
 - `{ value: any }` - Return a value directly
 - `undefined` - Use default behavior (throws error for unknown variables)
 
+### Per-Expression Variable Resolver
+
+`parser.resolve` is shared by every expression a parser produces. When you need different resolution logic for different evaluations — e.g. per-row, per-request, or per-tenant lookups — pass a resolver directly to `Expression.evaluate()` (or `parser.evaluate()`) instead of mutating `parser.resolve`. This lets a single parsed expression be reused across many calls without the cost of re-parsing or the hazards of shared mutable state.
+
+```js
+const parser = new Parser();
+const expr = parser.parse('$user.name + " is " + $user.age');
+
+// Same compiled expression, two different data sources, no parser mutation.
+expr.evaluate({}, (name) =>
+  name === '$user' ? { value: { name: 'Alice', age: 30 } } : undefined
+); // 'Alice is 30'
+
+expr.evaluate({}, (name) =>
+  name === '$user' ? { value: { name: 'Bob',   age: 25 } } : undefined
+); // 'Bob is 25'
+```
+
+The per-call resolver uses the same return shape as `parser.resolve` — `{ alias }`, `{ value }`, or `undefined` — and the resolution order during evaluation is:
+
+1. The `variables` object passed to `evaluate()`
+2. The per-call `resolver` (if provided)
+3. `parser.resolve` (the parser-level callback)
+4. Otherwise, a `VariableError` is thrown
+
+Because the per-call resolver falls through to `parser.resolve` on `undefined`, the two can be layered: a parser-level resolver can provide defaults or shared lookups, while per-call resolvers handle request-specific data.
+
+```js
+const parser = new Parser();
+
+// Parser-level: shared constants that never change
+parser.resolve = (name) =>
+  name === '$pi' ? { value: Math.PI } : undefined;
+
+// Per-call: request-specific data
+parser.parse('$pi * $radius ^ 2').evaluate({}, (name) =>
+  name === '$radius' ? { value: 5 } : undefined
+); // 78.539...
+```
+
+Both `Parser.evaluate(expr, variables, resolver)` and `Expression.evaluate(variables, resolver)` accept the resolver, and it propagates through nested constructs such as short-circuit `and`/`or`, the ternary `?:` operator, user-defined functions, and arrow functions.
+
 ## Type Conversion (as Operator)
 
 The `as` operator provides type conversion capabilities. **Disabled by default.**

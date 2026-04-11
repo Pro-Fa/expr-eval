@@ -3,7 +3,7 @@ import { TEOF } from './token.js';
 import { TokenStream } from './token-stream.js';
 import { ParserState } from './parser-state.js';
 import { Expression } from '../core/expression.js';
-import type { Value, VariableResolveResult, Values } from '../types/values.js';
+import type { Value, VariableResolveResult, VariableResolver, Values } from '../types/values.js';
 import type { Instruction } from './instruction.js';
 import type { OperatorFunction } from '../types/parser.js';
 import { atan2, condition, fac, filter, fold, gamma, hypot, indexOf, join, map, max, min, random, roundTo, sum, json, stringLength, isEmpty, stringContains, startsWith, endsWith, searchCount, trim, toUpper, toLower, toTitle, split, repeat, reverse, left, right, replace, replaceFirst, naturalSort, toNumber, toBoolean, padLeft, padRight, padBoth, slice, urlEncode, base64Encode, base64Decode, coalesceString, merge, keys, values, flatten, count, clamp, reduce, find, some, every, unique, distinct, isArray, isObject, isNumber, isString, isBoolean, isNull, isUndefined, isFunctionValue } from '../functions/index.js';
@@ -70,11 +70,6 @@ interface ParserOptions {
   allowMemberAccess?: boolean;
   operators?: Record<string, boolean>;
 }
-
-/**
- * Variable resolver function type for custom variable resolution
- */
-type VariableResolver = (token: string) => VariableResolveResult;
 
 export class Parser {
   public options: ParserOptions;
@@ -301,10 +296,12 @@ export class Parser {
 
   /**
    * Parses and immediately evaluates a mathematical expression.
-   * This is a convenience method equivalent to `parser.parse(expr).evaluate(variables)`.
+   * This is a convenience method equivalent to `parser.parse(expr).evaluate(variables, resolver)`.
    *
    * @param expr - The mathematical expression string to evaluate
    * @param variables - Optional object containing variable values
+   * @param resolver - Optional per-call variable resolver. Tried before the parser-level
+   *   resolver (if any) when a variable is not present in `variables`.
    * @returns The result of evaluating the expression
    * @throws {ParseError} When the expression contains syntax errors
    * @throws {VariableError} When the expression references undefined variables
@@ -315,8 +312,8 @@ export class Parser {
    * const result = parser.evaluate('2 + 3 * x', { x: 4 }); // Returns 14
    * ```
    */
-  evaluate(expr: string, variables?: Values): Value | Promise<Value> {
-    return this.parse(expr).evaluate(variables);
+  evaluate(expr: string, variables?: Values, resolver?: VariableResolver): Value | Promise<Value> {
+    return this.parse(expr).evaluate(variables, resolver);
   }
 
   private static readonly optionNameMap: Record<string, string> = {

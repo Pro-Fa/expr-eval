@@ -47,3 +47,10 @@ export interface VariableValue {
 }
 
 export type VariableResolveResult = VariableAlias | VariableValue | Value | undefined;
+
+/**
+ * Custom variable resolver callback signature.
+ * Given a variable name (as it appears in the expression), returns a resolution result
+ * or `undefined` to indicate that this resolver does not handle the variable.
+ */
+export type VariableResolver = (token: string) => VariableResolveResult;

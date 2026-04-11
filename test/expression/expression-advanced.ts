@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { Parser } from '../../index';
+import type { VariableResolver } from '../../index';
 
 describe('Expression Advanced Features TypeScript Test', () => {
   describe('function definitions', () => {
@@ -235,6 +236,110 @@ describe('Expression Advanced Features TypeScript Test', () => {
         }
       };
       expect(parser.evaluate('$b + $$b.c')).toBe(7);
+    });
+  });
+
+  describe('per-expression variable resolver', () => {
+    it('should resolve variables via a per-call resolver passed to Expression.evaluate', () => {
+      const parser = new Parser();
+      const data = { a: 5, b: 1 };
+      const resolver: VariableResolver = (token) =>
+        token.startsWith('$') ? { value: (data as any)[token.substring(1)] } : undefined;
+      expect(parser.parse('$a + $b').evaluate({}, resolver)).toBe(6);
+    });
+
+    it('should prefer the per-call resolver over the parser-level resolver', () => {
+      const parser = new Parser();
+      (parser as any).resolve = (token: string) =>
+        token === '$a' ? { value: 10 } : undefined;
+      const resolver: VariableResolver = (token) =>
+        token === '$a' ? { value: 1 } : undefined;
+      expect(parser.parse('$a').evaluate({}, resolver)).toBe(1);
+    });
+
+    it('should fall back to the parser-level resolver when the per-call resolver returns undefined', () => {
+      const parser = new Parser();
+      (parser as any).resolve = (token: string) =>
+        token === '$b' ? { value: 4 } : undefined;
+      const resolver: VariableResolver = (token) =>
+        token === '$a' ? { value: 3 } : undefined;
+      expect(parser.parse('$a + $b').evaluate({}, resolver)).toBe(7);
+    });
+
+    it('should prefer the values map over the per-call resolver', () => {
+      const parser = new Parser();
+      const resolver: VariableResolver = () => ({ value: 100 });
+      expect(parser.parse('a').evaluate({ a: 2 }, resolver)).toBe(2);
+    });
+
+    it('should support the { alias } shape in a per-call resolver', () => {
+      const parser = new Parser();
+      const obj = { variables: { a: 5, b: 1 } };
+      const resolver: VariableResolver = (token) =>
+        token === '$v' ? { alias: 'variables' } : undefined;
+      expect(parser.parse('$v.a + $v.b').evaluate(obj, resolver)).toBe(6);
+    });
+
+    it('should support the { value } shape in a per-call resolver', () => {
+      const parser = new Parser();
+      const data = { variables: { a: 5, b: 1 } };
+      const resolver: VariableResolver = (token) =>
+        token.startsWith('$') ? { value: (data.variables as any)[token.substring(1)] } : undefined;
+      expect(parser.parse('$a + $b').evaluate({}, resolver)).toBe(6);
+    });
+
+    it('should accept a resolver via the Parser.evaluate shortcut', () => {
+      const parser = new Parser();
+      const resolver: VariableResolver = (token) =>
+        token === '$a' ? { value: 42 } : undefined;
+      expect(parser.evaluate('$a + 1', {}, resolver)).toBe(43);
+    });
+
+    it('should throw a VariableError when neither resolver handles the variable', () => {
+      const parser = new Parser();
+      const resolver: VariableResolver = () => undefined;
+      expect(() => parser.parse('$missing').evaluate({}, resolver)).toThrow(/undefined variable: \$missing/);
+    });
+
+    it('should allow the same Expression to be evaluated with different per-call resolvers', () => {
+      const parser = new Parser();
+      const expression = parser.parse('$user.name');
+      const resolverA: VariableResolver = (token) =>
+        token === '$user' ? { value: { name: 'Alice' } } : undefined;
+      const resolverB: VariableResolver = (token) =>
+        token === '$user' ? { value: { name: 'Bob' } } : undefined;
+      expect(expression.evaluate({}, resolverA)).toBe('Alice');
+      expect(expression.evaluate({}, resolverB)).toBe('Bob');
+    });
+
+    it('should not leak the resolver across evaluations', () => {
+      const parser = new Parser();
+      const expression = parser.parse('$a');
+      const resolver: VariableResolver = () => ({ value: 9 });
+      expect(expression.evaluate({}, resolver)).toBe(9);
+      expect(() => expression.evaluate({})).toThrow(/undefined variable: \$a/);
+    });
+
+    it('should propagate the resolver through short-circuit and/or', () => {
+      const parser = new Parser();
+      const resolver: VariableResolver = (token) => {
+        if (token === '$t') return { value: true };
+        if (token === '$v') return { value: 7 };
+        return undefined;
+      };
+      expect(parser.parse('$t and $v').evaluate({}, resolver)).toBe(true);
+      expect(parser.parse('$t or $v').evaluate({}, resolver)).toBe(true);
+    });
+
+    it('should propagate the resolver through the ternary operator', () => {
+      const parser = new Parser();
+      const resolver: VariableResolver = (token) => {
+        if (token === '$cond') return { value: true };
+        if (token === '$a') return { value: 'yes' };
+        if (token === '$b') return { value: 'no' };
+        return undefined;
+      };
+      expect(parser.parse('$cond ? $a : $b').evaluate({}, resolver)).toBe('yes');
     });
   });
 

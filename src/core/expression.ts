@@ -9,6 +9,7 @@ import type {
   Value,
   SymbolOptions,
   VariableResolveResult,
+  VariableResolver,
   ReadonlyValues
 } from '../types/index.js';
 
@@ -95,6 +96,10 @@ export class Expression {
    * Evaluates the expression with the given variable values.
    *
    * @param values - Object containing variable values
+   * @param resolver - Optional per-call variable resolver. Tried before the parser-level
+   *   resolver (if any) when a variable is not present in `values`. Lets a single parsed
+   *   Expression be evaluated multiple times against different variable sources without
+   *   mutating parser state.
    * @returns The computed result of the expression
    * @throws {VariableError} When the expression references undefined variables
    * @throws {EvaluationError} When runtime evaluation fails
@@ -102,12 +107,18 @@ export class Expression {
    * ```typescript
    * const expr = parser.parse('2 + 3 * x');
    * const result = expr.evaluate({ x: 4 }); // Returns 14
+   *
+   * // Per-call resolver
+   * const expr2 = parser.parse('$a + $b');
+   * const result2 = expr2.evaluate({}, (t) =>
+   *   t.startsWith('$') ? { value: lookup(t.substring(1)) } : undefined
+   * );
    * ```
    */
-  evaluate(values?: ReadonlyValues): Value | Promise<Value> {
+  evaluate(values?: ReadonlyValues, resolver?: VariableResolver): Value | Promise<Value> {
     const safeValues = values || {};
 
-    return evaluate(this.tokens, this, safeValues);
+    return evaluate(this.tokens, this, safeValues, resolver);
   }
 
   /**

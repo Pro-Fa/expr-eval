@@ -24,6 +24,7 @@ export type {
   VariableAlias,
   VariableValue,
   VariableResolveResult,
+  VariableResolver,
   OperatorFunction
 } from './src/types/index.js';
 

@@ -8,7 +8,7 @@
 import { ISCALAR, IOP1, IOP2, IOP3, IVAR, IVARNAME, IFUNCALL, IFUNDEF, IARROW, IEXPR, IEXPREVAL, IMEMBER, IENDSTATEMENT, IARRAY, IUNDEFINED, ICASEMATCH, IWHENMATCH, ICASEELSE, ICASECOND, IWHENCOND, IOBJECT, IPROPERTY, IOBJECTEND } from '../parsing/instruction.js';
 import type { Instruction } from '../parsing/instruction.js';
 import type { Expression } from './expression.js';
-import type { Value, Values, VariableResolveResult } from '../types/values.js';
+import type { Value, Values, VariableResolveResult, VariableResolver } from '../types/values.js';
 import { VariableError } from '../types/errors.js';
 import { ExpressionValidator } from '../validation/expression-validator.js';
 
@@ -44,16 +44,17 @@ type EvaluationStack = any[];
  * of objects returned by the {@link Token} function.
  * @param expr The instance of the {@link Expression} class that invoked the evaluator.
  * @param values Input values provided to the expression.
+ * @param resolver Optional per-call variable resolver. Tried before the parser-level resolver.
  * @returns The return value is the expression result value or a promise that when resolved will contain
  * the expression result value.  A promise is only returned if a caller defined function returns a promise.
  */
-export default function evaluate(tokens: Instruction | Instruction[], expr: Expression, values: EvaluationValues): Value | Promise<Value> {
+export default function evaluate(tokens: Instruction | Instruction[], expr: Expression, values: EvaluationValues, resolver?: VariableResolver): Value | Promise<Value> {
   if (isExpressionEvaluator(tokens)) {
     return resolveExpression(tokens, values);
   }
 
   const nstack: EvaluationStack = [];
-  return runEvaluateLoop(tokens as Instruction[], expr, values, nstack);
+  return runEvaluateLoop(tokens as Instruction[], expr, values, nstack, 0, resolver);
 }
 
 /**
@@ -80,11 +81,11 @@ function isPromise(obj: any): obj is Promise<any> {
  * @returns The return value is the expression result value or a promise that when resolved will contain
  * the expression result value.  A promise is only returned if a caller defined function returns a promise.
  */
-function runEvaluateLoop(tokens: Instruction[], expr: Expression, values: EvaluationValues, nstack: EvaluationStack, startAt: number = 0): Value | Promise<Value> {
+function runEvaluateLoop(tokens: Instruction[], expr: Expression, values: EvaluationValues, nstack: EvaluationStack, startAt: number = 0, resolver?: VariableResolver): Value | Promise<Value> {
   const numTokens = tokens.length;
   for (let i = startAt; i < numTokens; i++) {
     const item = tokens[i];
-    evaluateExpressionToken(expr, values, item, nstack);
+    evaluateExpressionToken(expr, values, item, nstack, resolver);
     const last = nstack[nstack.length - 1];
     if (isPromise(last)) {
       // The only way a promise can get added to the stack is if a custom function was invoked that
@@ -96,7 +97,7 @@ function runEvaluateLoop(tokens: Instruction[], expr: Expression, values: Evalua
         nstack.push(resolvedValue);
         // ...with the stack updated with the resolved value from the promise we can call ourselves to
         // continue evaluating the expression.
-        return runEvaluateLoop(tokens, expr, values, nstack, i + 1);
+        return runEvaluateLoop(tokens, expr, values, nstack, i + 1, resolver);
       });
     }
   }
@@ -126,7 +127,7 @@ function resolveFinalValue(nstack: EvaluationStack, values: EvaluationValues): V
  * the {@link Token} function.
  * @param nstack The stack to use for expression evaluation.
  */
-function evaluateExpressionToken(expr: Expression, values: EvaluationValues, token: Instruction, nstack: EvaluationStack): void {
+function evaluateExpressionToken(expr: Expression, values: EvaluationValues, token: Instruction, nstack: EvaluationStack, resolver?: VariableResolver): void {
   let leftOperand: any, rightOperand: any, conditionValue: any;
   let operatorFunction: Function, functionArgs: any[], argumentCount: number;
 
@@ -139,12 +140,12 @@ function evaluateExpressionToken(expr: Expression, values: EvaluationValues, tok
 
     // Handle special short-circuit logical operators
     if (token.value === 'and') {
-      nstack.push(leftOperand ? !!evaluate(rightOperand, expr, values) : false);
+      nstack.push(leftOperand ? !!evaluate(rightOperand, expr, values, resolver) : false);
     } else if (token.value === 'or') {
-      nstack.push(leftOperand ? true : !!evaluate(rightOperand, expr, values));
+      nstack.push(leftOperand ? true : !!evaluate(rightOperand, expr, values, resolver));
     } else if (token.value === '=') {
       operatorFunction = expr.binaryOps[token.value];
-      nstack.push(operatorFunction(leftOperand, evaluate(rightOperand, expr, values), values));
+      nstack.push(operatorFunction(leftOperand, evaluate(rightOperand, expr, values, resolver), values));
     } else {
       operatorFunction = expr.binaryOps[token.value];
       nstack.push(operatorFunction(resolveExpression(leftOperand, values), resolveExpression(rightOperand, values)));
@@ -155,7 +156,7 @@ function evaluateExpressionToken(expr: Expression, values: EvaluationValues, tok
     conditionValue = nstack.pop();
 
     if (token.value === '?') {
-      nstack.push(evaluate(conditionValue ? trueValue : falseValue, expr, values));
+      nstack.push(evaluate(conditionValue ? trueValue : falseValue, expr, values, resolver));
     } else {
       operatorFunction = expr.ternaryOps[token.value];
       nstack.push(operatorFunction(
@@ -182,31 +183,21 @@ function evaluateExpressionToken(expr: Expression, values: EvaluationValues, tok
         valueResolved = true;
       } else {
         // We don't recognize the IVAR token.  Before throwing an error for an undefined variable we
-        // give the parser a shot at resolving the IVAR for us.  By default this callback will return
-        // undefined and fail to resolve, but the creator of the parser can replace the resolve callback
-        // with their own implementation to resolve variables.  That can return values that look like:
-        // { alias: "xxx" } - use xxx as the IVAR token instead of what was typed.
-        // { value: <something> } use <something> as the value for the variable.
-        const resolvedVariable: VariableResolveResult | undefined = expr.parser.resolve(variableName);
-        if (typeof resolvedVariable === 'object' && resolvedVariable && 'alias' in resolvedVariable && typeof resolvedVariable.alias === 'string') {
-          // The parser's resolver function returned { alias: "xxx" }, we want to use
-          // resolved.alias in place of token.value.
-          if (resolvedVariable.alias in values) {
-            const aliasValue = values[resolvedVariable.alias];
-            // Security: Validate that functions from context are allowed
-            ExpressionValidator.validateAllowedFunction(aliasValue, expr.functions, expr.toString());
-            nstack.push(aliasValue);
-            valueResolved = true;
-          }
-        } else if (typeof resolvedVariable === 'object' && resolvedVariable && 'value' in resolvedVariable) {
-          // The parser's resolver function returned { value: <something> }, use <something>
-          // as the value of the token.
-          const resolvedValue = resolvedVariable.value;
-          // Security: Validate that functions from context are allowed
-          ExpressionValidator.validateAllowedFunction(resolvedValue, expr.functions, expr.toString());
-          nstack.push(resolvedValue);
-          valueResolved = true;
+        // give custom resolvers a shot at resolving the IVAR for us.  Per-call resolvers (supplied to
+        // Expression.evaluate) take precedence over the parser-level resolver.  A resolver result can
+        // look like:
+        //   { alias: "xxx" } - use xxx as the IVAR token instead of what was typed.
+        //   { value: <something> } - use <something> as the value for the variable.
+        // Returning undefined means "I don't know this variable" and passes the attempt on to the
+        // next resolver in the chain.
+        let resolvedVariable: VariableResolveResult | undefined;
+        if (resolver) {
+          resolvedVariable = resolver(variableName);
         }
+        if (resolvedVariable === undefined) {
+          resolvedVariable = expr.parser.resolve(variableName);
+        }
+        valueResolved = applyResolvedVariable(resolvedVariable, values, expr, nstack);
       }
       if (!valueResolved) {
         throw new VariableError(
@@ -247,7 +238,7 @@ function evaluateExpressionToken(expr: Expression, values: EvaluationValues, tok
         for (let i = 0, len = functionParams.length; i < len; i++) {
           localScope[functionParams[i]] = functionArguments[i];
         }
-        return evaluate(expressionToEvaluate, expr, localScope);
+        return evaluate(expressionToEvaluate, expr, localScope, resolver);
       };
       // Set function name for debugging
       Object.defineProperty(userDefinedFunction, 'name', {
@@ -277,7 +268,7 @@ function evaluateExpressionToken(expr: Expression, values: EvaluationValues, tok
         for (let i = 0, len = functionParams.length; i < len; i++) {
           localScope[functionParams[i]] = functionArguments[i];
         }
-        return evaluate(expressionToEvaluate, expr, localScope);
+        return evaluate(expressionToEvaluate, expr, localScope, resolver);
       };
       // Set function name for debugging (anonymous arrow function)
       Object.defineProperty(arrowFunction, 'name', {
@@ -290,7 +281,7 @@ function evaluateExpressionToken(expr: Expression, values: EvaluationValues, tok
       return arrowFunction;
     })());
   } else if (type === IEXPR) {
-    nstack.push(createExpressionEvaluator(token, expr));
+    nstack.push(createExpressionEvaluator(token, expr, resolver));
   } else if (type === IEXPREVAL) {
     nstack.push(token);
   } else if (type === IMEMBER) {
@@ -389,16 +380,47 @@ function evaluateExpressionToken(expr: Expression, values: EvaluationValues, tok
   }
 }
 
-function createExpressionEvaluator(token: Instruction, expr: Expression): ExpressionEvaluator {
+function createExpressionEvaluator(token: Instruction, expr: Expression, resolver?: VariableResolver): ExpressionEvaluator {
   if (isExpressionEvaluator(token)) {
     return token;
   }
   return {
     type: IEXPREVAL,
     value: function (scope: EvaluationValues): Value | Promise<Value> {
-      return evaluate(token.value as Instruction[], expr, scope);
+      return evaluate(token.value as Instruction[], expr, scope, resolver);
     }
   };
+}
+
+/**
+ * Dispatches a {@link VariableResolveResult} onto the evaluation stack.
+ * Handles `{ alias }` and `{ value }` shapes, runs function allow-listing, and reports
+ * whether the variable was resolved so the caller can decide whether to throw.
+ */
+function applyResolvedVariable(
+  resolvedVariable: VariableResolveResult | undefined,
+  values: EvaluationValues,
+  expr: Expression,
+  nstack: EvaluationStack
+): boolean {
+  if (typeof resolvedVariable === 'object' && resolvedVariable && 'alias' in resolvedVariable && typeof resolvedVariable.alias === 'string') {
+    // Resolver returned { alias: "xxx" } - look xxx up in the values map.
+    if (resolvedVariable.alias in values) {
+      const aliasValue = values[resolvedVariable.alias];
+      ExpressionValidator.validateAllowedFunction(aliasValue, expr.functions, expr.toString());
+      nstack.push(aliasValue);
+      return true;
+    }
+    return false;
+  }
+  if (typeof resolvedVariable === 'object' && resolvedVariable && 'value' in resolvedVariable) {
+    // Resolver returned { value: <something> } - use <something> directly.
+    const resolvedValue = resolvedVariable.value;
+    ExpressionValidator.validateAllowedFunction(resolvedValue, expr.functions, expr.toString());
+    nstack.push(resolvedValue);
+    return true;
+  }
+  return false;
 }
 
 function isExpressionEvaluator(n: any): n is ExpressionEvaluator {

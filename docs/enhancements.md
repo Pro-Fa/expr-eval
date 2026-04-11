@@ -22,7 +22,7 @@ This TypeScript port adds the following features over the original library:
 ### Developer Integration Features
 
 - **Promise support** - Custom functions can return promises (async evaluation)
-- **Custom variable resolution** - `parser.resolve` callback for dynamic variable lookup
+- **Custom variable resolution** - `parser.resolve` callback for dynamic variable lookup, plus a per-call `resolver` argument on `Expression.evaluate()` / `Parser.evaluate()` so a single parsed expression can be evaluated against different data sources without mutating parser state
 - **`as` operator** - Type conversion with customizable implementation
 
 For detailed documentation, see:
