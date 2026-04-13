@@ -3,6 +3,15 @@ Expression Evaluator
 
 [![npm](https://img.shields.io/npm/v/@pro-fa/expr-eval.svg?maxAge=3600)](https://www.npmjs.com/package/@pro-fa/expr-eval)
 
+> [!WARNING]
+> # ⚠️ This repository is DEPRECATED and no longer maintained ⚠️
+>
+> **This project has a successor: [Pro-Fa/expreszo-typescript](https://github.com/Pro-Fa/expreszo-typescript)**
+>
+> The successor is **safer** and **faster**, with a modernized architecture and improved security guarantees. All users are strongly encouraged to migrate.
+>
+> 👉 **Please switch to [expreszo-typescript](https://github.com/Pro-Fa/expreszo-typescript) for ongoing updates, bug fixes, and security patches.**
+
 ## Description
 
 A versatile expression evaluation library that goes beyond mathematical expressions. It parses and evaluates expressions that can manipulate strings, objects, and arrays, providing a safer alternative to JavaScript's `eval` function.
