@@ -88,9 +88,9 @@
     "tsx": "^4.20.5",
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.15.0",
-    "vite": "^6.0.1",
+    "vite": "^8.0.16",
     "vite-plugin-dts": "^4.3.0",
-    "vitest": "^3.2.4",
+    "vitest": "^4.1.8",
     "vscode-languageserver-types": "^3.17.5"
   },
   "bundlesize": [
